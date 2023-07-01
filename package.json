@@ -1,0 +1,36 @@
+{
+  "name": "makrodex_be",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon -e js -r dotenv/config ./src/server.js",
+    "build":"tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lgadza/makrodex_be.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lgadza/makrodex_be/issues"
+  },
+  "homepage": "https://github.com/lgadza/makrodex_be#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-list-endpoints": "^6.0.0",
+    "http-errors": "^2.0.0",
+    "pg": "^8.9.0",
+    "sequelize": "^6.28.0",
+    "typescript": "^5.1.6"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.3",
+    "nodemon": "^2.0.20"
+  }
+}
