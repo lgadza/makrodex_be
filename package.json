@@ -6,8 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon -e js -r dotenv/config ./src/server.js",
-    "build":"tsc"
+    "dev": "nodemon -e js -r dotenv/config ./src/server.js"
   },
   "repository": {
     "type": "git",
@@ -26,8 +25,7 @@
     "express-list-endpoints": "^6.0.0",
     "http-errors": "^2.0.0",
     "pg": "^8.9.0",
-    "sequelize": "^6.28.0",
-    "typescript": "^5.1.6"
+    "sequelize": "^6.28.0"
   },
   "devDependencies": {
     "dotenv": "^16.0.3",
