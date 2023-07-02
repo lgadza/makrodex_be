@@ -9,19 +9,7 @@ const SchoolModel=sequelize.define("school",{
         primaryKey: true,
         defaultValue: DataType.UUIDV4,
       },
-      first_name: {
-        type: DataType.STRING,
-        allowNull: false,
-      },
-      last_name: {
-        type: DataType.STRING,
-        allowNull: false,
-      },
-      date_of_birth: {
-        type: DataType.DATEONLY,
-        allowNull: false,
-      },
-      gender: {
+      school_name: {
         type: DataType.STRING,
         allowNull: false,
       },
@@ -33,9 +21,9 @@ const SchoolModel=sequelize.define("school",{
         type: DataType.STRING,
         allowNull: false,
       },
-      state: {
+      province: {
         type: DataType.STRING,
-        allowNull: true,
+        allowNull: false,
       },
       country: {
         type: DataType.STRING,
@@ -47,12 +35,9 @@ const SchoolModel=sequelize.define("school",{
       },
       email: {
         type: DataType.STRING,
-        allowNull: true,
+        allowNull: false,
       },
 })
-SchoolModel.hasMany(ParentsModel,{foreignKey:"parent_id"});
-ParentsModel.belongsTo(SchoolModel);
-SchoolModel.hasMany(ApplicantModel,{foreignKey:{allowNull:false}});
-ApplicantModel.belongsTo(SchoolModel);
+
 
 export default SchoolModel
