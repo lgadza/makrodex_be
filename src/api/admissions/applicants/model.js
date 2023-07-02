@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import sequelize from "../../../db.js";
 import ParentsModel from "../../parents/model.js";
 import ApplicationModel from "../applications/model.js";
+import ParentApplicant from "../../intermediate_tables/parent_applicant.js";
 
 const ApplicantModel = sequelize.define("applicant", {
   applicant_id: {
@@ -51,10 +52,14 @@ const ApplicantModel = sequelize.define("applicant", {
   },
 });
 
-ApplicantModel.hasMany(ParentsModel, { foreignKey: "applicant_id" });
-ParentsModel.belongsTo(ApplicantModel);
+ParentsModel.hasMany(ApplicantModel, { 
+  foreignKey: {allowNull:false} });
+ApplicantModel.belongsToMany(ParentsModel,{
+  through:ParentApplicant,
+  foreignKey:{allowNull:false}
+});
 
-ApplicantModel.hasMany(ApplicationModel, { foreignKey: "applicant_id" });
+ApplicantModel.hasMany(ApplicationModel, { foreignKey: {allowNull:false} });
 ApplicationModel.belongsTo(ApplicantModel);
 
 export default ApplicantModel;

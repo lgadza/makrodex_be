@@ -34,8 +34,8 @@ next(error)
 // Create a new parent
 parentsRouter.post("/", async (req, res,next) => {
   try {
-    const parent = await ParentsModel.create(req.body);
-    res.status(201).send(parent);
+    const {parent_id} = await ParentsModel.create(req.body);
+    res.status(201).send(parent_id);
   } catch (error) {
     res.status(500).json({ error: "Failed to create parent" });
 next(error)  
