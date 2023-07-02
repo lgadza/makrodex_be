@@ -26,8 +26,8 @@ server.use(express.json())
 // server.use("/users", usersRouter)
 // server.use("/blogs", blogsRouter)
 // server.use("/categories", categoriesRouter)
-server.use("/applicant",applicantRouter)
-server.use("/file",fileRouter)
+server.use("/applicants",applicantRouter)
+server.use("/applicants/files",fileRouter)
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)

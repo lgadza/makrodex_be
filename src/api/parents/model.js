@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../db.js";
-import ApplicantModel from "../admissions/applicants/model.js";
 import ParentApplicant from "../intermediate_tables/parent_applicant.js";
+import ApplicantModel from "../admissions/applicants/model.js";
 
 const ParentsModel = sequelize.define("parent", {
   parent_id: {
@@ -51,16 +51,10 @@ const ParentsModel = sequelize.define("parent", {
   },
 });
 
-ParentsModel.belongsToMany(ApplicantModel, {
-  through: "ParentApplicant", // Intermediate table name
-  foreignKey: "parent_id", // Foreign key column name in the intermediate table
-  otherKey: "applicant_id", // Foreign key column name in the intermediate table for the ApplicantModel
-});
-
-ApplicantModel.belongsToMany(ParentsModel, {
-  through: ParentApplicant, // Intermediate table name
-  foreignKey: "applicant_id", // Foreign key column name in the intermediate table
-  otherKey: "parent_id", // Foreign key column name in the intermediate table for the ParentsModel
-});
+// ParentsModel.hasMany(ApplicantModel, { foreignKey: "parent_id" });
+// ApplicantModel.belongsToMany(ParentsModel, {
+//   through: ParentApplicant,
+//   foreignKey: "parent_id",
+// });
 
 export default ParentsModel;

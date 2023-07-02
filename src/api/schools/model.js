@@ -1,40 +1,40 @@
-import { DataType } from "sequelize-typescript";
-import sequelize from "../../../db";
-import ParentsModel from "../parents/model";
-import ApplicantModel from "../applicants/model";
+import { DataTypes } from "sequelize";
+import sequelize from "../../db.js";
+import ParentsModel from "../parents/model.js";
+import ApplicantModel from "../admissions/applicants/model.js";
 const SchoolModel=sequelize.define("school",{
    
     school_id: {
-        type: DataType.UUID,
+        type: DataTypes.UUID,
         primaryKey: true,
-        defaultValue: DataType.UUIDV4,
+        defaultValue: DataTypes.UUIDV4,
       },
       school_name: {
-        type: DataType.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       address: {
-        type: DataType.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       city: {
-        type: DataType.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       province: {
-        type: DataType.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       country: {
-        type: DataType.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       phone_number: {
-        type: DataType.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       email: {
-        type: DataType.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
       },
 })

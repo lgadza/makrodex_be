@@ -23,18 +23,18 @@ const ApplicationModel = sequelize.define("application", {
   },
 });
 
-ApplicationModel.belongsTo(SchoolModel, {
-  foreignKey: "school_id", 
-  allowNull: false, 
-});
-ApplicationModel.belongsTo(ApplicantModel, {
-  foreignKey: "applicant_id", 
-  allowNull: false, 
-});
+// ApplicationModel.belongsTo(SchoolModel, {
+//   foreignKey: "school_id", 
+//   allowNull: false, 
+// });
+// ApplicationModel.belongsTo(ApplicantModel, {
+//   foreignKey: "applicant_id", 
+//   allowNull: false, 
+// });
 
-ApplicationModel.hasMany(ParentsModel, { foreignKey: "parent_id" });
-ParentsModel.belongsToMany(ApplicationModel, {
-  through: ApplicationModel,
-});
+// ApplicationModel.hasMany(ParentsModel, { foreignKey: "parent_id" });
+// ParentsModel.belongsToMany(ApplicationModel, {
+//   through: ApplicationModel,
+// });
 
 export default ApplicationModel;

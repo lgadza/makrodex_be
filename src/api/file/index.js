@@ -1,13 +1,13 @@
 import express from "express";
 import multer from "multer";
-import cloudinary from "../lib/cloudinary";
-import FileUploadModel from "./model";
+import cloudinary from "../lib/cloudinary.js";
+import FileUploadModel from "./model.js";
 
-const fileRouter = express.FileRouter();
+const fileRouter = express();
 const upload = multer({ dest: 'uploads/' });
 
 // Get all files
-fileRouter.get(':applicant_id/', async (req, res) => {
+fileRouter.get('/:applicant_id', async (req, res) => {
   try {
     const files = await FileUploadModel.findAll();
     res.json(files);
@@ -17,7 +17,7 @@ fileRouter.get(':applicant_id/', async (req, res) => {
 });
 
 // Get one file by ID
-fileRouter.get('/:applicant_id/file_id', async (req, res) => {
+fileRouter.get('/:applicant_id/:file_id', async (req, res) => {
   try {
     const file = await FileUploadModel.findByPk(req.params.id);
     if (!file) {
@@ -64,7 +64,7 @@ fileRouter.post('/:applicant_id/multiple', upload.array('files', 10), async (req
 });
 
 // Delete a file by ID
-fileRouter.delete('/:applicant_id/file_id', async (req, res) => {
+fileRouter.delete('/:applicant_id/:file_id', async (req, res) => {
   try {
     const file = await FileUploadModel.findByPk(req.params.id);
     if (!file) {

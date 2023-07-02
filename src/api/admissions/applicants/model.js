@@ -33,7 +33,7 @@ const ApplicantModel = sequelize.define("applicant", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  state: {
+  province: {
     type: DataTypes.STRING,
     allowNull: true,
   },
