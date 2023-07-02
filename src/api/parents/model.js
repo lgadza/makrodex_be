@@ -51,10 +51,10 @@ const ParentsModel = sequelize.define("parent", {
   },
 });
 
-// ParentsModel.hasMany(ApplicantModel, { foreignKey: "parent_id" });
-// ApplicantModel.belongsToMany(ParentsModel, {
-//   through: ParentApplicant,
-//   foreignKey: "parent_id",
-// });
+ParentsModel.hasMany(ApplicantModel, { foreignKey: "parent_id" });
+ApplicantModel.belongsToMany(ParentsModel, {
+  through: ParentApplicant,
+  foreignKey: "parent_id",
+});
 
 export default ParentsModel;
