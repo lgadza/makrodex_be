@@ -13,6 +13,7 @@ import {
   notFoundErrorHandler,
   unauthorizedErrorHandler,
 } from "./errorHandlers.js"
+import fileRouter from "./api/file/index.js"
 
 const server = express()
 const port = process.env.PORT || 3001
@@ -26,6 +27,7 @@ server.use(express.json())
 // server.use("/blogs", blogsRouter)
 // server.use("/categories", categoriesRouter)
 server.use("/applicant",applicantRouter)
+server.use("/file",fileRouter)
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)
