@@ -37,6 +37,16 @@ const SchoolModel=sequelize.define("school",{
         type: DataTypes.STRING,
         allowNull: false,
       },
+      school_type: {
+        type: DataTypes.ENUM("private","public"),
+        allowNull: false,
+        
+      },
+      boarding_school: {
+        type: DataTypes.ENUM("boarding","day"),
+        allowNull: false,
+        
+      },
 })
 
 
