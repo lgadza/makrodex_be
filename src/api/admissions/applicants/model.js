@@ -18,6 +18,10 @@ const ApplicantModel = sequelize.define("applicant", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  second_name: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   date_of_birth: {
     type: DataTypes.DATEONLY,
     allowNull: false,
@@ -26,9 +30,25 @@ const ApplicantModel = sequelize.define("applicant", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  address: {
+  citizenship: {
     type: DataTypes.STRING,
     allowNull: false,
+  },
+  street: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  building_number: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  apartment_number: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  postal_code: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
   city: {
     type: DataTypes.STRING,
@@ -36,7 +56,7 @@ const ApplicantModel = sequelize.define("applicant", {
   },
   province: {
     type: DataTypes.STRING,
-    allowNull: true,
+    allowNull: false,
   },
   country: {
     type: DataTypes.STRING,
@@ -46,9 +66,25 @@ const ApplicantModel = sequelize.define("applicant", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  settlement_type: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   email: {
     type: DataTypes.STRING,
     allowNull: true,
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  policy_acceptance: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+  },
+  data_process_acceptance: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
   },
 });
 
