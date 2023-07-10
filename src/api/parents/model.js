@@ -9,38 +9,25 @@ const ParentsModel = sequelize.define("parent", {
     primaryKey: true,
     defaultValue: DataTypes.UUIDV4,
   },
-  parent_first_name: {
+  first_name: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  parent_last_name: {
+  last_name: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  date_of_birth: {
-    type: DataTypes.DATEONLY,
+  
+  country_code: {
+    type: DataTypes.STRING,
     allowNull: false,
   },
+  
   relationship: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  address: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  city: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  state: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  country: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
+ 
   phone_number: {
     type: DataTypes.STRING,
     allowNull: false,
