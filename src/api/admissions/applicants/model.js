@@ -88,14 +88,14 @@ const ApplicantModel = sequelize.define("applicant", {
   },
 });
 
-ParentsModel.hasMany(ApplicantModel, { 
-  foreignKey: {allowNull:false} });
-ApplicantModel.belongsToMany(ParentsModel,{
-  through:ParentApplicant,
-  foreignKey:{allowNull:false}
-});
+// ParentsModel.hasMany(ApplicantModel, { 
+//   foreignKey: {allowNull:false} });
+// ApplicantModel.belongsToMany(ParentsModel,{
+//   through:ParentApplicant,
+//   foreignKey:{allowNull:false}
+// });
 
-ApplicantModel.hasMany(ApplicationModel, { foreignKey: {allowNull:false} });
-ApplicationModel.belongsTo(ApplicantModel);
+// ApplicantModel.hasMany(ApplicationModel, { foreignKey: {allowNull:false} });
+// ApplicationModel.belongsTo(ApplicantModel);
 
 export default ApplicantModel;

@@ -15,6 +15,7 @@ import {
 } from "./errorHandlers.js"
 import fileRouter from "./api/file/index.js"
 import parentsRouter from "./api/parents/index.js"
+import candidate_router from "./api/admissions/applicants/candidate-registration.js"
 
 const server = express()
 const port = process.env.PORT || 3001
@@ -30,6 +31,7 @@ server.use(express.json())
 server.use("/applicants",applicantRouter)
 server.use("/parents",parentsRouter)
 server.use("/applicants/files",fileRouter)
+server.use("/applicants/registration",candidate_router)
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)
