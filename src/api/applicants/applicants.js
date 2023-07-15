@@ -28,7 +28,7 @@ applicantRouter.post("/register", async (req, res, next) => {
 applicantRouter.get("/", async (req, res, next) => {
   try {
     const query = {};
-    if (req.query.applicant) query.applicant = { [Op.iLike]: `${req.query.applicant}%` };
+    if (req.query.first_name) query.first_name = { [Op.iLike]: `${req.query.first_name}%` };
     const applicants = await ApplicantModel.findAll({
       where: { ...query },
       attributes: { exclude: ["password","createdAt"], },
