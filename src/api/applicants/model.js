@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import bcrypt from "bcrypt";
-import sequelize from "../../../db.js";
-// import ParentModel from "../../parents/model.js";
-import ParentApplicant from "../../intermediate_tables/parent_applicant.js";
+import sequelize from "../../db.js";
+// import ParentModel from "../parents/model.js";
+import ParentApplicant from "../intermediate_tables/parent_applicant.js";
 const ParentModel = sequelize.define("parent", {
     parent_id: {
       type: DataTypes.STRING,

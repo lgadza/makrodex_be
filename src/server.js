@@ -2,8 +2,6 @@ import express from "express"
 import cors from "cors"
 import listEndpoints from "express-list-endpoints"
 import { pgConnect, syncModels } from "./db.js"
-
-import applicantRouter from "./api/admissions/applicants/index.js"
 import {
   badRequestErrorHandler,
   forbiddenErrorHandler,
@@ -13,6 +11,7 @@ import {
 } from "./errorHandlers.js"
 import fileRouter from "./api/file/index.js"
 import parentsRouter from "./api/parents/index.js"
+import applicantRouter from "./api/applicants/applicants.js"
 
 
 const server = express()
@@ -23,9 +22,7 @@ server.use(cors())
 server.use(express.json())
 
 // ********************************** ENDPOINTS ****************************************
-// server.use("/users", usersRouter)
-// server.use("/blogs", blogsRouter)
-// server.use("/categories", categoriesRouter)
+
 server.use("/applicants",applicantRouter)
 server.use("/parents",parentsRouter)
 server.use("/applicants/files",fileRouter)

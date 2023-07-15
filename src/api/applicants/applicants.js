@@ -1,10 +1,8 @@
 import express from "express";
 import createHttpError from "http-errors";
 import ApplicantModel from "./model.js";
-import ParentsModel from "../../parents/model.js";
-import ApplicationModel from "../applications/model.js";
 import { Op } from "sequelize";
-import ParentModel from "../../parents/model.js";
+import ParentModel from "../parents/model.js";
 
 const applicantRouter = express.Router();
 

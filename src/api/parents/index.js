@@ -1,7 +1,7 @@
 import express from "express";
 import ParentsModel from "./model.js";
 import createHttpError from "http-errors";
-import ApplicantModel from "../admissions/applicants/model.js";
+import ApplicantModel from "../applicants/model.js";
 
 const parentsRouter = express.Router();
 

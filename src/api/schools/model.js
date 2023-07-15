@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../db.js";
 import ParentsModel from "../parents/model.js";
-import ApplicantModel from "../admissions/applicants/model.js";
+import ApplicantModel from "../applicants/model.js";
 const SchoolModel=sequelize.define("school",{
    
     school_id: {
