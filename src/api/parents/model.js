@@ -1,13 +1,13 @@
 import { DataTypes } from "sequelize";
+import bcrypt from "bcrypt";
 import sequelize from "../../db.js";
+import CandidateModel from "../admissions/applicants/registration-model.js";
 import ParentApplicant from "../intermediate_tables/parent_applicant.js";
-import ApplicantModel from "../admissions/applicants/model.js";
 
-const ParentsModel = sequelize.define("parent", {
+const ParentModel = sequelize.define("parent", {
   parent_id: {
-    type: DataTypes.UUID,
+    type: DataTypes.STRING,
     primaryKey: true,
-    defaultValue: DataTypes.UUIDV4,
   },
   first_name: {
     type: DataTypes.STRING,
@@ -17,17 +17,14 @@ const ParentsModel = sequelize.define("parent", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  
-  country_code: {
+  gender: {
+    type: DataTypes.ENUM("male", "female"),
+    allowNull: false,
+  },
+  citizenship: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  
-  relationship: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
- 
   phone_number: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -36,12 +33,31 @@ const ParentsModel = sequelize.define("parent", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  candidate_id: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    foreignKey:true,
+  },
 });
 
-// ApplicantModel.hasMany(ParentsModel, { foreignKey: {allowNull:false} });
-// ParentsModel.belongsToMany(ApplicantModel, {
-//   through: ParentApplicant,
-//   foreignKey: {allowNull:false},
-// });
+ParentModel.beforeCreate(async (parent) => {
+  const schoolId = "BC-FHS-0001";
+  const lastParent = await ParentModel.findOne({
+    order: [["createdAt", "DESC"]],
+  });
 
-export default ParentsModel;
+  let parentNumber = 1;
+  if (lastParent) {
+    const lastParentId = lastParent.parent_id;
+    const lastNumber = parseInt(lastParentId.split("_")[1]);
+    parentNumber = lastNumber + 1;
+  }
+
+  const formattedParentNumber = String(parentNumber).padStart(3, "0");
+  parent.parent_id = `${schoolId}_${formattedParentNumber}`;
+});
+
+ParentModel.belongsToMany(CandidateModel, { through: ParentApplicant, foreignKey: "parent_id" });
+CandidateModel.belongsToMany(ParentModel, { through: ParentApplicant, foreignKey: "candidate_id" });
+
+export default ParentModel;
