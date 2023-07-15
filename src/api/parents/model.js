@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import bcrypt from "bcrypt";
 import sequelize from "../../db.js";
-import CandidateModel from "../admissions/applicants/registration-model.js";
+import ApplicantModel from "../admissions/applicants/model.js";
 import ParentApplicant from "../intermediate_tables/parent_applicant.js";
 
 const ParentModel = sequelize.define("parent", {
@@ -33,11 +33,16 @@ const ParentModel = sequelize.define("parent", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  relationship: { 
+    type: DataTypes.STRING, 
+    allowNull: true
+  },
   candidate_id: {
     type: DataTypes.STRING,
     allowNull: false,
     foreignKey:true,
   },
+  
 });
 
 ParentModel.beforeCreate(async (parent) => {
@@ -57,7 +62,7 @@ ParentModel.beforeCreate(async (parent) => {
   parent.parent_id = `${schoolId}_${formattedParentNumber}`;
 });
 
-ParentModel.belongsToMany(CandidateModel, { through: ParentApplicant, foreignKey: "parent_id" });
-CandidateModel.belongsToMany(ParentModel, { through: ParentApplicant, foreignKey: "candidate_id" });
+ParentModel.belongsToMany(ApplicantModel, { through: ParentApplicant, foreignKey: "parent_id" });
+ApplicantModel.belongsToMany(ParentModel, { through: ParentApplicant, foreignKey: "candidate_id" });
 
 export default ParentModel;

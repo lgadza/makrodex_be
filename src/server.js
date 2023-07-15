@@ -2,9 +2,7 @@ import express from "express"
 import cors from "cors"
 import listEndpoints from "express-list-endpoints"
 import { pgConnect, syncModels } from "./db.js"
-// import usersRouter from "./api/users/index.js"
-// import blogsRouter from "./api/blogs/index.js"
-// import categoriesRouter from "./api/categories/index.js"
+
 import applicantRouter from "./api/admissions/applicants/index.js"
 import {
   badRequestErrorHandler,
@@ -15,7 +13,7 @@ import {
 } from "./errorHandlers.js"
 import fileRouter from "./api/file/index.js"
 import parentsRouter from "./api/parents/index.js"
-import candidate_router from "./api/admissions/applicants/candidate-registration.js"
+
 
 const server = express()
 const port = process.env.PORT || 3001
@@ -31,7 +29,7 @@ server.use(express.json())
 server.use("/applicants",applicantRouter)
 server.use("/parents",parentsRouter)
 server.use("/applicants/files",fileRouter)
-server.use("/applicants/registration",candidate_router)
+
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)
