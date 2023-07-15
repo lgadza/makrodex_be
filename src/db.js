@@ -10,7 +10,7 @@ const sequelize = new Sequelize(PG_DB, PG_USER, PG_PASSWORD, {
 
 export const pgConnect = async () => {
   try {
-    await sequelize.authenticate()
+    await sequelize.authenticate({logging:false})
     console.log("Succesfully connected to Postgres!")
   } catch (error) {
     console.log(error)

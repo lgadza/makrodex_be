@@ -9,15 +9,15 @@ const applicantRouter = express.Router();
 applicantRouter.post("/register", async (req, res, next) => {
   try {
     const { email } = req.body; // Destructure the email from req.body
-    const candidate = await ApplicantModel.findOne({ where: { email } });
-    if (candidate) {
+    const applicant = await ApplicantModel.findOne({ where: { email } });
+    if (applicant) {
        res.send({
         message: "This email has already been registered. Please login.",
       });
     } else {
-      const new_candidate = await ApplicantModel.create(req.body);
-      const { candidate_id } = new_candidate;
-      res.status(201).send({ candidate_id });
+      const new_applicant = await ApplicantModel.create(req.body);
+      const { applicant_id } = new_applicant;
+      res.status(201).send({ applicant_id });
     }
   } catch (error) {
     console.log(error);
@@ -28,17 +28,17 @@ applicantRouter.post("/register", async (req, res, next) => {
 applicantRouter.get("/", async (req, res, next) => {
   try {
     const query = {};
-    if (req.query.candidate) query.candidate = { [Op.iLike]: `${req.query.candidate}%` };
-    const candidates = await ApplicantModel.findAll({
+    if (req.query.applicant) query.applicant = { [Op.iLike]: `${req.query.applicant}%` };
+    const applicants = await ApplicantModel.findAll({
       where: { ...query },
-      attributes: { exclude: ["password"] },
+      attributes: { exclude: ["password","createdAt"], },
       include: {
         model: ParentModel,
         attributes: ["first_name", "last_name", "gender", "phone_number"],
         through: { attributes: [] },
       },
     });
-    res.send(candidates);
+    res.send(applicants);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
@@ -46,40 +46,17 @@ applicantRouter.get("/", async (req, res, next) => {
   }
 });
 
-applicantRouter.post("/", async (req, res, next) => {
+applicantRouter.get("/:applicant_id", async (req, res, next) => {
   try {
-    const { id } = await ApplicantModel.create(req.body);
-    res.status(201).send({ id });
-  } catch (error) {
-    next(error);
-  }
-});
-
-applicantRouter.get("/", async (req, res, next) => {
-  try {
-    const query = {};
-    if (req.query.user) query.user = { [Op.iLike]: `${req.query.user}%` };
-    const users = await ApplicantModel.findAll({
-      where: { ...query },
-      include: [ParentsModel, ApplicationModel],
+    const applicant = await ApplicantModel.findByPk(req.params.applicant_id, {
+      attributes: { exclude: ["password","createdAt"] },
+      include: [ParentModel],
     });
-    res.send(users);
-  } catch (error) {
-    next(error);
-  }
-});
-
-applicantRouter.get("/:userId", async (req, res, next) => {
-  try {
-    const user = await ApplicantModel.findByPk(req.params.userId, {
-      attributes: { exclude: ["createdAt", "updatedAt"] },
-      include: [ParentsModel, ApplicationModel],
-    });
-    if (user) {
-      res.send(user);
+    if (applicant) {
+      res.send(applicant);
     } else {
       next(
-        createHttpError(404, `User with id ${req.params.userId} is not found!`)
+        createHttpError(404, `Applicant with id ${req.params.applicant_id} is not found!`)
       );
     }
   } catch (error) {
@@ -87,20 +64,27 @@ applicantRouter.get("/:userId", async (req, res, next) => {
   }
 });
 
-applicantRouter.put("/:userId", async (req, res, next) => {
+applicantRouter.put("/:applicant_id", async (req, res, next) => {
   try {
-    const [numberOfUpdatedRows, updatedRecords] = await ApplicantModel.update(
+    const [numberOfUpdatedRows] = await ApplicantModel.update(
       req.body,
       {
-        where: { applicant_id: req.params.userId },
+        where: { applicant_id: req.params.applicant_id },
         returning: true,
       }
     );
     if (numberOfUpdatedRows === 1) {
-      res.send(updatedRecords[0]);
+      const updatedRecord = await ApplicantModel.findOne({
+        where: { applicant_id: req.params.applicant_id },
+        attributes: { exclude: ["password", "createdAt"] }, 
+        raw: true, // Retrieve the record as plain JSON data
+      });
+      delete updatedRecord.password; // Manually delete the "password" attribute
+      delete updatedRecord.createdAt; 
+      res.send(updatedRecord);
     } else {
       next(
-        createHttpError(404, `User with id ${req.params.userId} is not found!`)
+        createHttpError(404, `Applicant with id ${req.params.applicant_id} is not found!`)
       );
     }
   } catch (error) {
@@ -108,21 +92,24 @@ applicantRouter.put("/:userId", async (req, res, next) => {
   }
 });
 
-applicantRouter.delete("/:userId", async (req, res, next) => {
+
+
+applicantRouter.delete("/:applicant_id", async (req, res, next) => {
   try {
     const numberOfDeletedRows = await ApplicantModel.destroy({
-      where: { applicant_id: req.params.userId },
+      where: { applicant_id: req.params.applicant_id },
     });
     if (numberOfDeletedRows === 1) {
       res.status(204).send();
     } else {
       next(
-        createHttpError(404, `User with id ${req.params.userId} is not found!`)
+        createHttpError(404, `Applicant with id ${req.params.applicant_id} is not found!`)
       );
     }
   } catch (error) {
     next(error);
   }
 });
+
 
 export default applicantRouter;
