@@ -16,8 +16,9 @@ candidate_router.post(
           message: "This email has already been registered. Please login.",
         });
       } else {
-        const new_candidate = await CandidateModel.create(req.body); // Add await to wait for the creation of the new candidate
-        res.status(201).send({ new_candidate });
+        const new_candidate = await CandidateModel.create(req.body); 
+        const { candidate_id } = new_candidate; 
+        res.status(201).send({ candidate_id })
       }
     } catch (error) {
       console.log(error)
