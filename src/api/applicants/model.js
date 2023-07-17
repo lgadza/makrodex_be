@@ -135,6 +135,22 @@ ApplicantModel.beforeCreate(async (applicant) => {
   const hashedPassword = await bcrypt.hash(plainPassword, 10);
   applicant.password = hashedPassword;
 });
+
+ApplicantModel.checkCredentials = async function (email, password) {
+  const applicant = await this.findOne({ where: { email } });
+
+  if (applicant) {
+    const passwordMatch = await bcrypt.compare(password, applicant.password);
+
+    if (passwordMatch) {
+      return applicant;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
 // 1 to many relationship. one address can have many applicants but one applicant can have one address
 // AddressModel.hasMany(ApplicantModel,{foreignKey:{name:"address_id",allowNull:false}})
 // ApplicantModel.belongsTo(AddressModel)

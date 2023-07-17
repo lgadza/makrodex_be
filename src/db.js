@@ -6,11 +6,13 @@ const sequelize = new Sequelize(PG_DB, PG_USER, PG_PASSWORD, {
   host: PG_HOST,
   port: PG_PORT,
   dialect: "postgres",
+  logging:false,
+  
 })
 
 export const pgConnect = async () => {
   try {
-    await sequelize.authenticate({logging:false})
+    await sequelize.authenticate()
     console.log("Successfully connected to Postgres!")
   } catch (error) {
     console.log(error)

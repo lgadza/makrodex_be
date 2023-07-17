@@ -3,6 +3,7 @@ import createHttpError from "http-errors";
 import ApplicantModel from "./model.js";
 import { Op } from "sequelize";
 import ParentModel from "../guardians/model.js";
+import { createAccessToken } from "../lib/auth/tools.js";
 import { checkApplicantSchema, triggerBadRequest } from "./validator.js";
 
 const applicantRouter = express.Router();
@@ -111,6 +112,24 @@ applicantRouter.delete("/:applicant_id", async (req, res, next) => {
     next(error);
   }
 });
+applicantRouter.post("/login",async (req,res,next)=>{
+ try{
+  const {email,password}=req.body;
 
+  // const applicant=await ApplicantModel.findOne({where:{email:email}})
+  const applicant = await ApplicantModel.checkCredentials(email,password)
+  if(applicant){
+  const payload={id:applicant.id,email:applicant.email,role:applicant.role}
+      const accessToken=await createAccessToken(payload)
+      res.send({accessToken}) 
+  }else{
+    next(createHttpError(401, "Credentials are wrong!"))
+
+  }
+ }catch(error){
+  console.log(error)
+  next(error)
+ }
+})
 
 export default applicantRouter;
