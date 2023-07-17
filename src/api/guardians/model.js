@@ -62,7 +62,7 @@ GuardianModel.beforeCreate(async (guardian) => {
   guardian.id = `${schoolId}_${formattedGuardianNumber}`;
 });
 
-GuardianModel.belongsToMany(ApplicantModel, { through: GuardianApplicant, foreignKey: "id" });
-ApplicantModel.belongsToMany(GuardianModel, { through: GuardianApplicant, foreignKey: "candidate_id" });
+GuardianModel.belongsToMany(ApplicantModel, { through: GuardianApplicant, foreignKey: {name:"applicant_id" ,allowNull:false}});
+ApplicantModel.belongsToMany(GuardianModel, { through: GuardianApplicant, foreignKey: {name:"candidate_id" ,allowNull:false}});
 
 export default GuardianModel;

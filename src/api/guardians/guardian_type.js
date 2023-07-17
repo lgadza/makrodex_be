@@ -36,7 +36,7 @@ guardianTypeRouter.post("/bulk", async(req,res,next)=>{
 guardianTypeRouter.get("/", async(req,res,next)=>{
    try{
     const guardian_types=await GuardianTypeModel.findAll()
-    res.status(201).send({guardian_types})
+    res.status(201).send(guardian_types)
    }catch(error){
    console.log(error)
    next(error)

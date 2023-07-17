@@ -1,10 +1,11 @@
 import { DataTypes } from "sequelize";
 import bcrypt from "bcrypt";
 import sequelize from "../../db.js";
-// import ParentModel from "../parents/model.js";
-import ParentApplicant from "../intermediate_tables/guardian_applicant.js";
+// import GuardianModel from "../guardians/model.js";
+import GuardianApplicant from "../intermediate_tables/guardian_applicant.js";
 import AddressModel from "../address/model.js";
-const ParentModel = sequelize.define("parent", {
+import ApplicantAddressModel from "../intermediate_tables/applicant_address.js";
+const GuardianModel = sequelize.define("guardian", {
     id: {
       type: DataTypes.STRING,
       primaryKey: true,
@@ -40,21 +41,21 @@ const ParentModel = sequelize.define("parent", {
    
   });
   
-  ParentModel.beforeCreate(async (parent) => {
+  GuardianModel.beforeCreate(async (guardian) => {
     const schoolId = "BC-FHS-0001";
-    const lastParent = await ParentModel.findOne({
+    const lastGuardian = await GuardianModel.findOne({
       order: [["createdAt", "DESC"]],
     });
   
-    let parentNumber = 1;
-    if (lastParent) {
-      const lastParentId = lastParent.parent_id;
-      const lastNumber = parseInt(lastParentId.split("_")[1]);
-      parentNumber = lastNumber + 1;
+    let guardianNumber = 1;
+    if (lastGuardian) {
+      const lastGuardianId = lastGuardian.guardian_id;
+      const lastNumber = parseInt(lastGuardianId.split("_")[1]);
+      guardianNumber = lastNumber + 1;
     }
   
-    const formattedParentNumber = String(parentNumber).padStart(3, "0");
-    parent.parent_id = `${schoolId}_${formattedParentNumber}`;
+    const formattedGuardianNumber = String(guardianNumber).padStart(3, "0");
+    guardian.guardian_id = `${schoolId}_${formattedGuardianNumber}`;
   });
 
 const ApplicantModel = sequelize.define("applicant", {
@@ -94,6 +95,11 @@ const ApplicantModel = sequelize.define("applicant", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  role: {
+    type: DataTypes.ENUM("student","teacher","social worker","guidance counselor","bus driver","security personnel","technology coordinator","sports coach"),
+    allowNull: true,
+    defaultValue:"student"
+  },
   password: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -130,13 +136,18 @@ ApplicantModel.beforeCreate(async (applicant) => {
   applicant.password = hashedPassword;
 });
 // 1 to many relationship. one address can have many applicants but one applicant can have one address
-AddressModel.hasMany(ApplicantModel,{foreignKey:{allowNull:false}})
-ApplicantModel.belongsTo(AddressModel)
+// AddressModel.hasMany(ApplicantModel,{foreignKey:{name:"address_id",allowNull:false}})
+// ApplicantModel.belongsTo(AddressModel)
 
-// many to many relationship. one applicant can have many applicants and one parent can have many applicants
+// many to many relationship. one applicant can have many applicants and one guardian can have many applicants
 
-ApplicantModel.belongsToMany(ParentModel, { through: ParentApplicant, foreignKey: {allowNull:false} });
-ParentModel.belongsToMany(ApplicantModel, { through: ParentApplicant, foreignKey: {allowNull:false} });
+ApplicantModel.belongsToMany(GuardianModel, { through: GuardianApplicant, foreignKey: {name:"applicant_id" ,allowNull:false} });
+GuardianModel.belongsToMany(ApplicantModel, { through: GuardianApplicant, foreignKey: {name:"guardian_id_id" ,allowNull:false} });
+
+// many to many relationship. one applicant can have many address when they change address and one address can have many applicants living together
+
+ApplicantModel.belongsToMany(AddressModel, { through: ApplicantAddressModel, foreignKey: {name:"applicant_id" ,allowNull:false} });
+AddressModel.belongsToMany(ApplicantModel, { through: ApplicantAddressModel, foreignKey: {name:"address_id" ,allowNull:false} });
 
 
 export default ApplicantModel;

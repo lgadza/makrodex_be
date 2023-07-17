@@ -16,8 +16,8 @@ applicantRouter.post("/register", async (req, res, next) => {
       });
     } else {
       const new_applicant = await ApplicantModel.create(req.body);
-      const { applicant_id } = new_applicant;
-      res.status(201).send({ applicant_id });
+      const {id } = new_applicant;
+      res.status(201).send(id );
     }
   } catch (error) {
     console.log(error);
