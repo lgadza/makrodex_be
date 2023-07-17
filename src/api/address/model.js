@@ -14,10 +14,6 @@ import sequelize from "../../db.js";
         type:DataTypes.STRING,
         allowNull:false
     },
-    student_id:{
-        type:DataTypes.STRING,
-        allowNull:false
-    },
     apartment_number:{
         type:DataTypes.STRING,
         allowNull:true

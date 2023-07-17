@@ -2,10 +2,10 @@ import { DataTypes } from "sequelize";
 import bcrypt from "bcrypt";
 import sequelize from "../../db.js";
 import ApplicantModel from "../applicants/model.js";
-import ParentApplicant from "../intermediate_tables/parent_applicant.js";
+import GuardianApplicant from "../intermediate_tables/guardian_applicant.js";
 
-const ParentModel = sequelize.define("parent", {
-  parent_id: {
+const GuardianModel = sequelize.define("guardian", {
+  id: {
     type: DataTypes.STRING,
     primaryKey: true,
   },
@@ -45,24 +45,24 @@ const ParentModel = sequelize.define("parent", {
   
 });
 
-ParentModel.beforeCreate(async (parent) => {
+GuardianModel.beforeCreate(async (guardian) => {
   const schoolId = "BC-FHS-0001";
-  const lastParent = await ParentModel.findOne({
+  const lastGuardian = await GuardianModel.findOne({
     order: [["createdAt", "DESC"]],
   });
 
-  let parentNumber = 1;
-  if (lastParent) {
-    const lastParentId = lastParent.parent_id;
-    const lastNumber = parseInt(lastParentId.split("_")[1]);
-    parentNumber = lastNumber + 1;
+  let guardianNumber = 1;
+  if (lastGuardian) {
+    const lastGuardianId = lastGuardian.id;
+    const lastNumber = parseInt(lastGuardianId.split("_")[1]);
+    guardianNumber = lastNumber + 1;
   }
 
-  const formattedParentNumber = String(parentNumber).padStart(3, "0");
-  parent.parent_id = `${schoolId}_${formattedParentNumber}`;
+  const formattedGuardianNumber = String(guardianNumber).padStart(3, "0");
+  guardian.id = `${schoolId}_${formattedGuardianNumber}`;
 });
 
-ParentModel.belongsToMany(ApplicantModel, { through: ParentApplicant, foreignKey: "parent_id" });
-ApplicantModel.belongsToMany(ParentModel, { through: ParentApplicant, foreignKey: "candidate_id" });
+GuardianModel.belongsToMany(ApplicantModel, { through: GuardianApplicant, foreignKey: "id" });
+ApplicantModel.belongsToMany(GuardianModel, { through: GuardianApplicant, foreignKey: "candidate_id" });
 
-export default ParentModel;
+export default GuardianModel;

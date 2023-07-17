@@ -12,7 +12,7 @@ parentsRouter.get("/", async (req, res,next) => {
       {
         include: {
           model: ApplicantModel,
-          attributes: ["first_name", "last_name", "relationship", "gender", "phone_number"],
+          attributes: ["first_name", "last_name", "gender", "phone_number"],
           through: { attributes: [] },
         },
       }

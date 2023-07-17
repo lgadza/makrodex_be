@@ -2,7 +2,7 @@ import { DataTypes } from "sequelize";
 import bcrypt from "bcrypt";
 import sequelize from "../../db.js";
 // import ParentModel from "../parents/model.js";
-import ParentApplicant from "../intermediate_tables/parent_applicant.js";
+import ParentApplicant from "../intermediate_tables/guardian_applicant.js";
 import AddressModel from "../address/model.js";
 const ParentModel = sequelize.define("parent", {
     id: {
@@ -138,6 +138,5 @@ ApplicantModel.belongsTo(AddressModel)
 ApplicantModel.belongsToMany(ParentModel, { through: ParentApplicant, foreignKey: {allowNull:false} });
 ParentModel.belongsToMany(ApplicantModel, { through: ParentApplicant, foreignKey: {allowNull:false} });
 
-// ParentModel.hasMany(ApplicantModel, { through: ParentApplicant,  foreignKey: {allowNull:false} });
-// ApplicantModel.belongsToMany(ParentModel, { through: ParentApplicant,  foreignKey: {allowNull:false} });
+
 export default ApplicantModel;

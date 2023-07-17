@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../db.js";
 
-const ParentApplicant = sequelize.define("parent_applicant", {
+const GuardianApplicant = sequelize.define("applicant_guardian", {
   id: {
     type: DataTypes.UUID,
     primaryKey: true,
@@ -9,4 +9,4 @@ const ParentApplicant = sequelize.define("parent_applicant", {
   },
 });
 
-export default ParentApplicant;
+export default GuardianApplicant;
