@@ -11,7 +11,7 @@ const sequelize = new Sequelize(PG_DB, PG_USER, PG_PASSWORD, {
 export const pgConnect = async () => {
   try {
     await sequelize.authenticate({logging:false})
-    console.log("Succesfully connected to Postgres!")
+    console.log("Successfully connected to Postgres!")
   } catch (error) {
     console.log(error)
     process.exit(1) // kills node.js process
