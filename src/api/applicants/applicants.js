@@ -5,6 +5,7 @@ import { Op } from "sequelize";
 import ParentModel from "../guardians/model.js";
 import { createAccessToken } from "../lib/auth/tools.js";
 import { checkApplicantSchema, triggerBadRequest } from "./validator.js";
+import {JWTAuthMiddleware} from "../lib/auth/jwtAuth.js"
 
 const applicantRouter = express.Router();
 
@@ -48,9 +49,9 @@ applicantRouter.get("/", async (req, res, next) => {
   }
 });
 
-applicantRouter.get("/:applicant_id", async (req, res, next) => {
+applicantRouter.get("/me",JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const applicant = await ApplicantModel.findByPk(req.params.applicant_id, {
+    const applicant = await ApplicantModel.findByPk(req.user.id, {
       attributes: { exclude: ["password","createdAt"] },
       include: [ParentModel],
     });
@@ -58,7 +59,7 @@ applicantRouter.get("/:applicant_id", async (req, res, next) => {
       res.send(applicant);
     } else {
       next(
-        createHttpError(404, `Applicant with id ${req.params.applicant_id} is not found!`)
+        createHttpError(404, `Applicant with id ${req.user.id} is not found!`)
       );
     }
   } catch (error) {
@@ -66,18 +67,18 @@ applicantRouter.get("/:applicant_id", async (req, res, next) => {
   }
 });
 
-applicantRouter.put("/:applicant_id", async (req, res, next) => {
+applicantRouter.put("/me",JWTAuthMiddleware, async (req, res, next) => {
   try {
     const [numberOfUpdatedRows] = await ApplicantModel.update(
       req.body,
       {
-        where: { id: req.params.applicant_id },
+        where: { id: req.user.id },
         returning: true,
       }
     );
     if (numberOfUpdatedRows === 1) {
       const updatedRecord = await ApplicantModel.findOne({
-        where: { id: req.params.applicant_id },
+        where: { id: req.user.id },
         attributes: { exclude: ["password", "createdAt"] }, 
         raw: true, // Retrieve the record as plain JSON data
       });
@@ -86,7 +87,7 @@ applicantRouter.put("/:applicant_id", async (req, res, next) => {
       res.send(updatedRecord);
     } else {
       next(
-        createHttpError(404, `Applicant with id ${req.params.applicant_id} is not found!`)
+        createHttpError(404, `Applicant with id ${req.user.id} is not found!`)
       );
     }
   } catch (error) {
@@ -96,16 +97,16 @@ applicantRouter.put("/:applicant_id", async (req, res, next) => {
 
 
 
-applicantRouter.delete("/:applicant_id", async (req, res, next) => {
+applicantRouter.delete("/me",JWTAuthMiddleware,async (req, res, next) => {
   try {
     const numberOfDeletedRows = await ApplicantModel.destroy({
-      where: { id: req.params.applicant_id },
+      where: { id: req.user.id },
     });
     if (numberOfDeletedRows === 1) {
       res.status(204).send();
     } else {
       next(
-        createHttpError(404, `Applicant with id ${req.params.applicant_id} is not found!`)
+        createHttpError(404, `Applicant with id ${req.user.id} is not found!`)
       );
     }
   } catch (error) {
@@ -115,8 +116,6 @@ applicantRouter.delete("/:applicant_id", async (req, res, next) => {
 applicantRouter.post("/login",async (req,res,next)=>{
  try{
   const {email,password}=req.body;
-
-  // const applicant=await ApplicantModel.findOne({where:{email:email}})
   const applicant = await ApplicantModel.checkCredentials(email,password)
   if(applicant){
   const payload={id:applicant.id,email:applicant.email,role:applicant.role}
@@ -124,7 +123,6 @@ applicantRouter.post("/login",async (req,res,next)=>{
       res.send({accessToken}) 
   }else{
     next(createHttpError(401, "Credentials are wrong!"))
-
   }
  }catch(error){
   console.log(error)

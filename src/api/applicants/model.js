@@ -151,9 +151,6 @@ ApplicantModel.checkCredentials = async function (email, password) {
     return null;
   }
 };
-// 1 to many relationship. one address can have many applicants but one applicant can have one address
-// AddressModel.hasMany(ApplicantModel,{foreignKey:{name:"address_id",allowNull:false}})
-// ApplicantModel.belongsTo(AddressModel)
 
 // many to many relationship. one applicant can have many applicants and one guardian can have many applicants
 
