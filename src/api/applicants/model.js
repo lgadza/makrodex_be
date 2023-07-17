@@ -5,7 +5,7 @@ import sequelize from "../../db.js";
 import ParentApplicant from "../intermediate_tables/parent_applicant.js";
 import AddressModel from "../address/model.js";
 const ParentModel = sequelize.define("parent", {
-    parent_id: {
+    id: {
       type: DataTypes.STRING,
       primaryKey: true,
     },
@@ -37,10 +37,7 @@ const ParentModel = sequelize.define("parent", {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    applicant_id: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
+   
   });
   
   ParentModel.beforeCreate(async (parent) => {
@@ -61,7 +58,7 @@ const ParentModel = sequelize.define("parent", {
   });
 
 const ApplicantModel = sequelize.define("applicant", {
-  applicant_id: {
+  id: {
     type: DataTypes.STRING,
     primaryKey: true,
   },
@@ -109,10 +106,7 @@ const ApplicantModel = sequelize.define("applicant", {
     type: DataTypes.BOOLEAN,
     allowNull: false,
   },
-  address_id: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  }
+ 
 });
 
 ApplicantModel.beforeCreate(async (applicant) => {
@@ -123,27 +117,27 @@ ApplicantModel.beforeCreate(async (applicant) => {
 
   let applicantNumber = 1;
   if (lastApplicant) {
-    const lastApplicantId = lastApplicant.applicant_id;
+    const lastApplicantId = lastApplicant.id;
     const lastNumber = parseInt(lastApplicantId.split("_")[1]);
     applicantNumber = lastNumber + 1;
   }
 
   const formattedApplicantNumber = String(applicantNumber).padStart(3, "0");
-  applicant.applicant_id = `${schoolId}_${formattedApplicantNumber}`;
+  applicant.id = `${schoolId}_${formattedApplicantNumber}`;
 
   const plainPassword = applicant.password;
   const hashedPassword = await bcrypt.hash(plainPassword, 10);
   applicant.password = hashedPassword;
 });
 // 1 to many relationship. one address can have many applicants but one applicant can have one address
-AddressModel.hasMany(ApplicantModel,{foreignKey:"address_id"})
+AddressModel.hasMany(ApplicantModel,{foreignKey:{allowNull:false}})
 ApplicantModel.belongsTo(AddressModel)
 
 // many to many relationship. one applicant can have many applicants and one parent can have many applicants
 
-ApplicantModel.belongsToMany(ParentModel, { through: ParentApplicant, foreignKey: "applicant_id" });
-ParentModel.belongsToMany(ApplicantModel, { through: ParentApplicant, foreignKey: "parent_id" });
+ApplicantModel.belongsToMany(ParentModel, { through: ParentApplicant, foreignKey: {allowNull:false} });
+ParentModel.belongsToMany(ApplicantModel, { through: ParentApplicant, foreignKey: {allowNull:false} });
 
-ParentModel.belongsToMany(ApplicantModel, { through: ParentApplicant, foreignKey: "parent_id" });
-ApplicantModel.belongsToMany(ParentModel, { through: ParentApplicant, foreignKey: "applicant_id" });
+// ParentModel.hasMany(ApplicantModel, { through: ParentApplicant,  foreignKey: {allowNull:false} });
+// ApplicantModel.belongsToMany(ParentModel, { through: ParentApplicant,  foreignKey: {allowNull:false} });
 export default ApplicantModel;

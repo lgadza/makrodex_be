@@ -4,28 +4,24 @@ import ParentsModel from "../parents/model.js";
 import ApplicantModel from "../applicants/model.js";
 const SchoolModel=sequelize.define("school",{
    
-    school_id: {
+      id: {
         type: DataTypes.UUID,
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4,
       },
-      school_name: {
+      name: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      address: {
+      website: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
-      city: {
+      facebook: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
-      province: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      country: {
+      email: {
         type: DataTypes.STRING,
         allowNull: false,
       },
@@ -33,20 +29,20 @@ const SchoolModel=sequelize.define("school",{
         type: DataTypes.STRING,
         allowNull: false,
       },
-      email: {
+      instagram: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
-      school_type: {
-        type: DataTypes.ENUM("private","public"),
-        allowNull: false,
+      // school_type: {
+      //   type: DataTypes.ENUM("private","public"),
+      //   allowNull: false,
         
-      },
-      boarding_school: {
-        type: DataTypes.ENUM("boarding","day"),
-        allowNull: false,
+      // },
+      // boarding_school: {
+      //   type: DataTypes.ENUM("boarding","day"),
+      //   allowNull: false,
         
-      },
+      // },
 })
 
 
