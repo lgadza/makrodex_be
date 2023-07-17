@@ -12,6 +12,7 @@ import {
 import fileRouter from "./api/file/index.js"
 import parentsRouter from "./api/parents/index.js"
 import applicantRouter from "./api/applicants/applicants.js"
+import addressRouter from "./api/address/index.js"
 
 
 const server = express()
@@ -24,6 +25,7 @@ server.use(express.json())
 // ********************************** ENDPOINTS ****************************************
 
 server.use("/applicants",applicantRouter)
+server.use("/address", addressRouter)
 server.use("/parents",parentsRouter)
 server.use("/applicants/files",fileRouter)
 
