@@ -45,4 +45,5 @@ import sequelize from "../../db.js";
 
  })
 
+
  export default AddressModel

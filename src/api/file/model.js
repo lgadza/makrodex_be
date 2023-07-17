@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../../db.js';
 
-const FileUploadModel = sequelize.define('FileUpload', {
+const FileUploadModel = sequelize.define('file upload', {
     file_id: {
       type: DataTypes.UUID,
       primaryKey: true,

@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import sequelize from "../../db.js";
 // import ParentModel from "../parents/model.js";
 import ParentApplicant from "../intermediate_tables/parent_applicant.js";
+import AddressModel from "../address/model.js";
 const ParentModel = sequelize.define("parent", {
     parent_id: {
       type: DataTypes.STRING,
@@ -108,38 +109,10 @@ const ApplicantModel = sequelize.define("applicant", {
     type: DataTypes.BOOLEAN,
     allowNull: false,
   },
-  street: {
+  address_id: {
     type: DataTypes.STRING,
     allowNull: false,
-  },
-  building_number: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  apartment_number: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  postal_code: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  city: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  province: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  country: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  settlement_type: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
+  }
 });
 
 ApplicantModel.beforeCreate(async (applicant) => {
@@ -162,6 +135,11 @@ ApplicantModel.beforeCreate(async (applicant) => {
   const hashedPassword = await bcrypt.hash(plainPassword, 10);
   applicant.password = hashedPassword;
 });
+// 1 to many relationship. one address can have many applicants but one applicant can have one address
+AddressModel.hasMany(ApplicantModel,{foreignKey:"address_id"})
+ApplicantModel.belongsTo(AddressModel)
+
+// many to many relationship. one applicant can have many applicants and one parent can have many applicants
 
 ApplicantModel.belongsToMany(ParentModel, { through: ParentApplicant, foreignKey: "applicant_id" });
 ParentModel.belongsToMany(ApplicantModel, { through: ParentApplicant, foreignKey: "parent_id" });
