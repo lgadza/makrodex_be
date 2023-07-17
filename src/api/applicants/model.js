@@ -104,10 +104,10 @@ const ApplicantModel = sequelize.define("applicant", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  policy_acceptance: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-  },
+  // policy_acceptance: {
+  //   type: DataTypes.BOOLEAN,
+  //   allowNull: false,
+  // },
   data_process_acceptance: {
     type: DataTypes.BOOLEAN,
     allowNull: false,

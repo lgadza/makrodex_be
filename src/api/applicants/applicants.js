@@ -3,10 +3,11 @@ import createHttpError from "http-errors";
 import ApplicantModel from "./model.js";
 import { Op } from "sequelize";
 import ParentModel from "../guardians/model.js";
+import { checkApplicantSchema, triggerBadRequest } from "./validator.js";
 
 const applicantRouter = express.Router();
 
-applicantRouter.post("/register", async (req, res, next) => {
+applicantRouter.post("/register", checkApplicantSchema, triggerBadRequest, async (req, res, next) => {
   try {
     const { email } = req.body; // Destructure the email from req.body
     const applicant = await ApplicantModel.findOne({ where: { email } });
@@ -69,13 +70,13 @@ applicantRouter.put("/:applicant_id", async (req, res, next) => {
     const [numberOfUpdatedRows] = await ApplicantModel.update(
       req.body,
       {
-        where: { applicant_id: req.params.applicant_id },
+        where: { id: req.params.applicant_id },
         returning: true,
       }
     );
     if (numberOfUpdatedRows === 1) {
       const updatedRecord = await ApplicantModel.findOne({
-        where: { applicant_id: req.params.applicant_id },
+        where: { id: req.params.applicant_id },
         attributes: { exclude: ["password", "createdAt"] }, 
         raw: true, // Retrieve the record as plain JSON data
       });
@@ -97,7 +98,7 @@ applicantRouter.put("/:applicant_id", async (req, res, next) => {
 applicantRouter.delete("/:applicant_id", async (req, res, next) => {
   try {
     const numberOfDeletedRows = await ApplicantModel.destroy({
-      where: { applicant_id: req.params.applicant_id },
+      where: { id: req.params.applicant_id },
     });
     if (numberOfDeletedRows === 1) {
       res.status(204).send();
