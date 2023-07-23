@@ -9,9 +9,9 @@ import {JWTAuthMiddleware} from "../lib/auth/jwtAuth.js"
 
 const applicantRouter = express.Router();
 
-applicantRouter.post("/register", checkApplicantSchema, triggerBadRequest, async (req, res, next) => {
+applicantRouter.post("/register",checkApplicantSchema,triggerBadRequest, async (req, res, next) => {
   try {
-    const { email } = req.body; // Destructure the email from req.body
+    const { email } = req.body; 
     const applicant = await ApplicantModel.findOne({ where: { email } });
     if (applicant) {
        res.send({
@@ -20,11 +20,10 @@ applicantRouter.post("/register", checkApplicantSchema, triggerBadRequest, async
     } else {
       const new_applicant = await ApplicantModel.create(req.body);
       const {id } = new_applicant;
-      res.status(201).send(id );
+      res.status(201).send({success:true,id} );
     }
   } catch (error) {
-    console.log(error);
-    next(error);
+    next(error)
   }
 });
 
@@ -67,18 +66,18 @@ applicantRouter.get("/me",JWTAuthMiddleware, async (req, res, next) => {
   }
 });
 
-applicantRouter.put("/me",JWTAuthMiddleware, async (req, res, next) => {
+applicantRouter.put("/:applicant_id", async (req, res, next) => {
   try {
     const [numberOfUpdatedRows] = await ApplicantModel.update(
       req.body,
       {
-        where: { id: req.user.id },
+        where: { id: req.params.applicant_id },
         returning: true,
       }
     );
     if (numberOfUpdatedRows === 1) {
       const updatedRecord = await ApplicantModel.findOne({
-        where: { id: req.user.id },
+        where: { id: req.params.applicant_id },
         attributes: { exclude: ["password", "createdAt"] }, 
         raw: true, // Retrieve the record as plain JSON data
       });
@@ -87,16 +86,13 @@ applicantRouter.put("/me",JWTAuthMiddleware, async (req, res, next) => {
       res.send(updatedRecord);
     } else {
       next(
-        createHttpError(404, `Applicant with id ${req.user.id} is not found!`)
+        createHttpError(404, `Applicant with id ${req.params.applicant_id} is not found!`)
       );
     }
   } catch (error) {
     next(error);
   }
 });
-
-
-
 applicantRouter.delete("/me",JWTAuthMiddleware,async (req, res, next) => {
   try {
     const numberOfDeletedRows = await ApplicantModel.destroy({
@@ -116,6 +112,9 @@ applicantRouter.delete("/me",JWTAuthMiddleware,async (req, res, next) => {
 applicantRouter.post("/login",async (req,res,next)=>{
  try{
   const {email,password}=req.body;
+  const foundApplicant=await ApplicantModel.findOne({where:{email:email}})
+  console.log(foundApplicant,"FOUND APPLICANT")
+  if(foundApplicant){
   const applicant = await ApplicantModel.checkCredentials(email,password)
   if(applicant){
   const payload={id:applicant.id,email:applicant.email,role:applicant.role}
@@ -124,6 +123,9 @@ applicantRouter.post("/login",async (req,res,next)=>{
   }else{
     next(createHttpError(401, "Credentials are wrong!"))
   }
+}else{
+  next(createHttpError(401,`You do not have an account yet. Please sign up to access the platform`))
+}
  }catch(error){
   console.log(error)
   next(error)

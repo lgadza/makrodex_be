@@ -61,6 +61,7 @@ GuardianModel.beforeCreate(async (guardian) => {
   const formattedGuardianNumber = String(guardianNumber).padStart(3, "0");
   guardian.id = `${schoolId}_${formattedGuardianNumber}`;
 });
+// many to many relationship. one applicant can have many applicants and one guardian can have many applicants
 
 GuardianModel.belongsToMany(ApplicantModel, { through: GuardianApplicant, foreignKey: {name:"applicant_id" ,allowNull:false}});
 ApplicantModel.belongsToMany(GuardianModel, { through: GuardianApplicant, foreignKey: {name:"candidate_id" ,allowNull:false}});
