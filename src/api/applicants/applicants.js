@@ -6,6 +6,7 @@ import ParentModel from "../guardians/model.js";
 import { createAccessToken } from "../lib/auth/tools.js";
 import { checkApplicantSchema, triggerBadRequest } from "./validator.js";
 import {JWTAuthMiddleware} from "../lib/auth/jwtAuth.js"
+import AddressModel from "../address/model.js";
 
 const applicantRouter = express.Router();
 
@@ -34,11 +35,16 @@ applicantRouter.get("/", async (req, res, next) => {
     const applicants = await ApplicantModel.findAll({
       where: { ...query },
       attributes: { exclude: ["password","createdAt"], },
-      include: {
+      include:[ {
         model: ParentModel,
         attributes: ["first_name", "last_name", "gender", "phone_number"],
         through: { attributes: [] },
       },
+      {
+        model: AddressModel, 
+        attributes: ["id", "street", "building_number", "city", "country","province","type_of_settlement","postal_code"], 
+      },
+    ]
     });
     res.send(applicants);
   } catch (error) {
@@ -52,7 +58,16 @@ applicantRouter.get("/me",JWTAuthMiddleware, async (req, res, next) => {
   try {
     const applicant = await ApplicantModel.findByPk(req.user.id, {
       attributes: { exclude: ["password","createdAt"] },
-      include: [ParentModel],
+      include:[ {
+        model: ParentModel,
+        attributes: ["first_name", "last_name", "gender", "phone_number"],
+        through: { attributes: [] },
+      },
+      {
+        model: AddressModel, 
+        attributes: ["id", "street", "building_number", "city", "country","province","type_of_settlement","postal_code"], 
+      },
+    ],
     });
     if (applicant) {
       res.send(applicant);
@@ -66,7 +81,7 @@ applicantRouter.get("/me",JWTAuthMiddleware, async (req, res, next) => {
   }
 });
 
-applicantRouter.put("/:applicant_id", async (req, res, next) => {
+applicantRouter.put("/:applicant_id",JWTAuthMiddleware, async (req, res, next) => {
   try {
     const [numberOfUpdatedRows] = await ApplicantModel.update(
       req.body,

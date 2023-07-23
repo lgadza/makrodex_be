@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import bcrypt from "bcrypt";
 import sequelize from "../../db.js";
+import AddressModel from "../address/model.js";
 
 const ApplicantModel = sequelize.define("applicant", {
   id: {
@@ -107,5 +108,6 @@ ApplicantModel.checkCredentials = async function (email, password) {
   }
 };
 
-
+ApplicantModel.hasOne(AddressModel, { foreignKey: "applicant_id" });
+AddressModel.belongsTo(ApplicantModel, { foreignKey: "applicant_id" });
 export default ApplicantModel;

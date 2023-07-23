@@ -1,7 +1,5 @@
 import { DataTypes, UUIDV4 } from "sequelize";
 import sequelize from "../../db.js";
-import ApplicantModel from "../applicants/model.js";
-import ApplicantAddressModel from "../intermediate_tables/applicant_address.js";
  const AddressModel=sequelize.define("address",{
     id:{
         type:DataTypes.UUID,
@@ -24,6 +22,10 @@ import ApplicantAddressModel from "../intermediate_tables/applicant_address.js";
         type:DataTypes.STRING,
         allowNull:true
     },
+    location:{
+        type:DataTypes.STRING,
+        allowNull:false
+    },
     city:{
         type:DataTypes.STRING,
         allowNull:false
@@ -42,8 +44,9 @@ import ApplicantAddressModel from "../intermediate_tables/applicant_address.js";
     }
 
  })
- // many to many relationship. one applicant can have many address when they change address and one address can have many applicants living together
- AddressModel.belongsToMany(ApplicantModel, { through: ApplicantAddressModel, foreignKey: "address_id"});
- ApplicantModel.belongsToMany(AddressModel, { through: ApplicantAddressModel, foreignKey:"applicant_id"});
+ // one to many relationship. one applicant can have many address when they change address 
+//  AddressModel.belongsToMany(ApplicantModel, { through: ApplicantAddressModel, foreignKey: "address_id"});
+//  ApplicantModel.belongsToMany(AddressModel, { through: ApplicantAddressModel, foreignKey:"applicant_id"});
+
 
  export default AddressModel
