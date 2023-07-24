@@ -29,7 +29,6 @@ parentsRouter.get("/:parent_id", async (req, res,next) => {
   try {
     const parent = await ParentsModel.findByPk(req.params.parent_id);
     if (!parent) {
-    //   res.status(404).json({ error: "Parent not found" });
       createHttpError(404, `Parent with id ${req.params.parent_id} not found!`)
     } else {
       res.json(parent);
@@ -56,7 +55,6 @@ parentsRouter.put("/:parent_id", async (req, res,next) => {
   try {
     const parent = await ParentsModel.findByPk(req.params.parent_id);
     if (!parent) {
-    //   res.status(404).json({ error: "Parent not found" });
       createHttpError(404, `Parent with id ${re.params.parent_id} not found!`)
     } else {
       await parent.update(req.body);
@@ -73,7 +71,6 @@ parentsRouter.delete("/:parent_id", async (req, res,next) => {
   try {
     const parent = await ParentsModel.findByPk(req.params.parent_id);
     if (!parent) {
-    //   res.status(404).json({ error: "Parent not found" });
       createHttpError(404, `Parent with id ${re.params.parent_id} not found!`)
 
     } else {

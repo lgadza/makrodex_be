@@ -41,9 +41,26 @@ addressRouter.get("/:address_id", async (req, res, next) => {
 });
 
 // Update an address by ID
-addressRouter.put("/:address_id", async (req, res, next) => {
+addressRouter.put("/:address_id", JWTAuthMiddleware, async (req, res, next) => {
   try {
     const address_id = req.params.address_id;
+
+    // Find the address by ID
+    const address = await AddressModel.findByPk(address_id);
+    if (!address) {
+      return res.status(404).send({ error: "Address not found" });
+    }
+
+    // Get the applicant ID from the address record
+    const applicant_id = address.applicant_id;
+
+    // Find the applicant by ID
+    const applicant = await ApplicantModel.findByPk(applicant_id);
+    if (!applicant) {
+      return res.status(404).send({ error: "Applicant not found" });
+    }
+
+    // Update the address with the new data
     const [numberOfUpdatedRows] = await AddressModel.update(req.body, {
       where: { id: address_id },
       returning: true,
@@ -51,26 +68,47 @@ addressRouter.put("/:address_id", async (req, res, next) => {
     if (numberOfUpdatedRows === 0) {
       return res.status(404).send({ error: "Address not found" });
     }
+
     res.status(200).send({ message: "Address updated successfully" });
   } catch (error) {
     next(error);
   }
 });
 
+
 // Delete an address by ID
-addressRouter.delete("/:address_id", async (req, res, next) => {
+addressRouter.delete("/:address_id", JWTAuthMiddleware, async (req, res, next) => {
   try {
     const address_id = req.params.address_id;
+
+    // Find the address by ID
+    const address = await AddressModel.findByPk(address_id);
+    if (!address) {
+      return res.status(404).send({ error: "Address not found" });
+    }
+
+    // Get the applicant ID from the address record
+    const applicant_id = address.applicant_id;
+
+    // Find the applicant by ID
+    const applicant = await ApplicantModel.findByPk(applicant_id);
+    if (!applicant) {
+      return res.status(404).send({ error: "Applicant not found" });
+    }
+
+    // Delete the address
     const numberOfDeletedRows = await AddressModel.destroy({
       where: { id: address_id },
     });
     if (numberOfDeletedRows === 0) {
       return res.status(404).send({ error: "Address not found" });
     }
+
     res.status(204).send();
   } catch (error) {
     next(error);
   }
 });
+
 
 export default addressRouter;

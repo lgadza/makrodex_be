@@ -65,7 +65,7 @@ applicantRouter.get("/me",JWTAuthMiddleware, async (req, res, next) => {
       },
       {
         model: AddressModel, 
-        attributes: ["id", "street", "building_number", "city", "country","province","type_of_settlement","postal_code"], 
+        attributes: ["id", "street", "building_number", "city", "country","province","type_of_settlement","postal_code","location","apartment_number"], 
       },
     ],
     });

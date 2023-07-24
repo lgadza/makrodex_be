@@ -37,11 +37,7 @@ const GuardianModel = sequelize.define("guardian", {
     type: DataTypes.STRING, 
     allowNull: true
   },
-  candidate_id: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    foreignKey:true,
-  },
+ 
   
 });
 
