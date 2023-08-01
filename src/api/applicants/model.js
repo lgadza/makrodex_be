@@ -2,6 +2,8 @@ import { DataTypes } from "sequelize";
 import bcrypt from "bcrypt";
 import sequelize from "../../db.js";
 import AddressModel from "../address/model.js";
+import {GuardianApplicant, associateModels } from "../intermediate_tables/guardian_applicant.js";
+import GuardianModel from "../guardians/model.js";
 
 const ApplicantModel = sequelize.define("applicant", {
   id: {
@@ -10,14 +12,6 @@ const ApplicantModel = sequelize.define("applicant", {
     defaultValue:DataTypes.UUIDV4
 
   },
-  // address_Id: {
-  //   type: DataTypes.STRING,
-  //   references: {
-  //     model: "addresses",
-  //     key: "id",
-  //   },
-  //   allowNull: false,
-  // },
   first_name: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -107,7 +101,12 @@ ApplicantModel.checkCredentials = async function (email, password) {
     return null;
   }
 };
+// ApplicantModel.belongsToMany(GuardianModel, {
+//   through: GuardianApplicant,
+//   foreignKey: { allowNull: false, name: "applicant_id" },
+// });
+// ApplicantModel.hasOne(AddressModel, { foreignKey: "applicant_id" });
+// AddressModel.belongsTo(ApplicantModel, { foreignKey: "applicant_id" });
 
-ApplicantModel.hasOne(AddressModel, { foreignKey: "applicant_id" });
-AddressModel.belongsTo(ApplicantModel, { foreignKey: "applicant_id" });
 export default ApplicantModel;
+

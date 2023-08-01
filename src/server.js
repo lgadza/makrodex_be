@@ -9,12 +9,12 @@ import {
   notFoundErrorHandler,
   unauthorizedErrorHandler,
 } from "./errorHandlers.js"
-import fileRouter from "./api/file/index.js"
 import guardiansRouter from "./api/guardians/index.js"
 import applicantRouter from "./api/applicants/applicants.js"
 import addressRouter from "./api/address/index.js"
 import applicationRouter from "./api/applications/index.js"
 import guardianTypeRouter from "./api/guardians/guardian_type.js"
+import fileRouter from "./api/file/index.js"
 
 
 const server = express()

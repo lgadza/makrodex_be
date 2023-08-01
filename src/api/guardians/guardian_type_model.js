@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../db.js";
 import ParentModel from "./model.js";
-import ParentApplicant from "../intermediate_tables/guardian_applicant.js";
+import {GuardianApplicant} from "../intermediate_tables/guardian_applicant.js";
 
 const GuardianTypeModel=sequelize.define("guardian_type",{
     id:{
@@ -16,6 +16,6 @@ const GuardianTypeModel=sequelize.define("guardian_type",{
         
     }
 })
-ParentModel.belongsToMany(GuardianTypeModel,{through:ParentApplicant,foreignKey:{allowNull:false}})
-GuardianTypeModel.belongsToMany(ParentModel,{through:ParentApplicant,foreignKey:{allowNull:false}})
+ParentModel.belongsToMany(GuardianTypeModel,{through:GuardianApplicant,foreignKey:{allowNull:false}})
+GuardianTypeModel.belongsToMany(ParentModel,{through:GuardianApplicant,foreignKey:{allowNull:false}})
 export default GuardianTypeModel

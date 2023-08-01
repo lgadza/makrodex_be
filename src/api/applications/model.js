@@ -18,6 +18,6 @@ const ApplicationModel=sequelize.define("application",{
 ApplicantModel.hasMany(ApplicationModel,{foreignKey:{allowNull:false}})
 ApplicationModel.belongsTo(ApplicantModel)
 SchoolModel.belongsToMany(ApplicationModel,{through:ApplicationSchoolModel,foreignKey:{allowNull:false}})
-ApplicantModel.belongsToMany(SchoolModel,{through:ApplicationSchoolModel,foreignKey:false})
+ApplicantModel.belongsToMany(SchoolModel,{through:ApplicationSchoolModel,foreignKey:{allowNull:false}})
 
 export default ApplicationModel

@@ -35,15 +35,16 @@ applicantRouter.get("/", async (req, res, next) => {
     const applicants = await ApplicantModel.findAll({
       where: { ...query },
       attributes: { exclude: ["password","createdAt"], },
-      include:[ {
-        model: ParentModel,
-        attributes: ["first_name", "last_name", "gender", "phone_number"],
-        through: { attributes: [] },
-      },
-      {
-        model: AddressModel, 
-        attributes: ["id", "street", "building_number", "city", "country","province","type_of_settlement","postal_code"], 
-      },
+      include:[ 
+      //   {
+      //   model: ParentModel,
+      //   attributes: ["first_name", "last_name", "gender", "phone_number"],
+      //   through: { attributes: [] },
+      // },
+      // {
+      //   model: AddressModel, 
+      //   attributes: ["id", "street", "building_number", "city", "country","province","type_of_settlement","postal_code"], 
+      // },
     ]
     });
     res.send(applicants);
@@ -58,15 +59,16 @@ applicantRouter.get("/me",JWTAuthMiddleware, async (req, res, next) => {
   try {
     const applicant = await ApplicantModel.findByPk(req.user.id, {
       attributes: { exclude: ["password","createdAt"] },
-      include:[ {
-        model: ParentModel,
-        attributes: ["first_name", "last_name", "gender", "phone_number"],
-        through: { attributes: [] },
-      },
-      {
-        model: AddressModel, 
-        attributes: ["id", "street", "building_number", "city", "country","province","type_of_settlement","postal_code","location","apartment_number"], 
-      },
+      include:[ 
+      //   {
+      //   model: ParentModel,
+      //   attributes: ["first_name", "last_name", "relationship", "phone_number"],
+      //   through: { attributes: [] },
+      // },
+      // {
+      //   model: AddressModel, 
+      //   attributes: ["id", "street", "building_number", "city", "country","province","type_of_settlement","postal_code","location","apartment_number"], 
+      // },
     ],
     });
     if (applicant) {
