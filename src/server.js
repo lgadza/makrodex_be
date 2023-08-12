@@ -15,6 +15,7 @@ import addressRouter from "./api/address/index.js"
 import applicationRouter from "./api/applications/index.js"
 import guardianTypeRouter from "./api/guardians/guardian_type.js"
 import fileRouter from "./api/file/index.js"
+import AiRouter from "./api/makronexusAI/index.js"
 
 
 const server = express()
@@ -32,6 +33,7 @@ server.use("/guardians",guardiansRouter)
 server.use("/applicants/files",fileRouter)
 server.use("/applications",applicationRouter)
 server.use("/guardians/types",guardianTypeRouter)
+server.use("/ai",AiRouter)
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)
