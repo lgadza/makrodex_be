@@ -16,6 +16,7 @@ import applicationRouter from "./api/applications/index.js"
 import guardianTypeRouter from "./api/guardians/guardian_type.js"
 import fileRouter from "./api/file/index.js"
 import AiRouter from "./api/makronexusAI/index.js"
+import bodyParser from "body-parser"
 
 
 const server = express()
@@ -23,7 +24,8 @@ const port = process.env.PORT || 3001
 
 // ********************************* MIDDLEWARES ***************************************
 server.use(cors())
-server.use(express.json())
+// server.use(express.json())
+server.use(bodyParser.json())
 
 // ********************************** ENDPOINTS ****************************************
 
