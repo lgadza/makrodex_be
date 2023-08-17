@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../db.js";
 
-const StudentMakronexaQA = sequelize.define("student-makronexaQA", {
+const users_AiChatModel = sequelize.define("users_aiChat", {
   id: {
     type: DataTypes.UUID,
     primaryKey: true,
@@ -9,4 +9,4 @@ const StudentMakronexaQA = sequelize.define("student-makronexaQA", {
   },
 });
 
-export default StudentMakronexaQA;
+export default users_AiChatModel;

@@ -7,6 +7,7 @@ const sequelize = new Sequelize(PG_DB, PG_USER, PG_PASSWORD, {
   port: PG_PORT,
   dialect: "postgres",
   logging:false,
+  // logging:console.log,
   
 })
 

@@ -17,6 +17,7 @@ import guardianTypeRouter from "./api/guardians/guardian_type.js"
 import fileRouter from "./api/file/index.js"
 import AiRouter from "./api/makronexusAI/index.js"
 import bodyParser from "body-parser"
+import chatRouter from "./api/makronexusAI/chats/index.js"
 
 
 const server = express()
@@ -36,6 +37,7 @@ server.use("/applicants/files",fileRouter)
 server.use("/applications",applicationRouter)
 server.use("/guardians/types",guardianTypeRouter)
 server.use("/ai",AiRouter)
+server.use("/ai",chatRouter)
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)
