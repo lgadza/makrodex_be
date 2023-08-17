@@ -39,7 +39,8 @@ AiRouter.post("/chats/:chat_id/messages", async (req, res, next) => {
     // Create a new MakronexaQA instance for the user's input
     const newMakronexaQA = await MakronexaQA.create({
       type: "text",
-      content: question,
+      message: question,
+      from:"user",
       model: model,
       user_id: applicant_id,
       chat_id: chat_id,
@@ -52,7 +53,7 @@ AiRouter.post("/chats/:chat_id/messages", async (req, res, next) => {
     // Create a new MakronexaQA instance for the AI response
     const newResponseMakronexaQA = await MakronexaQA.create({
       type: "text",
-      content: aiResponseText.trim(),
+      message: aiResponseText.trim(),
       model: model,
       user_id: "36f23860-1052-40bd-886d-c3b96970e215",
       chat_id: chat_id,

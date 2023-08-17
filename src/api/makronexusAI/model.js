@@ -16,7 +16,7 @@ const MakronexaQA=sequelize.define("makronexaQA",{
         allowNull: false,
         defaultValue:"text"
       },
-      content: {
+      message: {
         type: DataTypes.STRING,
         allowNull: false,
       },
@@ -24,6 +24,23 @@ const MakronexaQA=sequelize.define("makronexaQA",{
         type: DataTypes.STRING,
         allowNull: true,
       },
+      from:{
+        type:DataTypes.ENUM("makronexa","user"),
+        allowNull:false,
+        defaultValue:"makronexa"
+
+      },
+      liked:{
+        type:DataTypes.BOOLEAN,
+        allowNull:false,
+        defaultValue:false
+      },
+      disliked:{
+        type:DataTypes.ENUM("true","false","no-comment"),
+        allowNull:false,
+        defaultValue:"no-comment"
+
+      }
   
 })
 const aiChatModel = sequelize.define("AiChat", {
@@ -37,7 +54,7 @@ MakronexaQA.belongsTo(ApplicantModel, { foreignKey: "user_id" });
 ApplicantModel.hasMany(MakronexaQA, {
   foreignKey: { allowNull: false, name: "user_id" },
 });
-aiChatModel.hasMany(MakronexaQA,{ foreignKey:{allowNull:false,name:"chat_id"} });
+// aiChatModel.hasMany(MakronexaQA,{ foreignKey:{allowNull:false,name:"chat_id"} });
 MakronexaQA.belongsTo(aiChatModel, {  foreignKey:{allowNull:false,name:"chat_id"} });
 
 export default MakronexaQA

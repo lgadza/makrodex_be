@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import sequelize from "../../../db.js";
 import ApplicantModel from "../../applicants/model.js";
 import users_AiChatModel from "../../intermediate_tables/usersAiChatModel.js";
+import MakronexaQA from "../model.js";
 
 const aiChatModel = sequelize.define("AiChat", {
   id: {
@@ -19,5 +20,6 @@ ApplicantModel.belongsToMany(aiChatModel, {
   through: users_AiChatModel,
   foreignKey: { allowNull: false, name: "user_id" },
 });
+aiChatModel.hasMany(MakronexaQA, { foreignKey: "chat_id" });
 
 export default aiChatModel;
