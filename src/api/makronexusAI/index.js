@@ -26,7 +26,7 @@ AiRouter.post("/chats/:chat_id/messages", async (req, res, next) => {
       model: model,
       prompt: message,
       max_tokens: 20,
-      temperature: 0.5,
+      temperature: 0.8,
     });
     const user=await ApplicantModel.findByPk(applicant_id)
     const chat = await aiChatModel.findByPk(chat_id);
