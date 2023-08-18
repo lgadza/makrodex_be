@@ -17,7 +17,7 @@ const MakronexaQA=sequelize.define("makronexaQA",{
         defaultValue:"text"
       },
       message: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false,
       },
       model: {

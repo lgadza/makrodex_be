@@ -7,6 +7,7 @@ import aiChatModel from "./chats/model.js";
 import sequelize from "../../db.js";
 
 const configuration = new Configuration({
+  organization:"org-OteAk3qMx5pQ9EiVVSKsenQG",
   apiKey: process.env.OPENAI_API_KEY,
 });
 
@@ -15,50 +16,71 @@ const openai = new OpenAIApi(configuration);
 const AiRouter = express.Router();
 
 AiRouter.post("/chats/:chat_id/messages", async (req, res, next) => {
-  
-
   try {
-    const { message, model, applicant_id, question } = req.body;
+    const { message, applicant_id, question,model } = req.body;
     const { chat_id } = req.params;
 
+
+        const makronexaPersonality=`You are a Socratic tutor. Use the following principles in responding to students:
+
+    - Ask thought-provoking, open-ended questions that challenge students' preconceptions and encourage them to engage in deeper reflection and critical thinking.
+    - Facilitate open and respectful dialogue among students, creating an environment where diverse viewpoints are valued and students feel comfortable sharing their ideas.
+    - Actively listen to students' responses, paying careful attention to their underlying thought processes and making a genuine effort to understand their perspectives.
+    - Guide students in their exploration of topics by encouraging them to discover answers independently, rather than providing direct answers, to enhance their reasoning and analytical skills.
+    - Promote critical thinking by encouraging students to question assumptions, evaluate evidence, and consider alternative viewpoints in order to arrive at well-reasoned conclusions.
+    - Demonstrate humility by acknowledging your own limitations and uncertainties, modeling a growth mindset and exemplifying the value of lifelong learning.`
+
     // Call OpenAI API to generate response
-    const response = await openai.createCompletion({
-      model: model,
-      prompt: message,
-      max_tokens: 20,
+    const response = await openai.createChatCompletion({
+      model: model, // Use the correct model name
+      messages:[
+        {
+          "role":"system","content":`${makronexaPersonality}`
+        },
+        {
+          role:"user",
+          content:message,
+        }
+      ] ,
+      max_tokens: 100,
       temperature: 0.8,
     });
-    const user=await ApplicantModel.findByPk(applicant_id)
+
+    const user = await ApplicantModel.findByPk(applicant_id);
     const chat = await aiChatModel.findByPk(chat_id);
+
     if (!chat) {
       return res.status(404).json({ error: "Chat not found" });
     }
-     if(!user) return res.status(404).json({error:"Applicant not found"})
-    const aiResponseText = response.data.choices[0].text;
+
+    if (!user) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
+    const aiResponseText = response.data.choices[0].message.content;
 
     // Create a new MakronexaQA instance for the user's input
     const newMakronexaQA = await MakronexaQA.create({
       type: "text",
       message: question,
-      from:"user",
-      model: model,
+      from: "user",
+      model: "gpt-3.5-turbo",
       user_id: applicant_id,
       chat_id: chat_id,
     });
 
     // Associate the user's input with the applicant
-    const applicant = await ApplicantModel.findByPk(applicant_id);
-    await newMakronexaQA.setApplicant(applicant);
+    await newMakronexaQA.setApplicant(user);
 
     // Create a new MakronexaQA instance for the AI response
     const newResponseMakronexaQA = await MakronexaQA.create({
       type: "text",
-      message: aiResponseText.trim(),
-      model: model,
+      message: aiResponseText,
+      model: "gpt-3.5-turbo",
       user_id: "36f23860-1052-40bd-886d-c3b96970e215",
       chat_id: chat_id,
     });
-   
+
     console.log(newResponseMakronexaQA, "newResponseMakronexaQA");
 
     res.json({
@@ -80,8 +102,6 @@ AiRouter.get("/models", async (req, res, next) => {
   }
 });
 
-
-// Get all messages
 AiRouter.get("/chats/messages", async (req, res, next) => {
   try {
     const messages = await MakronexaQA.findAll();
@@ -91,8 +111,5 @@ AiRouter.get("/chats/messages", async (req, res, next) => {
     next(error);
   }
 });
-
-
-
 
 export default AiRouter;
