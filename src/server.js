@@ -19,6 +19,7 @@ import AiRouter from "./api/makronexusAI/index.js"
 import bodyParser from "body-parser"
 import chatRouter from "./api/makronexusAI/chats/index.js"
 import pineconeRouter from "./api/makronexusAI/pinecone/index.js"
+import router from "./api/makronexusAI/langchain/index.js"
 
 
 const server = express()
@@ -40,6 +41,7 @@ server.use("/guardians/types",guardianTypeRouter)
 server.use("/ai",AiRouter)
 server.use("/ai",chatRouter)
 server.use('/pinecone', pineconeRouter);
+server.use('/langchain', router);
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)

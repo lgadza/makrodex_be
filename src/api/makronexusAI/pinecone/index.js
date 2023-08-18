@@ -117,7 +117,7 @@ pineconeRouter.post('/load-documents', async (req, res) => {
     });
 
     await createPineconeIndex(client, indexName, vectorDimension);
-    // await updatePinecone(client, indexName, docs);
+    await updatePinecone(client, indexName, docs);
     await queryPineconeVectorStoreAndQueryLLM(client, indexName, question);
 
     res.status(200).json({ message: 'Documents loaded and processed successfully.' });
