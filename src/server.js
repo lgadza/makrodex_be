@@ -20,7 +20,7 @@ import bodyParser from "body-parser"
 import chatRouter from "./api/makronexusAI/chats/index.js"
 import pineconeRouter from "./api/makronexusAI/pinecone/index.js"
 import router from "./api/makronexusAI/langchain/index.js"
-
+// import {PGVector } from 'langchain.vectorstores.pgvector';
 
 const server = express()
 const port = process.env.PORT || 3001

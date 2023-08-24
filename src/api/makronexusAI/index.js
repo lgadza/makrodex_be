@@ -56,8 +56,23 @@ AiRouter.post("/chats/:chat_id/messages", async (req, res, next) => {
     if (!user) {
       return res.status(404).json({ error: "Applicant not found" });
     }
-
+    function formatMathExpressions(response) {
+      const formattedResponse = response
+        .replace(/\b(x\^2)\b/g, 'x²')
+        .replace(/\b(x\^\d+)\b/g, 'x<sup>$1</sup>')
+        .replace(/\b(-\d+)\b/g, '₋$1')
+        .replace(/\(([^()]+)\)\(([^()]+)\)/g, '($1)($2)');
+    
+      return formattedResponse;
+    }
+    
+    
+    
+    
+    
+    
     const aiResponseText = response.data.choices[0].message.content;
+    const formattedResponse = formatMathExpressions(aiResponseText);
 
     // Create a new MakronexaQA instance for the user's input
     const newMakronexaQA = await MakronexaQA.create({
@@ -75,16 +90,16 @@ AiRouter.post("/chats/:chat_id/messages", async (req, res, next) => {
     // Create a new MakronexaQA instance for the AI response
     const newResponseMakronexaQA = await MakronexaQA.create({
       type: "text",
-      message: aiResponseText,
+      message: formattedResponse,
       model: "gpt-3.5-turbo",
-      user_id: "36f23860-1052-40bd-886d-c3b96970e215",
+      user_id: "59e4ece1-f519-4390-8462-cb88f10b25ef",
       chat_id: chat_id,
     });
 
     console.log(newResponseMakronexaQA, "newResponseMakronexaQA");
 
     res.json({
-      message: aiResponseText,
+      message: formattedResponse,
     });
   } catch (error) {
     console.error(error);

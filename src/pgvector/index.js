@@ -1,0 +1,1 @@
+import {PGVector} from "langchain/vectorstores.pgvector"
