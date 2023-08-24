@@ -92,7 +92,7 @@ AiRouter.post("/chats/:chat_id/messages", async (req, res, next) => {
       type: "text",
       message: formattedResponse,
       model: "gpt-3.5-turbo",
-      user_id: "59e4ece1-f519-4390-8462-cb88f10b25ef",
+      user_id: "5217fbc5-0ce1-4d2b-b966-5ce56da155c1",
       chat_id: chat_id,
     });
 

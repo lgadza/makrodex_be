@@ -120,9 +120,9 @@
 
 // export default router;
 import express from 'express';
-import { OpenAI } from 'langchain/llms';
+import { OpenAI } from 'langchain/llms/openai';
 import { RetrievalQAChain, loadQAStuffChain } from 'langchain/chains';
-import { OpenAIEmbeddings } from 'langchain/embeddings';
+import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import * as dotenv from 'dotenv';
 import { FaissStore } from 'langchain/vectorstores/faiss';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
@@ -168,7 +168,7 @@ router.post('/save', async (req, res) => {
     
     
     const embeddings = new OpenAIEmbeddings();
-    const vectorstore = await FaissStore.fromDocuments(documents, embeddings,COLLECTION_NAME,CONNECTION_STRING);
+    const vectorstore = await FaissStore.fromDocuments(documents, embeddings);
     // const file = await vectorstore.save('./');
 console.log(vectorstore,"VECTORSTORE")
     // if (file) {
