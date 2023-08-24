@@ -28,19 +28,19 @@ const applicantSchema = {
     },
   },
 
-  citizenship: {
-    in: ["body"],
-    isString: {
-      errorMessage: "citizenship is mandatory field and needs to be a string!",
-    },
-  },
-  date_of_birth: {
-    in: ["body"],
-    isDate:{
-      errorMessage: "date_of_birth is mandatory field and needs to be a valid date!",
-    },
-    toDate: true,
-  },
+  // citizenship: {
+  //   in: ["body"],
+  //   isString: {
+  //     errorMessage: "citizenship is mandatory field and needs to be a string!",
+  //   },
+  // },
+  // date_of_birth: {
+  //   in: ["body"],
+  //   isDate:{
+  //     errorMessage: "date_of_birth is mandatory field and needs to be a valid date!",
+  //   },
+  //   toDate: true,
+  // },
   gender: {
     in: ["body"],
     isString: {
@@ -51,12 +51,12 @@ const applicantSchema = {
       errorMessage: "gender must be either 'male' or 'female'",
     },
   },
-  phone_number: {
-    in: ["body"],
-    isString: {
-      errorMessage: "phone_number is mandatory field !",
-    },
-  },
+  // phone_number: {
+  //   in: ["body"],
+  //   isString: {
+  //     errorMessage: "phone_number is mandatory field !",
+  //   },
+  // },
   password: {
     in: ["body"],
     isString: {

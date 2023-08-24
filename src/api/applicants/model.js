@@ -20,26 +20,26 @@ const ApplicantModel = sequelize.define("applicant", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  second_name: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  date_of_birth: {
-    type: DataTypes.DATEONLY,
-    allowNull: false,
-  },
+  // second_name: {
+  //   type: DataTypes.STRING,
+  //   allowNull: true,
+  // },
+  // date_of_birth: {
+  //   type: DataTypes.DATEONLY,
+  //   allowNull: false,
+  // },
   gender: {
     type: DataTypes.ENUM("male", "female"),
     allowNull: false,
   },
-  citizenship: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  phone_number: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
+  // citizenship: {
+  //   type: DataTypes.STRING,
+  //   allowNull: false,
+  // },
+  // phone_number: {
+  //   type: DataTypes.STRING,
+  //   allowNull: false,
+  // },
   email: {
     type: DataTypes.STRING,
     allowNull: true,

@@ -1,0 +1,5 @@
+version: 1
+buildCommand: npm install
+startCommand: npm start
+env:
+  NODE_VERSION: 18.17.1

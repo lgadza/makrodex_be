@@ -129,7 +129,7 @@ import { TextLoader } from 'langchain/document_loaders/fs/text';
 import { CharacterTextSplitter } from 'langchain/text_splitter';
 import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
 import path from 'path';
-import {PGVector} from "langchain/vectorstores/pgvector"
+// import {PGVector} from "langchain/vectorstores/pgvector"
 import { fileURLToPath } from 'url';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import {ConversationChain} from"langchain/chains"
