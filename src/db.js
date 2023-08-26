@@ -1,5 +1,5 @@
-import pkg from 'pg';
-const { Pool } = pkg;
+// import pkg from 'pg';
+// const { Pool } = pkg;
 import { Sequelize } from "sequelize"
 
 const { PG_DB, PG_USER, PG_PASSWORD, PG_HOST, PG_PORT } = process.env
@@ -29,9 +29,10 @@ export const syncModels = async () => {
 }
 export const pool = new Pool({
   connectionString: process.env.POSTGRES_URL + "?sslmode=require",
-})
-pool.connect((error)=>{
-  if(error) throw error
-  console.log("Pool Connection to Postgres successful")
-})
+}) 
+// FOR VERCEL
+// pool.connect((error)=>{
+//   if(error) throw error
+//   console.log("Pool Connection to Postgres successful")
+// })
 export default sequelize
