@@ -1,7 +1,7 @@
 import express from "express"
 import cors from "cors"
 import listEndpoints from "express-list-endpoints"
-import { pgConnect, syncModels } from "./db.js"
+import { pgConnect, pool, syncModels } from "./db.js"
 import {
   badRequestErrorHandler,
   forbiddenErrorHandler,
@@ -57,3 +57,4 @@ server.listen(port, () => {
   console.table(listEndpoints(server))
   console.log(`Server is running on port ${port}`)
 })
+// await pool()
