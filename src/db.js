@@ -49,7 +49,8 @@ const { PG_DB, PG_USER, PG_PASSWORD, PG_HOST, PG_PORT } = process.env
 //   dialect: "postgres",
 //   logging: false,
 // })
-const sequelize = new Sequelize(`postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DB}`, {
+const sequelize = new Sequelize(`postgres://postgres:E1a2g3l4e!@localhost:5432/makronexus-library
+`, {
   dialect: "postgres",
   logging: false,
 });
