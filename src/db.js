@@ -40,16 +40,19 @@ import { Sequelize } from "sequelize"
 
 const { PG_DB, PG_USER, PG_PASSWORD, PG_HOST, PG_PORT } = process.env
 
-const sequelize = new Sequelize({
-  database: PG_DB,
-  username: PG_USER,
-  password: PG_PASSWORD,
-  host: PG_HOST,
-  port: PG_PORT,
+// const sequelize = new Sequelize({
+//   database: PG_DB,
+//   username: PG_USER,
+//   password: PG_PASSWORD,
+//   host: PG_HOST,
+//   port: PG_PORT,
+//   dialect: "postgres",
+//   logging: false,
+// })
+const sequelize = new Sequelize(`postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DB}`, {
   dialect: "postgres",
   logging: false,
-})
-
+});
 export const pgConnect = async () => {
   try {
     await sequelize.authenticate()
