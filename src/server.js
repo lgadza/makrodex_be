@@ -1,7 +1,7 @@
 import express from "express"
 import cors from "cors"
 import listEndpoints from "express-list-endpoints"
-import { pgConnect, pool, syncModels } from "./db.js"
+import { pgConnect, syncModels } from "./db.js"
 import {
   badRequestErrorHandler,
   forbiddenErrorHandler,

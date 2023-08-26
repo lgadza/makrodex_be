@@ -27,10 +27,10 @@ export const syncModels = async () => {
   await sequelize.sync({ alter: true })
   console.log("All tables successfully synchronized!")
 }
-export const pool = new Pool({
-  connectionString: process.env.POSTGRES_URL + "?sslmode=require",
-}) 
 // FOR VERCEL
+// export const pool = new Pool({
+//   connectionString: process.env.POSTGRES_URL + "?sslmode=require",
+// }) 
 // pool.connect((error)=>{
 //   if(error) throw error
 //   console.log("Pool Connection to Postgres successful")
