@@ -93,7 +93,6 @@ import { TextLoader } from 'langchain/document_loaders/fs/text';
 import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
 import { createPineconeIndex, updatePinecone, queryPineconeVectorStoreAndQueryLLM } from './helpers.js';  // Import helper functions
 
-dotenv.config();
 
 const pineconeRouter = express.Router();
 
