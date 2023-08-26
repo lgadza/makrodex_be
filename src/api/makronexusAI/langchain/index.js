@@ -123,7 +123,7 @@ import express from 'express';
 import { OpenAI } from 'langchain/llms/openai';
 import { RetrievalQAChain, loadQAStuffChain } from 'langchain/chains';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import * as dotenv from 'dotenv';
+// import * as dotenv from 'dotenv';
 import { FaissStore } from 'langchain/vectorstores/faiss';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
 import { CharacterTextSplitter } from 'langchain/text_splitter';
@@ -150,7 +150,7 @@ function getFilePath(filename) {
 const filePath = getFilePath('TheGreatGatsby.txt');
 
 const router = express.Router();
-dotenv.config();
+// dotenv.config();
 
 // POST endpoint to save the file
 router.post('/save', async (req, res) => {
