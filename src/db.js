@@ -39,7 +39,8 @@
 import { Sequelize } from "sequelize"
 
 // const { PG_DB, PG_USER, PG_PASSWORD, PG_HOST, PG_PORT } = process.env
-const sequelize = new Sequelize(process.env.CONNECTION_STRING,{
+const connectionString = process.env.CONNECTION_STRING;
+const sequelize = new Sequelize(`${connectionString}`,{
   dialect: "postgres",
   logging: false,
 })
