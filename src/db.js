@@ -40,7 +40,7 @@ import { Sequelize } from "sequelize"
 
 // const { PG_DB, PG_USER, PG_PASSWORD, PG_HOST, PG_PORT } = process.env
 const connectionString = process.env.CONNECTION_STRING;
-const sequelize = new Sequelize(`${connectionString}`,{
+const sequelize = new Sequelize("postgres://makronexus_user:RDc7oMPcZ1FFdS4JnxS8CI3IgJGsJnhv@dpg-cjlnbsnv9s6c73b1p92g-a/makronexus",{
   dialect: "postgres",
   logging: false,
 })
