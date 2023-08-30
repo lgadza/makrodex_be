@@ -5,6 +5,7 @@ import ApplicantModel from "../applicants/model.js";
 import MakronexaQA from "./model.js";
 import aiChatModel from "./chats/model.js";
 import sequelize from "../../db.js";
+import { JWTAuthMiddleware } from "../lib/auth/jwtAuth.js";
 
 const configuration = new Configuration({
   organization:"org-OteAk3qMx5pQ9EiVVSKsenQG",
@@ -15,7 +16,7 @@ const openai = new OpenAIApi(configuration);
 
 const AiRouter = express.Router();
 
-AiRouter.post("/chats/:chat_id/messages", async (req, res, next) => {
+AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, next) => {
   try {
     const { message, applicant_id, question,model } = req.body;
     const { chat_id } = req.params;
@@ -42,7 +43,7 @@ AiRouter.post("/chats/:chat_id/messages", async (req, res, next) => {
           content:message,
         }
       ] ,
-      max_tokens: 100,
+      max_tokens: 50,
       temperature: 0.8,
     });
 
@@ -118,7 +119,7 @@ AiRouter.get("/models", async (req, res, next) => {
   }
 });
 
-AiRouter.get("/chats/messages", async (req, res, next) => {
+AiRouter.get("/chats/messages",JWTAuthMiddleware, async (req, res, next) => {
   try {
     const messages = await MakronexaQA.findAll();
     res.json(messages);

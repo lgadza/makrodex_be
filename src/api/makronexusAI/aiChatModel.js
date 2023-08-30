@@ -11,9 +11,14 @@ const aiChatModel = sequelize.define("aichat", {
     defaultValue: DataTypes.UUIDV4,
   },
 });
-aiChatModel.belongsToMany(ApplicantModel,{ 
-  through: "users_aiChat", 
-  foreignKey:{allowNull:false,name:"aiChat_id"} });
-  ApplicantModel.belongsToMany(aiChatModel,{through: "users_aiChat",  foreignKey:{allowNull:false,name:"user_id"}});
+aiChatModel.belongsToMany(ApplicantModel, {
+  through: "users_aiChat",
+  foreignKey: { allowNull: false, name: "chat_id" },
+});
+
+ApplicantModel.belongsToMany(aiChatModel, {
+  through: "users_aiChat",
+  foreignKey: { allowNull: false, name: "user_id" },
+});
 
   export default aiChatModel;

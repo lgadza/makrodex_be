@@ -44,14 +44,13 @@ const router = express.Router();
 
 // POST endpoint to save the file
 router.post('/save', async (req, res) => {
-  const collectionName="Makronexus_EduCenter"
   try {
     const loader = new TextLoader(filePath);
     const docs = await loader.load();
 
     const splitter = new CharacterTextSplitter({
       chuckSize: 200,
-      chunkOverlap: 20,
+      chunkOverlap: 50,
     });
 
     const documents = await splitter.splitDocuments(docs);
@@ -59,17 +58,12 @@ router.post('/save', async (req, res) => {
     
     
     const embeddings = new OpenAIEmbeddings();
-    const vectorstore = await QdrantVectorStore.fromDocuments(documents, embeddings,
-      {
-        url: process.env.QDRANT_URL,
-         collectionName: collectionName,
-         apiKey:process.env.QDRANT_DB_KEY
-      });
+    const vectorstore = await FaissStore.fromDocuments(documents, embeddings);
     // const file = await vectorstore.save('./');
 console.log(vectorstore,"VECTORSTORE")
-    if (vectorstore) {
-      res.json({ message: 'File saved successfully' });
-    }
+    // if (file) {
+    //   res.json({ message: 'File saved successfully' });
+    // }
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'An error occurred while saving the file' });
@@ -78,20 +72,10 @@ console.log(vectorstore,"VECTORSTORE")
 
 // GET endpoint to query the file
 router.get('/query', async (req, res) => {
-  const collectionName="Makronexus_EduCenter"
-
   try {
     const embeddings = new OpenAIEmbeddings();
-    const vectorStore = await QdrantVectorStore.fromExistingCollection(
-      embeddings,
-      {
-        url: process.env.QDRANT_URL,
-        collectionName: collectionName,
-        apiKey:process.env.QDRANT_DB_KEY
-
-      }
-    );;
-    const model = new OpenAI({ temperature: 0,model:"gpt-3.5-turbo" });
+    const vectorStore = await FaissStore.load('./', embeddings);
+    const model = new OpenAI({ temperature: 0 });
 
     const chain = new RetrievalQAChain({
       combineDocumentsChain: loadQAStuffChain(model),

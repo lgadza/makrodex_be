@@ -18,9 +18,7 @@ import fileRouter from "./api/file/index.js"
 import AiRouter from "./api/makronexusAI/index.js"
 import bodyParser from "body-parser"
 import chatRouter from "./api/makronexusAI/chats/index.js"
-import pineconeRouter from "./api/makronexusAI/pinecone/index.js"
 import router from "./api/makronexusAI/langchain/index.js"
-// import {PGVector } from 'langchain.vectorstores.pgvector';
 
 const server = express()
 const port = process.env.PORT || 3001
@@ -40,8 +38,7 @@ server.use("/applications",applicationRouter)
 server.use("/guardians/types",guardianTypeRouter)
 server.use("/ai",AiRouter)
 server.use("/ai",chatRouter)
-server.use('/pinecone', pineconeRouter);
-server.use('/langchain', router);
+server.use('/langchain/qdrant', router);
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)
