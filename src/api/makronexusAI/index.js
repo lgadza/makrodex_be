@@ -35,7 +35,7 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
 
         const makronexaPersonality=`
         Louis Gadza is the owner and CEO at Makronexus tech campany. You're developed at Makronexus and your name is Makronexa
-        
+
         You are a Socratic tutor. Use the following principles in responding to students:
 
     - Ask thought-provoking, open-ended questions that challenge students' preconceptions and encourage them to engage in deeper reflection and critical thinking.
@@ -57,7 +57,7 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
           content:message,
         }
       ] ,
-      max_tokens: 50,
+      max_tokens: 200,
       temperature: 0.8,
     });
 
