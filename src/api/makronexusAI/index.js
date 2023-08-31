@@ -15,7 +15,18 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 const AiRouter = express.Router();
-
+const promptDALLE=async(prompt)=>{
+  try{
+    const response=await openai.createImage({
+      prompt,
+      n:2,
+      size:"512x512",
+    });
+    return response.data.data;
+  }catch(error){
+    console.log(error)
+  }
+}
 AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, next) => {
   try {
     const { message, applicant_id, question,model } = req.body;
@@ -67,11 +78,6 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
       return formattedResponse;
     }
     
-    
-    
-    
-    
-    
     const aiResponseText = response.data.choices[0].message.content;
     const formattedResponse = formatMathExpressions(aiResponseText);
 
@@ -113,6 +119,45 @@ AiRouter.get("/models", async (req, res, next) => {
   try {
     const response = await openai.listEngines();
     res.json({ models: response.data.data });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
+AiRouter.post("/chats/:chat_id/image-search", async (req, res, next) => {
+  try {
+    const { message, applicant_id,model } = req.body;
+    const { chat_id } = req.params;
+    const user = await ApplicantModel.findByPk(applicant_id);
+    const chat = await aiChatModel.findByPk(chat_id);
+    if (!chat) {
+      return res.status(404).json({ error: "Chat not found" });
+    }
+    if(req.body.model==="dalle"){
+    const prompt=req.body.prompt
+    const response=await promptDALLE(prompt)
+    const newMakronexaQA = await MakronexaQA.create({
+      type: "text",
+      message: prompt,
+      from: "user",
+      model: "dalle",
+      user_id: applicant_id,
+      chat_id: chat_id,
+    });
+
+    // Associate the user's input with the applicant
+    await newMakronexaQA.setApplicant(user);
+    const responseString = JSON.stringify(response);
+    const newResponseMakronexaQA = await MakronexaQA.create({
+      type: "imageUrl",
+      message: responseString,
+      model: "dalle",
+      user_id: "adf0fea2-3693-4385-ab0f-bb3b81a20279",
+      chat_id: chat_id,
+    });
+    console.log(newResponseMakronexaQA, "newResponseMakronexaQA");
+    res.send({message:responseString})
+  }
   } catch (error) {
     console.error(error);
     next(error);

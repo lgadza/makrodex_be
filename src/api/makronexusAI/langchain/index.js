@@ -6,12 +6,11 @@ import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 // import * as dotenv from 'dotenv';
 import { FaissStore } from 'langchain/vectorstores/faiss';
 import { QdrantVectorStore } from 'langchain/vectorstores/qdrant';
-
 import { TextLoader } from 'langchain/document_loaders/fs/text';
 import { CharacterTextSplitter } from 'langchain/text_splitter';
 import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
+import { BufferLoader } from 'langchain/document_loaders/fs/buffer';
 import path from 'path';
-// import {PGVector} from "langchain/vectorstores/pgvector"
 import { fileURLToPath } from 'url';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import {ConversationChain} from"langchain/chains"
@@ -24,6 +23,7 @@ import {
 import { BufferMemory } from 'langchain/memory';
 // QDRANT 
 import {QdrantClient} from '@qdrant/js-client-rest';
+import multer from 'multer';
 // import {PointStruct} from '@qdrant'
 const client = new QdrantClient({
   url: 'https://a5a98b7e-35ea-44f9-8e2f-38cf6148a624.us-east-1-0.aws.cloud.qdrant.io:6333',
@@ -39,15 +39,30 @@ function getFilePath(filename) {
 }
 const filePath = getFilePath('TheGreatGatsby.txt');
 
+const storage = multer.memoryStorage(); // Store files in memory
+const upload = multer({ storage });
+
 const router = express.Router();
 // dotenv.config();
 
 // POST endpoint to save the file
-router.post('/save', async (req, res) => {
+router.post('/save',upload.single('file'), async (req, res) => {
   const collectionName="Makronexus_EduCenter"
   try {
+    const { title, description,fileExtension, file, subject, level } = req.body;
+    const fileDataAsString = req.file.path;
+console.log(fileDataAsString,"FILEPAtH");
+    if(fileExtension==='pdf'){
+      const loader= new PDFLoader(file)
+      const text=""
+      for(page in loader.pages){
+        text+=page.extract_text()
+      }
+      res.json(text);
+    }
     const loader = new TextLoader(filePath);
     const docs = await loader.load();
+   
 
     const splitter = new CharacterTextSplitter({
       chuckSize: 200,
@@ -58,18 +73,18 @@ router.post('/save', async (req, res) => {
     console.log(documents);
     
     
-    const embeddings = new OpenAIEmbeddings();
-    const vectorstore = await QdrantVectorStore.fromDocuments(documents, embeddings,
-      {
-        url: process.env.QDRANT_URL,
-         collectionName: collectionName,
-         apiKey:process.env.QDRANT_DB_KEY
-      });
-    // const file = await vectorstore.save('./');
-console.log(vectorstore,"VECTORSTORE")
-    if (vectorstore) {
-      res.json({ message: 'File saved successfully' });
-    }
+//     const embeddings = new OpenAIEmbeddings();
+//     const vectorstore = await QdrantVectorStore.fromDocuments(documents, embeddings,
+//       {
+//         url: process.env.QDRANT_URL,
+//          collectionName: collectionName,
+//          apiKey:process.env.QDRANT_DB_KEY
+//       });
+//     // const file = await vectorstore.save('./');
+// console.log(vectorstore,"VECTORSTORE")
+//     if (vectorstore) {
+//       res.json({ message: 'File saved successfully' });
+//     }
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'An error occurred while saving the file' });
