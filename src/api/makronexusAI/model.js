@@ -12,7 +12,7 @@ const MakronexaQA=sequelize.define("makronexaQA",{
         defaultValue: DataTypes.UUIDV4,
       },
       type: {
-        type: DataTypes.ENUM("text","image","video"),
+        type: DataTypes.ENUM("text","imageUrl","video"),
         allowNull: false,
         defaultValue:"text"
       },
