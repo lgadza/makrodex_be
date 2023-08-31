@@ -133,7 +133,7 @@ AiRouter.post("/chats/:chat_id/image-search", async (req, res, next) => {
     if (!chat) {
       return res.status(404).json({ error: "Chat not found" });
     }
-    if(req.body.model==="dalle"){
+    if(req.body.prompt){
     const prompt=req.body.prompt
     const response=await promptDALLE(prompt)
     const newMakronexaQA = await MakronexaQA.create({
