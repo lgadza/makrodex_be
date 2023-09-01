@@ -72,18 +72,9 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
     if (!user) {
       return res.status(404).json({ error: "Applicant not found" });
     }
-    function formatMathExpressions(response) {
-      const formattedResponse = response
-        .replace(/\b(x\^2)\b/g, 'x²')
-        .replace(/\b(x\^\d+)\b/g, 'x<sup>$1</sup>')
-        .replace(/\b(-\d+)\b/g, '₋$1')
-        .replace(/\(([^()]+)\)\(([^()]+)\)/g, '($1)($2)');
     
-      return formattedResponse;
-    }
     
     const aiResponseText = response.data.choices[0].message.content;
-    const formattedResponse = formatMathExpressions(aiResponseText);
 
     // Create a new MakronexaQA instance for the user's input
     const newMakronexaQA = await MakronexaQA.create({
@@ -101,7 +92,7 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
     // Create a new MakronexaQA instance for the AI response
     const newResponseMakronexaQA = await MakronexaQA.create({
       type: "text",
-      message: formattedResponse,
+      message: aiResponseText,
       model: "gpt-3.5-turbo",
       user_id: "adf0fea2-3693-4385-ab0f-bb3b81a20279",
       // user_id: "5217fbc5-0ce1-4d2b-b966-5ce56da155c1",
@@ -111,7 +102,7 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
     console.log(newResponseMakronexaQA, "newResponseMakronexaQA");
 
     res.json({
-      message: formattedResponse,
+      message: aiResponseText,
     });
   } catch (error) {
     console.error(error);
