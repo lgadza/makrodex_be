@@ -27,6 +27,30 @@ const promptDALLE=async(prompt)=>{
     console.log(error)
   }
 }
+const imageSearch = async (query, page = 1, perPage = 10) => {
+  const apiKey = process.env.UNSPLASH_ACCESS_KEY; // Replace with your Unsplash API key
+  const apiUrl = `https://api.unsplash.com/search/photos/?query=${query}&page=${page}&per_page=${perPage}`;
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Client-ID ${apiKey}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} - ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.results; // Return the array of image results
+  } catch (error) {
+    console.error('Error fetching Unsplash images:', error);
+    throw error; // Rethrow the error for handling in the calling code
+  }
+};
+
 AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, next) => {
   try {
     const { message, applicant_id, question,model } = req.body;
@@ -130,7 +154,11 @@ AiRouter.post("/chats/:chat_id/image-search", async (req, res, next) => {
     }
     if(req.body.prompt){
     const prompt=req.body.prompt
-    const response=await promptDALLE(prompt)
+    // const response=await promptDALLE(prompt)
+    const response=await imageSearch(prompt)
+    const smallImageUrls = response.map((image) => image.urls.small);
+
+    console.log(response,"smallImageUrls")
     const newMakronexaQA = await MakronexaQA.create({
       type: "text",
       message: prompt,
@@ -142,16 +170,19 @@ AiRouter.post("/chats/:chat_id/image-search", async (req, res, next) => {
 
     // Associate the user's input with the applicant
     await newMakronexaQA.setApplicant(user);
-    const responseString = JSON.stringify(response);
+    const responseString = JSON.stringify(smallImageUrls);
     const newResponseMakronexaQA = await MakronexaQA.create({
       type: "imageUrl",
       message: responseString,
       model: "dalle",
       user_id: "adf0fea2-3693-4385-ab0f-bb3b81a20279",
+      // user_id: "5217fbc5-0ce1-4d2b-b966-5ce56da155c1",
       chat_id: chat_id,
     });
     console.log(newResponseMakronexaQA, "newResponseMakronexaQA");
-    res.send({message:responseString})
+    // res.send({message:response})
+    res.send({ message: responseString });
+
   }
   } catch (error) {
     console.error(error);
