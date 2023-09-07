@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/lgadza/makrodex_be#readme",
   "dependencies": {
+    "@dqbd/tiktoken": "^1.0.7",
     "@qdrant/js-client-rest": "^1.4.0",
     "@sendgrid/mail": "^7.7.0",
     "bcrypt": "^5.1.0",

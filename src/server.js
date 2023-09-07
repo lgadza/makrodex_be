@@ -19,12 +19,18 @@ import AiRouter from "./api/makronexusAI/index.js"
 import bodyParser from "body-parser"
 import chatRouter from "./api/makronexusAI/chats/index.js"
 import router from "./api/makronexusAI/langchain/index.js"
+import aiSettingsRouter from "./api/makronexusAI/aiSettings/index.js"
 
 const server = express()
 const port = process.env.PORT || 3001
 
 // ********************************* MIDDLEWARES ***************************************
-server.use(cors())
+server.use(cors(
+  {
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  }
+))
 // server.use(express.json())
 server.use(bodyParser.json())
 
@@ -39,6 +45,7 @@ server.use("/guardians/types",guardianTypeRouter)
 server.use("/ai",AiRouter)
 server.use("/ai",chatRouter)
 server.use('/langchain/qdrant', router);
+server.use('/makronexa', aiSettingsRouter);
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)

@@ -3,9 +3,37 @@ import multer from "multer";
 import cloudinary from "../lib/cloudinary.js";
 import FileUploadModel from "./model.js";
 import createHttpError from "http-errors";
+import ApplicantModel from "../applicants/model.js";
+// import { CloudinaryStorage } from "multer-storage-cloudinary";
+
 
 const fileRouter = express.Router();
 const upload = multer({ dest: 'uploads/' });
+
+// const cloudinaryUploader = multer({
+//   storage: new CloudinaryStorage({
+//     cloudinary,
+//     params: {
+//       folder: "makronexus/img/users",
+//     },
+//   }),
+//   limits: { fileSize: 1024 * 1024 * 2 },
+// }).single("avatar");
+
+// // Post user Avatar
+// fileRouter.post("/:user_id/avatar",async(req,res,next)=>{
+//   try{
+//     const url=req.file.path
+//     console.log(url,"URL AVATAR")
+
+//     const uploadUser=await ApplicantModel.findOne({
+//       where:{id:req.params.user_id}
+//     })
+
+//   }catch(error){
+//     console.log(error,"Error")
+//   }
+// })
 
 // Get all files for an applicant
 fileRouter.get('/:applicant_id', async (req, res, next) => {
