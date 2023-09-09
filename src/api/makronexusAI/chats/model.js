@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../../db.js";
-import ApplicantModel from "../../applicants/model.js";
+import UserModel from "../../users/model.js";
 import users_AiChatModel from "../../intermediate_tables/usersAiChatModel.js";
 import MakronexaQA from "../model.js";
 
@@ -12,11 +12,11 @@ const aiChatModel = sequelize.define("AiChat", {
   },
 });
 
-aiChatModel.belongsToMany(ApplicantModel, {
+aiChatModel.belongsToMany(UserModel, {
   through: users_AiChatModel,
   foreignKey: { allowNull: false, name: "chat_id" },
 });
-ApplicantModel.belongsToMany(aiChatModel, {
+UserModel.belongsToMany(aiChatModel, {
   through: users_AiChatModel,
   foreignKey: { allowNull: false, name: "user_id" },
 });

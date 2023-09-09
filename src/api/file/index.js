@@ -3,7 +3,7 @@ import multer from "multer";
 import cloudinary from "../lib/cloudinary.js";
 import FileUploadModel from "./model.js";
 import createHttpError from "http-errors";
-import ApplicantModel from "../applicants/model.js";
+import UserModel from "../users/model.js";
 // import { CloudinaryStorage } from "multer-storage-cloudinary";
 
 
@@ -26,7 +26,7 @@ const upload = multer({ dest: 'uploads/' });
 //     const url=req.file.path
 //     console.log(url,"URL AVATAR")
 
-//     const uploadUser=await ApplicantModel.findOne({
+//     const uploadUser=await UserModel.findOne({
 //       where:{id:req.params.user_id}
 //     })
 
@@ -35,12 +35,12 @@ const upload = multer({ dest: 'uploads/' });
 //   }
 // })
 
-// Get all files for an applicant
-fileRouter.get('/:applicant_id', async (req, res, next) => {
+// Get all files for an user
+fileRouter.get('/:user_id', async (req, res, next) => {
   try {
     const files = await FileUploadModel.findAll({
       where: {
-        applicant_id: req.params.applicant_id,
+        user_id: req.params.user_id,
       },
     });
     res.json(files);
@@ -49,12 +49,12 @@ fileRouter.get('/:applicant_id', async (req, res, next) => {
   }
 });
 
-// Get one file by ID for an applicant
-fileRouter.get('/:applicant_id/:file_id', async (req, res, next) => {
+// Get one file by ID for an user
+fileRouter.get('/:user_id/:file_id', async (req, res, next) => {
   try {
     const file = await FileUploadModel.findOne({
       where: {
-        applicant_id: req.params.applicant_id,
+        user_id: req.params.user_id,
         file_id: req.params.file_id,
       },
     });
@@ -67,12 +67,12 @@ fileRouter.get('/:applicant_id/:file_id', async (req, res, next) => {
   }
 });
 
-// Upload one file for an applicant
-fileRouter.post('/:applicant_id', upload.single('file'), async (req, res, next) => {
+// Upload one file for an user
+fileRouter.post('/:user_id', upload.single('file'), async (req, res, next) => {
   try {
     const result = await cloudinary.uploader.upload(req.file.path);
     const file = await FileUploadModel.create({
-      applicant_id: req.params.applicant_id,
+      user_id: req.params.user_id,
       filename: req.file.originalname,
       url: result.secure_url,
     });
@@ -83,8 +83,8 @@ fileRouter.post('/:applicant_id', upload.single('file'), async (req, res, next) 
   }
 });
 
-// Upload multiple files for an applicant
-fileRouter.post('/:applicant_id/multiple', upload.array('files', 10), async (req, res, next) => {
+// Upload multiple files for an user
+fileRouter.post('/:user_id/multiple', upload.array('files', 10), async (req, res, next) => {
   try {
     const uploadPromises = req.files.map((file) =>
       cloudinary.uploader.upload(file.path)
@@ -92,7 +92,7 @@ fileRouter.post('/:applicant_id/multiple', upload.array('files', 10), async (req
     const results = await Promise.all(uploadPromises);
     const files = await FileUploadModel.bulkCreate(
       results.map((result, index) => ({
-        applicant_id: req.params.applicant_id,
+        user_id: req.params.user_id,
         filename: req.files[index].originalname,
         url: result.secure_url,
       }))
@@ -103,12 +103,12 @@ fileRouter.post('/:applicant_id/multiple', upload.array('files', 10), async (req
   }
 });
 
-// Delete a file by ID for an applicant
-fileRouter.delete('/:applicant_id/:file_id', async (req, res, next) => {
+// Delete a file by ID for an user
+fileRouter.delete('/:user_id/:file_id', async (req, res, next) => {
   try {
     const file = await FileUploadModel.destroy({
       where: {
-        applicant_id: req.params.applicant_id,
+        user_id: req.params.user_id,
         file_id: req.params.file_id,
       },
     });

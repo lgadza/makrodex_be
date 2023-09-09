@@ -1,15 +1,15 @@
 import express from "express";
 import AddressModel from "./model.js";
-import ApplicantModel from "../applicants/model.js";
+import UserModel from "../users/model.js";
 import { JWTAuthMiddleware } from "../lib/auth/jwtAuth.js";
 
 const addressRouter = express.Router();
 
-// Create an address for a specific applicant
-addressRouter.post("/:applicant_id", JWTAuthMiddleware, async (req, res, next) => {
+// Create an address for a specific user
+addressRouter.post("/:user_id", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const applicant_id = req.params.applicant_id;
-    const { id } = await AddressModel.create({ ...req.body, applicant_id });
+    const user_id = req.params.user_id;
+    const { id } = await AddressModel.create({ ...req.body, user_id });
     res.status(201).send({ id });
   } catch (error) {
     next(error);
@@ -51,13 +51,13 @@ addressRouter.put("/:address_id", JWTAuthMiddleware, async (req, res, next) => {
       return res.status(404).send({ error: "Address not found" });
     }
 
-    // Get the applicant ID from the address record
-    const applicant_id = address.applicant_id;
+    // Get the user ID from the address record
+    const user_id = address.user_id;
 
-    // Find the applicant by ID
-    const applicant = await ApplicantModel.findByPk(applicant_id);
-    if (!applicant) {
-      return res.status(404).send({ error: "Applicant not found" });
+    // Find the user by ID
+    const user = await UserModel.findByPk(user_id);
+    if (!user) {
+      return res.status(404).send({ error: "User not found" });
     }
 
     // Update the address with the new data
@@ -87,13 +87,13 @@ addressRouter.delete("/:address_id", JWTAuthMiddleware, async (req, res, next) =
       return res.status(404).send({ error: "Address not found" });
     }
 
-    // Get the applicant ID from the address record
-    const applicant_id = address.applicant_id;
+    // Get the user ID from the address record
+    const user_id = address.user_id;
 
-    // Find the applicant by ID
-    const applicant = await ApplicantModel.findByPk(applicant_id);
-    if (!applicant) {
-      return res.status(404).send({ error: "Applicant not found" });
+    // Find the user by ID
+    const user = await UserModel.findByPk(user_id);
+    if (!user) {
+      return res.status(404).send({ error: "User not found" });
     }
 
     // Delete the address

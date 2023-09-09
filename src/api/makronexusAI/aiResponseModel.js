@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../db.js";
-import ApplicantModel from "../applicants/model.js";
+import UserModel from "../users/model.js";
 import StudentMakronexaQA from "../intermediate_tables/students_makronexaQAs.js";
 import MakronexaQA from "./model.js";
 

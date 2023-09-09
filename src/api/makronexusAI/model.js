@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../db.js";
 import ParentsModel from "../guardians/model.js";
-import ApplicantModel from "../applicants/model.js";
+import UserModel from "../users/model.js";
 // import StudentMakronexaQA from "../intermediate_tables/students_makronexaQAs.js";
 // import aiChatModel from "./aiChatModel.js";
 const MakronexaQA=sequelize.define("makronexaQA",{
@@ -50,8 +50,8 @@ const aiChatModel = sequelize.define("AiChat", {
       defaultValue: DataTypes.UUIDV4,
     },
   });
-MakronexaQA.belongsTo(ApplicantModel, { foreignKey: "user_id" });
-ApplicantModel.hasMany(MakronexaQA, {
+MakronexaQA.belongsTo(UserModel, { foreignKey: "user_id" });
+UserModel.hasMany(MakronexaQA, {
   foreignKey: { allowNull: false, name: "user_id" },
 });
 // aiChatModel.hasMany(MakronexaQA,{ foreignKey:{allowNull:false,name:"chat_id"} });

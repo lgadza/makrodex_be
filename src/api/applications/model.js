@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../db.js";
-import ApplicantModel from "../applicants/model.js";
+import UserModel from "../users/model.js";
 import SchoolModel from "../schools/model.js";
 import ApplicationSchoolModel from "../intermediate_tables/application_school.js";
 
@@ -15,9 +15,9 @@ const ApplicationModel=sequelize.define("application",{
         defaultValue:"pending"
     }
 })
-ApplicantModel.hasMany(ApplicationModel,{foreignKey:{allowNull:false}})
-ApplicationModel.belongsTo(ApplicantModel)
+UserModel.hasMany(ApplicationModel,{foreignKey:{allowNull:false}})
+ApplicationModel.belongsTo(UserModel)
 SchoolModel.belongsToMany(ApplicationModel,{through:ApplicationSchoolModel,foreignKey:{allowNull:false}})
-ApplicantModel.belongsToMany(SchoolModel,{through:ApplicationSchoolModel,foreignKey:{allowNull:false}})
+UserModel.belongsToMany(SchoolModel,{through:ApplicationSchoolModel,foreignKey:{allowNull:false}})
 
 export default ApplicationModel

@@ -1,7 +1,7 @@
 
 import { Configuration, OpenAIApi } from "openai";
 import express from "express";
-import ApplicantModel from "../applicants/model.js";
+import UserModel from "../users/model.js";
 import MakronexaQA from "./model.js";
 import aiChatModel from "./chats/model.js";
 import sequelize from "../../db.js";
@@ -53,7 +53,7 @@ const imageSearch = async (query, page = 1, perPage = 10) => {
 
 AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const { message, applicant_id, question,model } = req.body;
+    const { message, user_id, question,model } = req.body;
     const { chat_id } = req.params;
 
 
@@ -86,7 +86,7 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
       temperature: 0.8,
     });
 
-    const user = await ApplicantModel.findByPk(applicant_id);
+    const user = await UserModel.findByPk(user_id);
     const chat = await aiChatModel.findByPk(chat_id);
 
     if (!chat) {
@@ -94,7 +94,7 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
     }
 
     if (!user) {
-      return res.status(404).json({ error: "Applicant not found" });
+      return res.status(404).json({ error: "User not found" });
     }
     
     
@@ -106,12 +106,12 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
       message: question,
       from: "user",
       model: "gpt-3.5-turbo",
-      user_id: applicant_id,
+      user_id: user_id,
       chat_id: chat_id,
     });
 
-    // Associate the user's input with the applicant
-    await newMakronexaQA.setApplicant(user);
+    // Associate the user's input with the user
+    await newMakronexaQA.setUser(user);
 
     // Create a new MakronexaQA instance for the AI response
     const newResponseMakronexaQA = await MakronexaQA.create({
@@ -145,9 +145,9 @@ AiRouter.get("/models", async (req, res, next) => {
 });
 AiRouter.post("/chats/:chat_id/image-search", async (req, res, next) => {
   try {
-    const { message, applicant_id,model } = req.body;
+    const { message, user_id,model } = req.body;
     const { chat_id } = req.params;
-    const user = await ApplicantModel.findByPk(applicant_id);
+    const user = await UserModel.findByPk(user_id);
     const chat = await aiChatModel.findByPk(chat_id);
     if (!chat) {
       return res.status(404).json({ error: "Chat not found" });
@@ -164,12 +164,12 @@ AiRouter.post("/chats/:chat_id/image-search", async (req, res, next) => {
       message: prompt,
       from: "user",
       model: "dalle",
-      user_id: applicant_id,
+      user_id: user_id,
       chat_id: chat_id,
     });
 
-    // Associate the user's input with the applicant
-    await newMakronexaQA.setApplicant(user);
+    // Associate the user's input with the user
+    await newMakronexaQA.setUser(user);
     const responseString = JSON.stringify(smallImageUrls);
     const newResponseMakronexaQA = await MakronexaQA.create({
       type: "imageUrl",

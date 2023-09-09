@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../../db.js";
-import ApplicantModel from "../../applicants/model.js";
+import UserModel from "../../users/model.js";
 const AiSettings=sequelize.define("aiSettings",{
       id: {
         type: DataTypes.UUID,
@@ -23,9 +23,9 @@ const AiSettings=sequelize.define("aiSettings",{
   
 })
 
-AiSettings.hasMany(ApplicantModel, {
+AiSettings.hasMany(UserModel, {
     foreignKey: { allowNull: true, name: "aiSettings_id" },
 });
-ApplicantModel.belongsTo(AiSettings, { foreignKey: "aiSettings_id" });
+UserModel.belongsTo(AiSettings, { foreignKey: "aiSettings_id" });
 
 export default AiSettings

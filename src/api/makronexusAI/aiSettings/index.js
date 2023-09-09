@@ -1,6 +1,6 @@
 import express from "express";
 import AiSettings from "./model.js";
-import ApplicantModel from "../../applicants/model.js";
+import UserModel from "../../users/model.js";
 import { JWTAuthMiddleware } from "../../lib/auth/jwtAuth.js";
 
 const aiSettingsRouter = express.Router();
@@ -11,7 +11,7 @@ const aiSettingsRouter = express.Router();
 aiSettingsRouter.post("/:user_id/aiSettings", JWTAuthMiddleware, async (req, res, next) => {
     try {
       const { user_id } = req.params;
-      const user = await ApplicantModel.findByPk(user_id);
+      const user = await UserModel.findByPk(user_id);
   
       if (!user) {
         return res.status(404).json({ error: "User not found!" });
@@ -38,7 +38,7 @@ aiSettingsRouter.post("/:user_id/aiSettings", JWTAuthMiddleware, async (req, res
 aiSettingsRouter.get("/:user_id/aiSettings", JWTAuthMiddleware, async (req, res, next) => {
     try {
       const { user_id } = req.params;
-      const user = await ApplicantModel.findByPk(user_id);
+      const user = await UserModel.findByPk(user_id);
       
       if (!user) {
         return res.status(404).json({ error: "User not found!" });
@@ -67,7 +67,7 @@ aiSettingsRouter.put("/:user_id/aiSettings", JWTAuthMiddleware, async (req, res,
       const { temperature, personality, tittle } = req.body;
   
       // Check if the user exists
-      const user = await ApplicantModel.findByPk(user_id);
+      const user = await UserModel.findByPk(user_id);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
@@ -114,7 +114,7 @@ aiSettingsRouter.delete("/:aiSettings_id", JWTAuthMiddleware, async (req, res, n
       }
   
       // Check if the user associated with this aiSettings exists
-      const user = await ApplicantModel.findByPk(aiSettings.user_id);
+      const user = await UserModel.findByPk(aiSettings.user_id);
   
       if (!user) {
         return res.status(404).json({ error: "User not found" });

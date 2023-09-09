@@ -1,7 +1,7 @@
 import { checkSchema, validationResult } from "express-validator";
 import createHttpError from "http-errors";
 
-const applicantSchema = {
+const userSchema = {
   first_name: {
     in: ["body"],
     isString: {
@@ -71,7 +71,7 @@ const applicantSchema = {
   },
 };
 
-export const checkApplicantSchema = checkSchema(applicantSchema);
+export const checkUserSchema = checkSchema(userSchema);
 
 export const triggerBadRequest = (req, res, next) => {
   const errors = validationResult(req);
@@ -81,7 +81,7 @@ export const triggerBadRequest = (req, res, next) => {
 
     const errorResponse = {
       success: false,
-      message: "Errors during applicant validation",
+      message: "Errors during user validation",
       errorsList: errorMessages,
     };
     return res.status(400).json(errorResponse);

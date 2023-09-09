@@ -1,9 +1,9 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../db.js";
-import ApplicantModel from "../applicants/model.js";
+import UserModel from "../users/model.js";
 import AddressModel from "../address/model.js";
 
-const ApplicantAddressModel = sequelize.define("applicant_address", {
+const UserAddressModel = sequelize.define("user_address", {
   id: {
     type: DataTypes.UUID,
     primaryKey: true,
@@ -12,4 +12,4 @@ const ApplicantAddressModel = sequelize.define("applicant_address", {
 });
 
 
-export default ApplicantAddressModel;
+export default UserAddressModel;

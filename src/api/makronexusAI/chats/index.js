@@ -1,7 +1,7 @@
 import express from "express";
 import MakronexaQA from "../model.js";
 import aiChatModel from "./model.js";
-import ApplicantModel from "../../applicants/model.js";
+import UserModel from "../../users/model.js";
 import { JWTAuthMiddleware } from "../../lib/auth/jwtAuth.js";
 
 const chatRouter = express.Router();
@@ -11,7 +11,7 @@ chatRouter.get("/:user_id/chats/:chat_id",JWTAuthMiddleware, async (req, res, ne
   
   try {
     const {user_id,chat_id}=req.params
-  const user=await ApplicantModel.findByPk(user_id)
+  const user=await UserModel.findByPk(user_id)
   if(!user){return res.status(404).json({error:"User not found!"})}
 
     const chat = await aiChatModel.findAll({include:{
@@ -40,7 +40,7 @@ chatRouter.get("/:user_id/chats/:chat_id",JWTAuthMiddleware, async (req, res, ne
 chatRouter.post("/:user_id/chats",JWTAuthMiddleware, async (req, res, next) => {
   try {
     const {user_id}=req.params
-    const user=await ApplicantModel.findByPk(user_id)
+    const user=await UserModel.findByPk(user_id)
     if(!user){return res.status(404).json({error:"User not found!"})}
     const newChat = await aiChatModel.create();
     await user.addAiChat(newChat);
@@ -55,7 +55,7 @@ chatRouter.post("/:user_id/chats",JWTAuthMiddleware, async (req, res, next) => {
 chatRouter.get("/:user_id/chats",JWTAuthMiddleware, async (req, res, next) => {
   try {
     const { user_id } = req.params;
-    const user = await ApplicantModel.findByPk(user_id);
+    const user = await UserModel.findByPk(user_id);
     if (!user) {
       return res.status(404).json({ error: "User not found!" });
     }

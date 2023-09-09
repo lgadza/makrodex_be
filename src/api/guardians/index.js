@@ -1,7 +1,7 @@
 import express from "express";
 import createHttpError from "http-errors";
 import GuardianModel from "./model.js";
-import {GuardianApplicant} from "../intermediate_tables/guardian_applicant.js"; // 
+import {GuardianUser} from "../intermediate_tables/guardian_user.js"; // 
 
 const parentsRouter = express.Router();
 
@@ -31,14 +31,14 @@ parentsRouter.get("/:parent_id", async (req, res, next) => {
   }
 });
 
-// Create a new parent and associate with an applicant
-parentsRouter.post("/:applicant_id", async (req, res, next) => {
+// Create a new parent and associate with an user
+parentsRouter.post("/:user_id", async (req, res, next) => {
   try {
-    const { applicant_id } = req.params;
+    const { user_id } = req.params;
     const { parent_id } = await GuardianModel.create(req.body);
 
-    // Associate the parent with the applicant in the applicant-parent table
-    await GuardianApplicant.create({ applicant_id, parent_id });
+    // Associate the parent with the user in the user-parent table
+    await GuardianUser.create({ user_id, parent_id });
 
     res.status(201).send(parent_id);
   } catch (error) {

@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import bcrypt from "bcrypt";
 import sequelize from "../../db.js";
-import { GuardianApplicant,associateModels } from "../intermediate_tables/guardian_applicant.js";
-import ApplicantModel from "../applicants/model.js";
+import { GuardianUser,associateModels } from "../intermediate_tables/guardian_user.js";
+import UserModel from "../users/model.js";
 
 const GuardianModel = sequelize.define("guardian", {
   id: {
@@ -48,11 +48,11 @@ const GuardianModel = sequelize.define("guardian", {
 //   const formattedGuardianNumber = String(guardianNumber).padStart(3, "0");
 //   guardian.id = `${schoolId}_${formattedGuardianNumber}`;
 // });
-// many to many relationship. one applicant can have many applicants and one guardian can have many applicants
+// many to many relationship. one user can have many users and one guardian can have many users
 
 // associateModels()
-GuardianModel.belongsToMany(ApplicantModel, {
-  through: GuardianApplicant,
+GuardianModel.belongsToMany(UserModel, {
+  through: GuardianUser,
   foreignKey: { allowNull: false, name: "guardian_id" },
 });
 

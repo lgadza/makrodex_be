@@ -1,11 +1,11 @@
 import express from "express"
-import ApplicationModel from "./model.js"
+import UserModel from "./model.js"
 
-const applicationRouter=express.Router()
+const userRouter=express.Router()
 
-applicationRouter.post("/", async(req,res,next)=>{
+userRouter.post("/", async(req,res,next)=>{
     try{
-        const {id}=await ApplicationModel.create(req.body)
+        const {id}=await UserModel.create(req.body)
         res.status(201).send({id})
 
     }catch(error){
@@ -13,13 +13,13 @@ applicationRouter.post("/", async(req,res,next)=>{
     }
 })
 
-applicationRouter.get("/",async(req,res,next)=>{
+userRouter.get("/",async(req,res,next)=>{
     try{
-        const applications=await ApplicationModel.findAll()
-        res.status(200).send({applications})
+        const users=await UserModel.findAll()
+        res.status(200).send({users})
     }catch(error){
         console.log(error)
         next(error)
     }
 })
-export default applicationRouter
+export default userRouter

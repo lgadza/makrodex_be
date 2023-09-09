@@ -44,9 +44,9 @@ import sequelize from "../../db.js";
     }
 
  })
- // one to many relationship. one applicant can have many address when they change address 
-//  AddressModel.belongsToMany(ApplicantModel, { through: ApplicantAddressModel, foreignKey: "address_id"});
-//  ApplicantModel.belongsToMany(AddressModel, { through: ApplicantAddressModel, foreignKey:"applicant_id"});
+ // one to many relationship. one user can have many address when they change address 
+//  AddressModel.belongsToMany(UserModel, { through: UserAddressModel, foreignKey: "address_id"});
+//  UserModel.belongsToMany(AddressModel, { through: UserAddressModel, foreignKey:"user_id"});
 
 
  export default AddressModel
