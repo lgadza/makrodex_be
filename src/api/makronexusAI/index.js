@@ -118,7 +118,7 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
       type: "text",
       message: aiResponseText,
       model: "gpt-3.5-turbo",
-      user_id: "adf0fea2-3693-4385-ab0f-bb3b81a20279",
+      user_id: "1cc462da-405f-4a5a-9763-5ef0433fa39f", //cloud
       // user_id: "5217fbc5-0ce1-4d2b-b966-5ce56da155c1",
       chat_id: chat_id,
     });
@@ -175,7 +175,7 @@ AiRouter.post("/chats/:chat_id/image-search", async (req, res, next) => {
       type: "imageUrl",
       message: responseString,
       model: "dalle",
-      user_id: "adf0fea2-3693-4385-ab0f-bb3b81a20279",
+      user_id: "1cc462da-405f-4a5a-9763-5ef0433fa39f", //cloud
       // user_id: "5217fbc5-0ce1-4d2b-b966-5ce56da155c1",
       chat_id: chat_id,
     });
