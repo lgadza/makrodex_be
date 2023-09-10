@@ -6,7 +6,7 @@ import express from "express";
 // import fetch from 'node-fetch';
 const client=new Client()
 const whatsAppRouter=express.Router()
-const token = process.env.TOKEN;
+const token = process.env.WHATSAPP_VERIFY_TOKEN;
 client.on("qr",(qr)=>{
     qrcode.generate(qr,{small:true})
 })
