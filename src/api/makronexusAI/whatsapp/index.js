@@ -101,7 +101,55 @@ const configuration = new Configuration({
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+whatsAppRouter.post("/webhooks",async(req,res,next)=>{
+    try {
+    const body_param=req.body
+    console.log(JSON.stringify(body_param,null,2))
+    const url = process.env.BUSINESS_WHATSAPP_URL;
+    const headers = {
+      'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}`, 
+      'Content-Type': 'application/json',
+    };
 
+
+    if(body_param.object){
+        if(body_param.entry && 
+            body_param.entry[0].changes &&
+            body_param.entry[0].changes[0].value.message&&
+            body_param.entry[0].changes[0].value.message[0])
+            {
+                const phoneNoId=body_param.entry[0].changes[0].value.metadata.phone_number_id
+                const from =body_param.entry[0].changes[0].value.messages[0].from;
+                const msgBody=body_param.entry[0].changes[0].value.messages[0].text.body
+                const messagePayload={
+                    "messaging_product": "whatsapp",
+                    "to": from,
+                    "text":{
+                        "body":"Hi..I am Makronexus"
+                    },
+                }
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(messagePayload),
+                  });
+                  if (response.ok) {
+                    const responseData = await response.json();
+                    res.status(response.status).json(responseData);
+                  } else {
+                    res.status(response.status).json({ error: 'API request failed' });
+                  }
+
+            }else{
+                res.sendStatus(403)
+            }
+            
+            }
+            } catch (error) {
+                console.error('Error:', error);
+                res.status(500).json({ error: 'Internal Server Error' });
+            }
+})
 
 
   export default whatsAppRouter
