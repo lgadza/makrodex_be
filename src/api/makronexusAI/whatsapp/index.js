@@ -168,7 +168,8 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
   
     const messagePayload = {
       "messaging_product": 'whatsapp',
-      "to": "+"+recipient,
+      "to": "+48794144892",
+    //   "to": "+"+recipient,
       "text": { "body": message },
     };
   
