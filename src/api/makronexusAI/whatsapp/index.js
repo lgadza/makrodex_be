@@ -167,9 +167,9 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
     };
   
     const messagePayload = {
-      messaging_product: 'whatsapp',
-      to: recipient,
-      text: { body: message },
+      "messaging_product": 'whatsapp',
+      "to": "+"+recipient,
+      "text": { "body": message },
     };
   
     const response = await fetch(url, {
@@ -177,6 +177,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
       headers,
       body: JSON.stringify(messagePayload),
     });
+
   console.log(response,"RESPONSE")
     if (response.ok) {
       const responseData = await response.json();
