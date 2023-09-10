@@ -7,46 +7,46 @@ import express from "express";
 const client=new Client()
 const whatsAppRouter=express.Router()
 const token = process.env.WHATSAPP_VERIFY_TOKEN;
-client.on("qr",(qr)=>{
-    qrcode.generate(qr,{small:true})
-})
+// client.on("qr",(qr)=>{
+//     qrcode.generate(qr,{small:true})
+// })
 
-client.on("ready",()=>{
-    console.log("Client is ready");
-})
+// client.on("ready",()=>{
+//     console.log("Client is ready");
+// })
 
-client.initialize()
-const configuration = new Configuration({
-    organization:"org-OteAk3qMx5pQ9EiVVSKsenQG",
-    apiKey: process.env.OPENAI_API_KEY,
-  });
+// client.initialize()
+// const configuration = new Configuration({
+//     organization:"org-OteAk3qMx5pQ9EiVVSKsenQG",
+//     apiKey: process.env.OPENAI_API_KEY,
+//   });
   
-  const openai = new OpenAIApi(configuration);
+//   const openai = new OpenAIApi(configuration);
 
-  const runCompletion=async(message)=>{
-    const response = await openai.createChatCompletion({
-        model: "gpt-3.5-turbo", 
-        messages:[
-          {
-            "role":"system","content":`${makronexaPersonality}`
-          },
-          {
-            role:"user",
-            content:message,
-          }
-        ] ,
-        max_tokens: 300,
-        temperature: 0.8,
-      });
-    const aiResponseText = response.data.choices[0].message.content;
+//   const runCompletion=async(message)=>{
+//     const response = await openai.createChatCompletion({
+//         model: "gpt-3.5-turbo", 
+//         messages:[
+//           {
+//             "role":"system","content":`${makronexaPersonality}`
+//           },
+//           {
+//             role:"user",
+//             content:message,
+//           }
+//         ] ,
+//         max_tokens: 300,
+//         temperature: 0.8,
+//       });
+//     const aiResponseText = response.data.choices[0].message.content;
 
-      return aiResponseText
-  }
+//       return aiResponseText
+//   }
 
-  client.on("message",message=>{
-    console.log(message.body)
-    runCompletion(message.body).then(result=>message.reply(result))
-  })
+//   client.on("message",message=>{
+//     console.log(message.body)
+//     runCompletion(message.body).then(result=>message.reply(result))
+//   })
   whatsAppRouter.get('/webhooks', (req, res) => {
     if (
       req.query['hub.mode'] == 'subscribe' &&
@@ -106,20 +106,27 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
       const bodyParam = req.body;
       console.log(JSON.stringify(bodyParam, null, 2));
   
-      if (isValidWebhookRequest(bodyParam)) {
-        const messageData = extractMessageData(bodyParam);
-  
-        if (messageData) {
-          const { from, text } = messageData;
-          const replyMessage = `Hello! You said: "${text}"`;
-  
-          await sendWhatsAppMessage(from, replyMessage);
-          res.status(200).json({ message: 'Message sent' });
-        } else {
-          res.status(400).json({ error: 'Invalid message data' });
-        }
+      // Check if the request is a verification request
+      if (bodyParam && bodyParam['hub.mode'] === 'subscribe' && bodyParam['hub.verify_token'] === token) {
+        
+        res.status(200).send(bodyParam['hub.challenge']);
       } else {
-        res.status(403).json({ error: 'Invalid webhook request' });
+        // Handle incoming messages
+        if (isValidWebhookRequest(bodyParam)) {
+          const messageData = extractMessageData(bodyParam);
+  
+          if (messageData) {
+            const { from, text } = messageData;
+            const replyMessage = `Hello! You said: "${text}"`;
+  
+            await sendWhatsAppMessage(from, replyMessage);
+            res.status(200).json({ message: 'Message sent' });
+          } else {
+            res.status(400).json({ error: 'Invalid message data' });
+          }
+        } else {
+          res.status(403).json({ error: 'Invalid webhook request' });
+        }
       }
     } catch (error) {
       console.error('Error:', error);
@@ -151,7 +158,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
   }
   
   async function sendWhatsAppMessage(recipient, message) {
-    const url = process.env.BUSINESS_WHATSAPP_URL;
+    const url = process.env.BUSINESS_WHATSAPP_URL; 
     const headers = {
       'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}`,
       'Content-Type': 'application/json',
