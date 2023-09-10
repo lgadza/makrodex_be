@@ -75,7 +75,7 @@ const token = process.env.WHATSAPP_VERIFY_TOKEN;
       "to": "+48794144892", // Replace with the recipient's WhatsApp number
       "type": "template",
       "template": {
-        "name": "makronexus_intro",
+        "name": "hello_world",
         "language": {
           "code": "en_US"
         }
@@ -94,13 +94,15 @@ const token = process.env.WHATSAPP_VERIFY_TOKEN;
       const responseData = await response.json();
       res.status(response.status).json(responseData);
     } else {
-      res.status(response.status).json({ error: 'API request failed' });
+      res.status(response.status).json({ error: 'API request failed',response });
     }
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+
 whatsAppRouter.post('/webhooks', async (req, res) => {
     try {
       const bodyParam = req.body;
@@ -175,7 +177,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
       headers,
       body: JSON.stringify(messagePayload),
     });
-  
+  console.log(response,"RESPONSE")
     if (response.ok) {
       const responseData = await response.json();
       return responseData;
