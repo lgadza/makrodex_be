@@ -20,6 +20,7 @@ import bodyParser from "body-parser"
 import chatRouter from "./api/makronexusAI/chats/index.js"
 import router from "./api/makronexusAI/langchain/index.js"
 import aiSettingsRouter from "./api/makronexusAI/aiSettings/index.js"
+import whatsAppRouter from "./api/makronexusAI/whatsapp/index.js"
 
 const server = express()
 const port = process.env.PORT || 3001
@@ -44,6 +45,7 @@ server.use("/applications",applicationRouter)
 server.use("/guardians/types",guardianTypeRouter)
 server.use("/ai",AiRouter)
 server.use("/ai",chatRouter)
+server.use('/ai', whatsAppRouter);
 server.use('/langchain/qdrant', router);
 server.use('/makronexa', aiSettingsRouter);
 
