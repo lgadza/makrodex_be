@@ -72,7 +72,7 @@ const token = process.env.WHATSAPP_VERIFY_TOKEN;
     
     const messagePayload = {
       "messaging_product": "whatsapp",
-      "to": "+48794144892", // Replace with the recipient's WhatsApp number
+      "to": "+48794144892", 
       "type": "template",
       "template": {
         "name": "hello_world",
@@ -104,89 +104,93 @@ const token = process.env.WHATSAPP_VERIFY_TOKEN;
 
 
 whatsAppRouter.post('/webhooks', async (req, res) => {
-    try {
-      const bodyParam = req.body;
-      console.log(JSON.stringify(bodyParam, null, 2));
-  
-      // Check if the request is a verification request
-      if (bodyParam && bodyParam['hub.mode'] === 'subscribe' && bodyParam['hub.verify_token'] === token) {
-        
-        res.status(200).send(bodyParam['hub.challenge']);
-      } else {
-        // Handle incoming messages
-        if (isValidWebhookRequest(bodyParam)) {
-          const messageData = extractMessageData(bodyParam);
-  
-          if (messageData) {
-            const { from, text } = messageData;
-            const replyMessage = `Hello! You said: "${text}"`;
-  
-            await sendWhatsAppMessage(from, replyMessage);
-            res.status(200).json({ message: 'Message sent' });
-          } else {
-            res.status(400).json({ error: 'Invalid message data' });
-          }
-        } else {
-          res.status(403).json({ error: 'Invalid webhook request' });
-        }
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  });
-  
-  function isValidWebhookRequest(body) {
-    return (
-      body &&
-      body.entry &&
-      Array.isArray(body.entry) &&
-      body.entry.length > 0 &&
-      body.entry[0].changes &&
-      Array.isArray(body.entry[0].changes) &&
-      body.entry[0].changes.length > 0 &&
-      body.entry[0].changes[0].value &&
-      body.entry[0].changes[0].value.message
-    );
-  }
-  
-  function extractMessageData(body) {
-    const message = body.entry[0].changes[0].value.message;
-    const phoneNoId = body.entry[0].changes[0].value.metadata.phone_number_id;
-    const from = message.from;
-    const text = message.text.body;
-  
-    return { from, text };
-  }
-  
-  async function sendWhatsAppMessage(recipient, message) {
-    const url = process.env.BUSINESS_WHATSAPP_URL; 
-    const headers = {
-      'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}`,
-      'Content-Type': 'application/json',
-    };
-  
-    const messagePayload = {
-      "messaging_product": 'whatsapp',
-      "to": "+48794144892",
-    //   "to": "+"+recipient,
-      "text": { "body": message },
-    };
-  
-    const response = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(messagePayload),
-    });
+  try {
+    const bodyParam = req.body;
+    console.log(JSON.stringify(bodyParam, null, 2));
 
-  console.log(response,"RESPONSE")
-    if (response.ok) {
-      const responseData = await response.json();
-      return responseData;
+    // Handle incoming messages
+    if (isValidWebhookRequest(bodyParam)) {
+      console.log("YES WEBOOK_REQUEST IS VALID")
+      const messageData = extractMessageData(bodyParam);
+
+      if (messageData) {
+      console.log("YES WE DATA EXTRACTED")
+
+        const { from, text } = messageData;
+        const replyMessage = `Hello! You said: "${text}"`;
+
+        // Send a reply message
+        await sendWhatsAppMessage(from, replyMessage);
+        res.status(200).json({ message: 'Message sent' });
+      console.log("YES MESSAGE SENT")
+
+      } else {
+        res.status(400).json({ error: 'Invalid message data' });
+      console.log("Invalid message data")
+
+      }
     } else {
-      throw new Error('API request failed');
+      res.status(403).json({ error: 'Invalid webhook request' });
+      console.log("Invalid webhook request")
     }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+    console.log("Internal Server Error")
   }
+});
+
+function isValidWebhookRequest(body) {
+  return (
+    body &&
+    body.entry &&
+    Array.isArray(body.entry) &&
+    body.entry.length > 0 &&
+    body.entry[0].changes &&
+    Array.isArray(body.entry[0].changes) &&
+    body.entry[0].changes.length > 0 &&
+    body.entry[0].changes[0].value &&
+    body.entry[0].changes[0].value.message
+  );
+}
+
+function extractMessageData(body) {
+  const message = body.entry[0].changes[0].value.message;
+  const phoneNoId = body.entry[0].changes[0].value.metadata.phone_number_id;
+  const from = message.from;
+  const text = message.text.body;
+
+  return { from, text };
+}
+
+async function sendWhatsAppMessage(recipient, message) {
+  const url = process.env.BUSINESS_WHATSAPP_URL;
+  const headers = {
+    'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}`,
+    'Content-Type': 'application/json',
+  };
+
+  const messagePayload = {
+    "messaging_product": "whatsapp",
+    "to": "+" + recipient,
+    "text": { "body": message },
+  };
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(messagePayload),
+  });
+
+  console.log(response, "RESPONSE");
+
+  if (response.ok) {
+    const responseData = await response.json();
+    return responseData;
+  } else {
+    throw new Error('API request failed');
+  }
+}
 
 
   export default whatsAppRouter
