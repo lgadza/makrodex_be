@@ -101,55 +101,81 @@ const configuration = new Configuration({
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-whatsAppRouter.post("/webhooks",async(req,res,next)=>{
+whatsAppRouter.post('/webhooks', async (req, res) => {
     try {
-    const body_param=req.body
-    console.log(JSON.stringify(body_param,null,2))
+      const bodyParam = req.body;
+      console.log(JSON.stringify(bodyParam, null, 2));
+  
+      if (isValidWebhookRequest(bodyParam)) {
+        const messageData = extractMessageData(bodyParam);
+  
+        if (messageData) {
+          const { from, text } = messageData;
+          const replyMessage = `Hello! You said: "${text}"`;
+  
+          await sendWhatsAppMessage(from, replyMessage);
+          res.status(200).json({ message: 'Message sent' });
+        } else {
+          res.status(400).json({ error: 'Invalid message data' });
+        }
+      } else {
+        res.status(403).json({ error: 'Invalid webhook request' });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
+  function isValidWebhookRequest(body) {
+    return (
+      body &&
+      body.entry &&
+      Array.isArray(body.entry) &&
+      body.entry.length > 0 &&
+      body.entry[0].changes &&
+      Array.isArray(body.entry[0].changes) &&
+      body.entry[0].changes.length > 0 &&
+      body.entry[0].changes[0].value &&
+      body.entry[0].changes[0].value.message
+    );
+  }
+  
+  function extractMessageData(body) {
+    const message = body.entry[0].changes[0].value.message;
+    const phoneNoId = body.entry[0].changes[0].value.metadata.phone_number_id;
+    const from = message.from;
+    const text = message.text.body;
+  
+    return { from, text };
+  }
+  
+  async function sendWhatsAppMessage(recipient, message) {
     const url = process.env.BUSINESS_WHATSAPP_URL;
     const headers = {
-      'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}`, 
+      'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}`,
       'Content-Type': 'application/json',
     };
-
-
-    if(body_param.object){
-        if(body_param.entry && 
-            body_param.entry[0].changes &&
-            body_param.entry[0].changes[0].value.message&&
-            body_param.entry[0].changes[0].value.message[0])
-            {
-                const phoneNoId=body_param.entry[0].changes[0].value.metadata.phone_number_id
-                const from =body_param.entry[0].changes[0].value.messages[0].from;
-                const msgBody=body_param.entry[0].changes[0].value.messages[0].text.body
-                const messagePayload={
-                    "messaging_product": "whatsapp",
-                    "to": from,
-                    "text":{
-                        "body":"Hi..I am Makronexus"
-                    },
-                }
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify(messagePayload),
-                  });
-                  if (response.ok) {
-                    const responseData = await response.json();
-                    res.status(response.status).json(responseData);
-                  } else {
-                    res.status(response.status).json({ error: 'API request failed' });
-                  }
-
-            }else{
-                res.sendStatus(403)
-            }
-            
-            }
-            } catch (error) {
-                console.error('Error:', error);
-                res.status(500).json({ error: 'Internal Server Error' });
-            }
-})
+  
+    const messagePayload = {
+      messaging_product: 'whatsapp',
+      to: recipient,
+      text: { body: message },
+    };
+  
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(messagePayload),
+    });
+  
+    if (response.ok) {
+      const responseData = await response.json();
+      return responseData;
+    } else {
+      throw new Error('API request failed');
+    }
+  }
 
 
   export default whatsAppRouter
