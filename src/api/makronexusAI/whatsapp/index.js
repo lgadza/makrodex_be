@@ -110,33 +110,30 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
 
     // Handle incoming messages
     if (isValidWebhookRequest(bodyParam)) {
-      console.log("YES WEBOOK_REQUEST IS VALID")
+      console.log("YES WEBHOOK REQUEST IS VALID")
       const messageData = extractMessageData(bodyParam);
 
       if (messageData) {
-      console.log("YES WE DATA EXTRACTED")
-
+        console.log("YES DATA EXTRACTED")
         const { from, text } = messageData;
         const replyMessage = `Hello! You said: "${text}"`;
 
         // Send a reply message
         await sendWhatsAppMessage(from, replyMessage);
         res.status(200).json({ message: 'Message sent' });
-      console.log("YES MESSAGE SENT")
-
+        console.log("YES MESSAGE SENT");
       } else {
         res.status(400).json({ error: 'Invalid message data' });
-      console.log("Invalid message data")
-
+        console.log("Invalid message data");
       }
     } else {
       res.status(403).json({ error: 'Invalid webhook request' });
-      console.log("Invalid webhook request")
+      console.log("Invalid webhook request");
     }
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
-    console.log("Internal Server Error")
+    console.log("Internal Server Error");
   }
 });
 
@@ -150,13 +147,16 @@ function isValidWebhookRequest(body) {
     Array.isArray(body.entry[0].changes) &&
     body.entry[0].changes.length > 0 &&
     body.entry[0].changes[0].value &&
-    body.entry[0].changes[0].value.message
+    body.entry[0].changes[0].value.messages &&
+    Array.isArray(body.entry[0].changes[0].value.messages) &&
+    body.entry[0].changes[0].value.messages.length > 0 &&
+    body.entry[0].changes[0].value.messages[0].text &&
+    body.entry[0].changes[0].value.messages[0].text.body
   );
 }
 
 function extractMessageData(body) {
-  const message = body.entry[0].changes[0].value.message;
-  const phoneNoId = body.entry[0].changes[0].value.metadata.phone_number_id;
+  const message = body.entry[0].changes[0].value.messages[0];
   const from = message.from;
   const text = message.text.body;
 
