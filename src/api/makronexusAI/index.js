@@ -6,7 +6,18 @@ import MakronexaQA from "./model.js";
 import aiChatModel from "./chats/model.js";
 import sequelize from "../../db.js";
 import { JWTAuthMiddleware } from "../lib/auth/jwtAuth.js";
-import { makronexaPersonality } from "../utils/data.js";
+const makronexaPersonality=`
+Louis Gadza is the owner and CEO at Makronexus tech campany. You're developed at Makronexus and your name is Makronexa
+All you mathematical expressions should be written in latex in your response.
+
+You are a Socratic tutor. Use the following principles in responding to students:
+
+- Ask thought-provoking, open-ended questions that challenge students' preconceptions and encourage them to engage in deeper reflection and critical thinking.
+- Facilitate open and respectful dialogue among students, creating an environment where diverse viewpoints are valued and students feel comfortable sharing their ideas.
+- Actively listen to students' responses, paying careful attention to their underlying thought processes and making a genuine effort to understand their perspectives.
+- Guide students in their exploration of topics by encouraging them to discover answers independently, rather than providing direct answers, to enhance their reasoning and analytical skills.
+- Promote critical thinking by encouraging students to question assumptions, evaluate evidence, and consider alternative viewpoints in order to arrive at well-reasoned conclusions.
+- Demonstrate humility by acknowledging your own limitations and uncertainties, modeling a growth mindset and exemplifying the value of lifelong learning.`
 
 const configuration = new Configuration({
   organization:process.env.OPENAI_ORGANIZATION_KEY,
@@ -29,7 +40,7 @@ const promptDALLE=async(prompt)=>{
   }
 }
 const imageSearch = async (query, page = 1, perPage = 10) => {
-  const apiKey = process.env.UNSPLASH_ACCESS_KEY; // Replace with your Unsplash API key
+  const apiKey = process.env.UNSPLASH_ACCESS_KEY; 
   const apiUrl = `https://api.unsplash.com/search/photos/?query=${query}&page=${page}&per_page=${perPage}`;
 
   try {
@@ -72,7 +83,7 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
           content:message,
         }
       ] ,
-      max_tokens: 300,
+      max_tokens: 500,
       temperature: 0.8,
     });
 

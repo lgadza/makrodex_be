@@ -45,9 +45,9 @@ const UserModel = sequelize.define("user", {
     allowNull: true,
   },
   role: {
-    type: DataTypes.ENUM("student","teacher","social worker","guidance counselor","bus driver","security personnel","technology coordinator","sports coach"),
+    type: DataTypes.ENUM("student","teacher","social worker","guidance counselor","bus driver","security personnel","technology coordinator","sports coach","user"),
     allowNull: true,
-    defaultValue:"student"
+    defaultValue:"user"
   },
   password: {
     type: DataTypes.STRING,
