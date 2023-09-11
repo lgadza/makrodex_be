@@ -7,46 +7,12 @@ import express from "express";
 const client=new Client()
 const whatsAppRouter=express.Router()
 const token = process.env.WHATSAPP_VERIFY_TOKEN;
-// client.on("qr",(qr)=>{
-//     qrcode.generate(qr,{small:true})
-// })
+const configuration = new Configuration({
+  organization:process.env.OPENAI_ORGANIZATION_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
-// client.on("ready",()=>{
-//     console.log("Client is ready");
-// })
-
-// client.initialize()
-// const configuration = new Configuration({
-//     organization:"org-OteAk3qMx5pQ9EiVVSKsenQG",
-//     apiKey: process.env.OPENAI_API_KEY,
-//   });
-  
-//   const openai = new OpenAIApi(configuration);
-
-//   const runCompletion=async(message)=>{
-//     const response = await openai.createChatCompletion({
-//         model: "gpt-3.5-turbo", 
-//         messages:[
-//           {
-//             "role":"system","content":`${makronexaPersonality}`
-//           },
-//           {
-//             role:"user",
-//             content:message,
-//           }
-//         ] ,
-//         max_tokens: 300,
-//         temperature: 0.8,
-//       });
-//     const aiResponseText = response.data.choices[0].message.content;
-
-//       return aiResponseText
-//   }
-
-//   client.on("message",message=>{
-//     console.log(message.body)
-//     runCompletion(message.body).then(result=>message.reply(result))
-//   })
+const openai = new OpenAIApi(configuration);
   whatsAppRouter.get('/webhooks', (req, res) => {
     if (
       req.query['hub.mode'] == 'subscribe' &&
@@ -110,13 +76,28 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
 
     // Handle incoming messages
     if (isValidWebhookRequest(bodyParam)) {
-      console.log("YES WEBHOOK REQUEST IS VALID")
+      
       const messageData = extractMessageData(bodyParam);
 
       if (messageData) {
-        console.log("YES DATA EXTRACTED")
         const { from, text } = messageData;
-        const replyMessage = `Hello! You said: "${text}"`;
+
+        const response = await openai.createChatCompletion({
+          model: "gpt-3.5-turbo", 
+          messages:[
+            {
+              "role":"system","content":`${makronexaPersonality}`
+            },
+            {
+              role:"user",
+              content:text,
+            }
+          ] ,
+          max_tokens: 300,
+          temperature: 0.8,
+        });
+        
+        const replyMessage = response.data.choices[0].message.content;
 
         // Send a reply message
         await sendWhatsAppMessage(from, replyMessage);

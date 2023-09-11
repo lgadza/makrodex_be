@@ -9,7 +9,7 @@ import { JWTAuthMiddleware } from "../lib/auth/jwtAuth.js";
 import { makronexaPersonality } from "../utils/data.js";
 
 const configuration = new Configuration({
-  organization:"org-OteAk3qMx5pQ9EiVVSKsenQG",
+  organization:process.env.OPENAI_ORGANIZATION_KEY,
   apiKey: process.env.OPENAI_API_KEY,
 });
 
