@@ -30,7 +30,7 @@ export const pgConnect = async () => {
 }
 
 export const syncModels = async () => {
-  await sequelize.sync({ force: true })
+  await sequelize.sync({ alter: true })
   console.log("All tables successfully synchronized!")
 }
 

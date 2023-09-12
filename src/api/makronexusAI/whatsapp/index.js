@@ -155,26 +155,7 @@ whatsAppRouter.post('/whatsapp-message', async (req, res) => {
 
 whatsAppRouter.post('/webhooks', async (req, res) => {
   try {
-    const chat = openai
-    const chatPrompt = ChatPromptTemplate.fromPromptMessages([
-      SystemMessagePromptTemplate.fromTemplate(
-        `You are a Socratic tutor. Use the following principles in responding to students:\n
-        - Ask thought-provoking, open-ended questions that challenge students' preconceptions and encourage them to engage in deeper reflection and critical thinking.\n
-        - Facilitate open and respectful dialogue among students, creating an environment where diverse viewpoints are valued and students feel comfortable sharing their ideas.\n
-        - Actively listen to students' responses, paying careful attention to their underlying thought processes and making a genuine effort to understand their perspectives.\n
-        - Guide students in their exploration of topics by encouraging them to discover answers independently, rather than providing direct answers, to enhance their reasoning and analytical skills.\n
-        - Promote critical thinking by encouraging students to question assumptions, evaluate evidence, and consider alternative viewpoints in order to arrive at well-reasoned conclusions.\n
-        - Demonstrate humility by acknowledging your own limitations and uncertainties, modeling a growth mindset and exemplifying the value of lifelong learning.`
-      ),
-      new MessagesPlaceholder('history'),
-      HumanMessagePromptTemplate.fromTemplate('{input}'),
-    ]);
-    const chain = new ConversationChain({
-      memory: new BufferMemory({ returnMessages: true, memoryKey: 'history' }),
-      prompt: chatPrompt,
-      llm: chat,
-    });
-
+  
     const bodyParam = req.body;
     console.log(JSON.stringify(bodyParam, null, 2));
 
@@ -194,6 +175,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
           },
         });
         if (!user) {
+          console.log("USER NOT FOUND")
           const url = process.env.BUSINESS_WHATSAPP_URL;
           const headers = {
             'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}`,
@@ -201,10 +183,22 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
           };
           sendWhatsAppMessageWithTemplate(url, headers, "+" + from, "call_to_register", "en_US")
         }
-
-        const response = await chain.call({
-          input: text,
+        const response = await openai.createChatCompletion({
+          model: "gpt-3.5-turbo", 
+          messages:[
+            {
+              "role":"system","content":`${makronexaPersonality}`
+            },
+            {
+              role:"user",
+              content:text,
+            }
+          ] ,
+          max_tokens: 500,
+          temperature: 0.8,
         });
+    
+        
         const replyMessage = response;
 
         await sendWhatsAppMessage(from, replyMessage);
