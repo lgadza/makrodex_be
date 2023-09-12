@@ -36,10 +36,10 @@ const UserModel = sequelize.define("user", {
   //   type: DataTypes.STRING,
   //   allowNull: false,
   // },
-  // phone_number: {
-  //   type: DataTypes.STRING,
-  //   allowNull: false,
-  // },
+  phone_number: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   email: {
     type: DataTypes.STRING,
     allowNull: true,

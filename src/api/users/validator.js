@@ -28,12 +28,12 @@ const userSchema = {
     },
   },
 
-  // citizenship: {
-  //   in: ["body"],
-  //   isString: {
-  //     errorMessage: "citizenship is mandatory field and needs to be a string!",
-  //   },
-  // },
+  country_code: {
+    in: ["body"],
+    isString: {
+      errorMessage: "country_code is mandatory field",
+    },
+  },
   // date_of_birth: {
   //   in: ["body"],
   //   isDate:{
@@ -51,12 +51,12 @@ const userSchema = {
       errorMessage: "gender must be either 'male' or 'female'",
     },
   },
-  // phone_number: {
-  //   in: ["body"],
-  //   isString: {
-  //     errorMessage: "phone_number is mandatory field !",
-  //   },
-  // },
+  phone_number: {
+    in: ["body"],
+    isString: {
+      errorMessage: "phone_number is mandatory field !",
+    },
+  },
   password: {
     in: ["body"],
     isString: {
