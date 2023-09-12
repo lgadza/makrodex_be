@@ -21,10 +21,12 @@ const token = process.env.WHATSAPP_VERIFY_TOKEN;
 
 const configuration = new Configuration({
   organization: process.env.OPENAI_ORGANIZATION_KEY,
-  apiKey: process.env.OPENAI_API_KEY,
+  openAIApiKey: process.env.OPENAI_API_KEY,
+  temperature: 0.8,
+  model:"gpt-3.5-turbo" 
 });
 
-const openai = new OpenAIApi(configuration);
+const openai = new OpenAI(configuration);
 
 export async function sendWhatsAppMessageWithTemplate(url, headers, phone, name, languageCode = "en_US") {
   const messagePayload ={
@@ -153,7 +155,7 @@ whatsAppRouter.post('/whatsapp-message', async (req, res) => {
 
 whatsAppRouter.post('/webhooks', async (req, res) => {
   try {
-    const chat = new OpenAI({ temperature: 0,model:"gpt-3.5-turbo" });
+    const chat = openai
     const chatPrompt = ChatPromptTemplate.fromPromptMessages([
       SystemMessagePromptTemplate.fromTemplate(
         `You are a Socratic tutor. Use the following principles in responding to students:\n
