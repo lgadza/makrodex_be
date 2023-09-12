@@ -181,11 +181,14 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
 
       if (messageData) {
         const { from, text } = messageData;
+        const phone_number = from.slice(-9);
+        console.log(phone_number,"FROM PHONE_NUMBER")
+        const country_code = fromValue.slice(0, -9);
+        console.log(country_code,"FROM country_code")
         const user = await UserModel.findOne({
           where: {
-            [Op.and]: [
-              sequelize.literal(`CONCAT(country_code, phone_number) = '+${from}'`),
-            ],
+            phone_number: phone_number,
+            country_code: "+" + country_code,
           },
         });
         if (!user) {
