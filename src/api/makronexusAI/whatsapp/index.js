@@ -6,6 +6,7 @@ import express from "express";
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import {ConversationChain} from "langchain/chains"
 import { BufferMemory } from 'langchain/memory';
+import { OpenAI } from 'langchain/llms/openai';
 import {
   MessagesPlaceholder,
   SystemMessagePromptTemplate,
@@ -14,7 +15,6 @@ import {
 } from 'langchain/prompts';
 import UserModel from "../../users/model.js";
 
-const Op = sequelize.Op;
 
 const whatsAppRouter = express.Router();
 const token = process.env.WHATSAPP_VERIFY_TOKEN;
@@ -153,7 +153,7 @@ whatsAppRouter.post('/whatsapp-message', async (req, res) => {
 
 whatsAppRouter.post('/webhooks', async (req, res) => {
   try {
-    const chat = new ChatOpenAI({ temperature: 0 });
+    const chat = new OpenAI({ temperature: 0,model:"gpt-3.5-turbo" });
     const chatPrompt = ChatPromptTemplate.fromPromptMessages([
       SystemMessagePromptTemplate.fromTemplate(
         `You are a Socratic tutor. Use the following principles in responding to students:\n
