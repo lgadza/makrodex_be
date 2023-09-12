@@ -20,13 +20,11 @@ const whatsAppRouter = express.Router();
 const token = process.env.WHATSAPP_VERIFY_TOKEN;
 
 const configuration = new Configuration({
-  organization: process.env.OPENAI_ORGANIZATION_KEY,
-  openAIApiKey: process.env.OPENAI_API_KEY,
-  temperature: 0.8,
-  model:"gpt-3.5-turbo" 
+  organization:process.env.OPENAI_ORGANIZATION_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
-const openai = new OpenAI(configuration);
+const openai = new OpenAIApi(configuration);
 
 export async function sendWhatsAppMessageWithTemplate(url, headers, phone, name, languageCode = "en_US") {
   const messagePayload ={
@@ -199,7 +197,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
         });
     
         
-        const replyMessage = response;
+        const replyMessage = response.data.choices[0].message.content;
 
         await sendWhatsAppMessage(from, replyMessage);
         res.status(200).json({ message: 'Message sent' });
