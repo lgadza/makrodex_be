@@ -1,4 +1,3 @@
-import { Client } from "whatsapp-web.js";
 import sequelize from "../../../db.js";
 import qrcode from "qrcode-terminal"
 import { Configuration,OpenAIApi } from "openai";
@@ -14,42 +13,108 @@ import {
   HumanMessagePromptTemplate,
 } from 'langchain/prompts';
 import UserModel from "../../users/model.js";
+
 const Op = sequelize.Op;
-// import fetch from 'node-fetch';
-const client=new Client()
-const whatsAppRouter=express.Router()
+
+const whatsAppRouter = express.Router();
 const token = process.env.WHATSAPP_VERIFY_TOKEN;
 
 const configuration = new Configuration({
-  organization:process.env.OPENAI_ORGANIZATION_KEY,
+  organization: process.env.OPENAI_ORGANIZATION_KEY,
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-  const openai = new OpenAIApi(configuration);
-export const sendWhatsAppMessageWithTemplate= async(url, headers, phone,name,languageCode="en_US")=> {
-  const messagePayload = {
+const openai = new OpenAIApi(configuration);
+
+export async function sendWhatsAppMessageWithTemplate(url, headers, phone, name, languageCode = "en_US") {
+  const messagePayload ={
     "messaging_product": "whatsapp",
-    "to": phone, 
+    "recipient_type": "individual",
+    "to": phone,
     "type": "template",
     "template": {
       "name": name,
       "language": {
         "code": languageCode
-      }
+      },
+      "components": [
+        {
+          "type": "header",
+          "parameters": [
+            {
+              "type": "image",
+              "image": {
+                "link": "https://asset.cloudinary.com/di6cppfze/3bfcaf7e984143027f37fd2ee33ee9d4"
+              }
+            }
+          ]
+        },
+        {
+          "type": "body",
+          "parameters": [
+            {
+              "type": "text",
+              "text": "Welcome to Makronexus! 🎉\n\nWe're excited to be your educational companion. With Makronexa, you'll find quick answers, a wealth of resources, and eco-friendly education—all at your fingertips.\n\nAnd here's the special bit: CALA (Continuous Assessment Learning Activities) made easy. We're here to help you navigate it effortlessly, whether you're a student or a teacher.\n\nGot questions? We've got answers! Reach out anytime.\n\nRegards,\nLouis Gadza\nMakronexus Team"
+            }
+          ]
+        },
+        
+        
+        {
+          "type": "button",
+          "sub_type": "web_url",
+          "index": "0",
+          "parameters": [
+            {
+              "type": "text",
+              "text": "About Makronexus"
+            },
+            {
+              "type": "url",
+              "url": "https://makronexus.com/"
+            }
+          ]
+        },
+        {
+          "type": "footer",
+          "parameters": [
+            {
+              "type": "text",
+              "text": "Copyright © 2023 Makronexus. All rights reserved."
+            }
+          ]
+        },
+      ]
     }
-  };
+  }
+  
+  
 
+  
+  // const messagePayload = {
+  //   "messaging_product": "whatsapp",
+  //   "to": phone,
+  //   "type": "template",
+  //   "template": {
+  //     "name": name,
+  //     "language": {
+  //       "code": languageCode
+  //     }
+  //   }
+  // };
+  console.log("Sending WhatsApp Message...");
   try {
     const response = await fetch(url, {
       method: 'POST',
       headers,
       body: JSON.stringify(messagePayload),
     });
-
+    console.log("API Response:", response);
     if (response.ok) {
       const responseData = await response.json();
       return responseData;
     } else {
+      console.error('API request failed');
       throw new Error('API request failed');
     }
   } catch (error) {
@@ -58,39 +123,38 @@ export const sendWhatsAppMessageWithTemplate= async(url, headers, phone,name,lan
   }
 }
 
+whatsAppRouter.get('/webhooks', (req, res) => {
+  if (
+    req.query['hub.mode'] == 'subscribe' &&
+    req.query['hub.verify_token'] == token
+  ) {
+    res.send(req.query['hub.challenge']);
+  } else {
+    res.sendStatus(400);
+  }
+});
 
-
-  whatsAppRouter.get('/webhooks', (req, res) => {
-    if (
-      req.query['hub.mode'] == 'subscribe' &&
-      req.query['hub.verify_token'] == token
-    ) {
-      res.send(req.query['hub.challenge']);
-    } else {
-      res.sendStatus(400);
-    }
-  });
-  whatsAppRouter.post('/whatsapp-message', async (req, res) => {
-    try {
-    const phone="+48794144892"
+whatsAppRouter.post('/whatsapp-message', async (req, res) => {
+  try {
+    const phone = "+48794144892";
     const url = process.env.BUSINESS_WHATSAPP_URL;
     const headers = {
-      'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}`, 
+      'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}`,
       'Content-Type': 'application/json',
-    }; 
-  
- sendWhatsAppMessageWithTemplate(url,headers,phone,"makronexus_intro","en")
+    };
+
+    await sendWhatsAppMessageWithTemplate(url, headers, phone, "call_to_register", "en_US");
+    res.status(200).json({ message: 'Message sent' });
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-
 whatsAppRouter.post('/webhooks', async (req, res) => {
   try {
     const chat = new ChatOpenAI({ temperature: 0 });
-      const chatPrompt = ChatPromptTemplate.fromPromptMessages([
+    const chatPrompt = ChatPromptTemplate.fromPromptMessages([
       SystemMessagePromptTemplate.fromTemplate(
         `You are a Socratic tutor. Use the following principles in responding to students:\n
         - Ask thought-provoking, open-ended questions that challenge students' preconceptions and encourage them to engage in deeper reflection and critical thinking.\n
@@ -108,67 +172,47 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
       prompt: chatPrompt,
       llm: chat,
     });
-    
+
     const bodyParam = req.body;
     console.log(JSON.stringify(bodyParam, null, 2));
 
     if (isValidWebhookRequest(bodyParam)) {
-      
       const messageData = extractMessageData(bodyParam);
 
       if (messageData) {
         const { from, text } = messageData;
-const user = await UserModel.findOne({
-  where: {
-    [Op.and]: [
-      sequelize.literal(`CONCAT(country_code, phone_number) = '+${from}'`),
-    ],
-  },
-});
-if(!user){
-  const url = process.env.BUSINESS_WHATSAPP_URL;
-  const headers = {
-    'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}`,
-    'Content-Type': 'application/json',
-  };
-sendWhatsAppMessageWithTemplate(url,headers,"+"+from,"call_to_register","en_US")
-}
+        const user = await UserModel.findOne({
+          where: {
+            [Op.and]: [
+              sequelize.literal(`CONCAT(country_code, phone_number) = '+${from}'`),
+            ],
+          },
+        });
+        if (!user) {
+          const url = process.env.BUSINESS_WHATSAPP_URL;
+          const headers = {
+            'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}`,
+            'Content-Type': 'application/json',
+          };
+          sendWhatsAppMessageWithTemplate(url, headers, "+" + from, "call_to_register", "en_US")
+        }
 
-        // const response = await openai.createChatCompletion({
-        //   model: "gpt-3.5-turbo", 
-        //   messages:[
-        //     {
-        //       "role":"system","content":`${makronexaPersonality}`
-        //     },
-        //     {
-        //       role:"user",
-        //       content:text,
-        //     }
-        //   ] ,
-        //   max_tokens: 300,
-        //   temperature: 0.8,
-        // });
         const response = await chain.call({
-      input: text,
-    });
-        const replyMessage = response
+          input: text,
+        });
+        const replyMessage = response;
 
-        // Send a reply message
         await sendWhatsAppMessage(from, replyMessage);
         res.status(200).json({ message: 'Message sent' });
-        console.log("YES MESSAGE SENT");
       } else {
         res.status(400).json({ error: 'Invalid message data' });
-        console.log("Invalid message data");
       }
     } else {
       res.status(403).json({ error: 'Invalid webhook request' });
-      console.log("Invalid webhook request");
     }
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
-    console.log("Internal Server Error");
   }
 });
 
@@ -217,8 +261,6 @@ async function sendWhatsAppMessage(recipient, message) {
     body: JSON.stringify(messagePayload),
   });
 
-  console.log(response, "RESPONSE");
-
   if (response.ok) {
     const responseData = await response.json();
     return responseData;
@@ -227,5 +269,5 @@ async function sendWhatsAppMessage(recipient, message) {
   }
 }
 
+export default whatsAppRouter;
 
-  export default whatsAppRouter
