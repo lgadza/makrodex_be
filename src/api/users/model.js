@@ -20,10 +20,10 @@ const UserModel = sequelize.define("user", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  // second_name: {
-  //   type: DataTypes.STRING,
-  //   allowNull: true,
-  // },
+  country_code: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   // date_of_birth: {
   //   type: DataTypes.DATEONLY,
   //   allowNull: false,

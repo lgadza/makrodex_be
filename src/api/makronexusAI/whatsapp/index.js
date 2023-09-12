@@ -4,7 +4,7 @@ import qrcode from "qrcode-terminal"
 import { Configuration,OpenAIApi } from "openai";
 import { makronexaPersonality } from "../../utils/data.js";
 import express from "express";
-import { OpenAI } from 'langchain/llms/openai';
+import { ChatOpenAI } from 'langchain/chat_models/openai';
 import {ConversationChain} from "langchain/chains"
 import { BufferMemory } from 'langchain/memory';
 import {
