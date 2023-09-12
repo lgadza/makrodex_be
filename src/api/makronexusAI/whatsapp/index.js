@@ -26,7 +26,7 @@ const configuration = new Configuration({
 });
 
   const openai = new OpenAIApi(configuration);
-async function sendWhatsAppMessageWithTemplate(url, headers, phone,name,languageCode="en_US") {
+export const sendWhatsAppMessageWithTemplate= async(url, headers, phone,name,languageCode="en_US")=> {
   const messagePayload = {
     "messaging_product": "whatsapp",
     "to": phone, 
@@ -79,7 +79,7 @@ async function sendWhatsAppMessageWithTemplate(url, headers, phone,name,language
       'Content-Type': 'application/json',
     }; 
   
- sendWhatsAppMessage(url,headers,phone,"makronexus_intro","en")
+ sendWhatsAppMessageWithTemplate(url,headers,phone,"makronexus_intro","en")
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal Server Error' });

@@ -7,21 +7,37 @@ import { createAccessToken } from "../lib/auth/tools.js";
 import { checkUserSchema, triggerBadRequest } from "./validator.js";
 import {JWTAuthMiddleware} from "../lib/auth/jwtAuth.js"
 import AddressModel from "../address/model.js";
+import { sendWhatsAppMessageWithTemplate } from "../makronexusAI/whatsapp/index.js";
 
 const userRouter = express.Router();
 
 userRouter.post("/register",checkUserSchema,triggerBadRequest, async (req, res, next) => {
+  const url = process.env.BUSINESS_WHATSAPP_URL;
+  const headers = {
+    'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}`, 
+    'Content-Type': 'application/json',
+  }; 
   try {
-    const { email } = req.body; 
-    const user = await UserModel.findOne({ where: { email } });
-    if (user) {
-       res.send({
+    const { email,phone_number,country_code } = req.body; 
+    const phone=country_code+phone_number
+    console.log("PHONE_NUMBER",phone)
+    const userByEmail = await UserModel.findOne({ where: { email } });
+    const userByPhone = await UserModel.findOne({ where: { country_code, phone_number } });
+    if (userByEmail) {
+      res.status(400).send({
         message: "This email has already been registered. Please login.",
+      });
+    } else if (userByPhone) {
+      res.status(400).send({
+        message: "This phone number has been registered by another user.",
       });
     } else {
       const new_user = await UserModel.create(req.body);
-      const {id } = new_user;
-      res.status(201).send({success:true,id} );
+      if(new_user){
+        sendWhatsAppMessageWithTemplate(url,headers,phone,"call_to_register","en_US")
+        const {id } = new_user;
+        res.status(201).send({success:true,id} );
+      }
     }
   } catch (error) {
     next(error)
