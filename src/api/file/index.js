@@ -4,36 +4,56 @@ import cloudinary from "../lib/cloudinary.js";
 import FileUploadModel from "./model.js";
 import createHttpError from "http-errors";
 import UserModel from "../users/model.js";
-// import { CloudinaryStorage } from "multer-storage-cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 
 
 const fileRouter = express.Router();
 const upload = multer({ dest: 'uploads/' });
 
-// const cloudinaryUploader = multer({
-//   storage: new CloudinaryStorage({
-//     cloudinary,
-//     params: {
-//       folder: "makronexus/img/users",
-//     },
-//   }),
-//   limits: { fileSize: 1024 * 1024 * 2 },
-// }).single("avatar");
+const cloudinaryUploader = multer({
+  storage: new CloudinaryStorage({
+    cloudinary,
+    params: {
+      folder: "makronexus/img/users",
+    },
+  }),
+  limits: { fileSize: 1024 * 1024 * 2 },
+}).single("avatar");
 
-// // Post user Avatar
-// fileRouter.post("/:user_id/avatar",async(req,res,next)=>{
-//   try{
-//     const url=req.file.path
-//     console.log(url,"URL AVATAR")
+// Post user Avatar
+fileRouter.post("/:user_id/avatar",async(req,res,next)=>{
+  try{
+    const user_id=req.params.user_id
+    const url=req.file.path
+    console.log(url,"URL AVATAR")
 
-//     const uploadUser=await UserModel.findOne({
-//       where:{id:req.params.user_id}
-//     })
+     // Find the user by user_id and update the avatar URL
+     const [updatedRowCount, updatedUser] = await UserModel.update(
+      { avatar: url },
+      {
+        where: { id: user_id },
+        returning: true, 
+      }
+    );
+    if (updatedRowCount > 0) {
+      const updatedRecord = await UserModel.findOne({
+        where: { id: user_id },
+        attributes: { exclude: ["password", "createdAt"] }, 
+        raw: true, 
+      });
+      delete updatedRecord.password; 
+      delete updatedRecord.createdAt; 
+      res.send(updatedRecord);
+    } else {
+      next(
+        createHttpError(404, `User with id ${user_id} not found!`)
+      );
+    }
 
-//   }catch(error){
-//     console.log(error,"Error")
-//   }
-// })
+  }catch(error){
+    console.log(error,"Error")
+  }
+})
 
 // Get all files for an user
 fileRouter.get('/:user_id', async (req, res, next) => {

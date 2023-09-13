@@ -24,25 +24,30 @@ const UserModel = sequelize.define("user", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  // date_of_birth: {
-  //   type: DataTypes.DATEONLY,
-  //   allowNull: false,
-  // },
+  date_of_birth: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+  },
   gender: {
     type: DataTypes.ENUM("male", "female"),
     allowNull: false,
   },
-  // citizenship: {
-  //   type: DataTypes.STRING,
-  //   allowNull: false,
-  // },
+  citizenship: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   phone_number: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   email: {
     type: DataTypes.STRING,
     allowNull: true,
+  },
+  avatar: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue:"https://cdn.pixabay.com/photo/2020/07/01/12/58/icon-5359553_960_720.png"
   },
   role: {
     type: DataTypes.ENUM("student","teacher","social worker","guidance counselor","bus driver","security personnel","technology coordinator","sports coach","user"),
