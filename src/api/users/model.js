@@ -25,7 +25,7 @@ const UserModel = sequelize.define("user", {
     allowNull: false,
   },
   date_of_birth: {
-    type: DataTypes.DATEONLY,
+    type: DataTypes.STRING,
     allowNull: true,
   },
   gender: {
