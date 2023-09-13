@@ -12,11 +12,6 @@ import { sendWhatsAppMessageWithTemplate } from "../makronexusAI/whatsapp/index.
 const userRouter = express.Router();
 
 userRouter.post("/register",checkUserSchema,triggerBadRequest, async (req, res, next) => {
-  const url = process.env.BUSINESS_WHATSAPP_URL;
-  const headers = {
-    'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}`, 
-    'Content-Type': 'application/json',
-  }; 
   try {
     const { email,phone_number,country_code } = req.body; 
     const phone=country_code+phone_number
@@ -34,7 +29,7 @@ userRouter.post("/register",checkUserSchema,triggerBadRequest, async (req, res, 
     } else {
       const new_user = await UserModel.create(req.body);
       if(new_user){
-        sendWhatsAppMessageWithTemplate(url,headers,phone,"makronexus_intro","en","")
+        sendWhatsAppMessageWithTemplate(phone,"makronexus_intro")
         const {id } = new_user;
         res.status(201).send({success:true,id} );
       }

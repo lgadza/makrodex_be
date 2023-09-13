@@ -26,19 +26,25 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration);
 
-export async function sendWhatsAppMessageWithTemplate(url, headers, phone, name, languageCode = "en_US", user) {
+export async function sendWhatsAppMessageWithTemplate( phone, name) {
+  const url = process.env.BUSINESS_WHATSAPP_URL;
+  const headers = {
+    'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}`,
+    'Content-Type': 'application/json',
+  };
+
   let messagePayload;
 
   if (name === "makronexus_intro") {
-    messagePayload = {
+    messagePayload ={
       "messaging_product": "whatsapp",
       "recipient_type": "individual",
       "to": phone,
       "type": "template",
       "template": {
-        "name": name,
+        "name": "makronexus_intro",
         "language": {
-          "code": languageCode
+          "code": "en"
         },
         "components": [
           {
@@ -47,14 +53,15 @@ export async function sendWhatsAppMessageWithTemplate(url, headers, phone, name,
               {
                 "type": "image",
                 "image": {
-                  "link": "https://asset.cloudinary.com/di6cppfze/3bfcaf7e984143027f37fd2ee33ee9d4"
+                  "link": "https://media.licdn.com/dms/image/D4D22AQGmKvoLUHk-kg/feedshare-shrink_800/0/1694598891620?e=1697673600&v=beta&t=ejreU3bE7sUT8htftow4d2w8njphSAbmmbIWSUHV1ao"
                 }
               }
             ]
           }
         ]
       }
-    };
+    }
+    
   } else if (name === "call_to_register") {
     messagePayload = {
       "messaging_product": "whatsapp",
@@ -62,7 +69,7 @@ export async function sendWhatsAppMessageWithTemplate(url, headers, phone, name,
       "to": phone,
       "type": "template",
       "template": {
-        "name": name,
+        "name": "call_to_register",
         "language": {
           "code": "en_US"
         },
@@ -73,7 +80,7 @@ export async function sendWhatsAppMessageWithTemplate(url, headers, phone, name,
               {
                 "type": "image",
                 "image": {
-                  "link": "https://asset.cloudinary.com/di6cppfze/3bfcaf7e984143027f37fd2ee33ee9d4"
+                  "link": "https://media.licdn.com/dms/image/D4D22AQGmKvoLUHk-kg/feedshare-shrink_800/0/1694598891620?e=1697673600&v=beta&t=ejreU3bE7sUT8htftow4d2w8njphSAbmmbIWSUHV1ao"
                 }
               }
             ]
@@ -83,14 +90,14 @@ export async function sendWhatsAppMessageWithTemplate(url, headers, phone, name,
             "parameters": [
               {
                 "type": "text",
-                "text": user
+                "text": "Friend"
               }
             ]
           }
         ]
       }
-    };
-  }
+    }
+  }    
 
   try {
     const response = await fetch(url, {
@@ -100,6 +107,7 @@ export async function sendWhatsAppMessageWithTemplate(url, headers, phone, name,
     });
     if (response.ok) {
       const responseData = await response.json();
+      console.log("MESSAGES SENT")
       return responseData;
     } else {
       throw new Error('API request failed');
@@ -113,13 +121,8 @@ export async function sendWhatsAppMessageWithTemplate(url, headers, phone, name,
 whatsAppRouter.post('/whatsapp-message', async (req, res) => {
   try {
     const phone = "+48794144892";
-    const url = process.env.BUSINESS_WHATSAPP_URL;
-    const headers = {
-      'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}`,
-      'Content-Type': 'application/json',
-    };
-
-    await sendWhatsAppMessageWithTemplate(url, headers, phone, "makronexus_intro", "en");
+   
+    await sendWhatsAppMessageWithTemplate(phone, "makronexus_intro");
     res.status(200).json({ message: 'Message sent' });
   } catch (error) {
     console.error('Error:', error);
@@ -150,13 +153,8 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
         });
         if (!user) {
           console.log("USER NOT FOUND")
-          const url = process.env.BUSINESS_WHATSAPP_URL;
-          const headers = {
-            'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}`,
-            'Content-Type': 'application/json',
-          };
-          sendWhatsAppMessageWithTemplate(url, headers, "+" + from, "call_to_register", "en_US","Friend")
-        }
+          sendWhatsAppMessageWithTemplate("+" + from, "call_to_register")
+        }else{
         const response = await openai.createChatCompletion({
           model: "gpt-3.5-turbo", 
           messages:[
@@ -177,6 +175,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
 
         await sendWhatsAppMessage(from, replyMessage);
         res.status(200).json({ message: 'Message sent' });
+      }
       } else {
         res.status(400).json({ error: 'Invalid message data' });
       }
