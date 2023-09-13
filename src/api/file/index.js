@@ -5,6 +5,7 @@ import FileUploadModel from "./model.js";
 import createHttpError from "http-errors";
 import UserModel from "../users/model.js";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
+import { JWTAuthMiddleware } from "../lib/auth/jwtAuth.js";
 
 
 const fileRouter = express.Router();
@@ -21,7 +22,7 @@ const cloudinaryUploader = multer({
 }).single("avatar");
 
 // Post user Avatar
-fileRouter.post("/:user_id/avatar",async(req,res,next)=>{
+fileRouter.post("/:user_id/avatar", JWTAuthMiddleware, cloudinaryUploader,async(req,res,next)=>{
   try{
     const user_id=req.params.user_id
     const url=req.file.path
