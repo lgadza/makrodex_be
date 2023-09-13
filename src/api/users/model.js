@@ -47,7 +47,7 @@ const UserModel = sequelize.define("user", {
   avatar: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"https://cdn.pixabay.com/photo/2020/07/01/12/58/icon-5359553_960_720.png"
+    defaultValue:"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
   },
   role: {
     type: DataTypes.ENUM("student","teacher","social worker","guidance counselor","bus driver","security personnel","technology coordinator","sports coach","user"),

@@ -107,9 +107,9 @@ userRouter.put("/:user_id",JWTAuthMiddleware, async (req, res, next) => {
       const updatedRecord = await UserModel.findOne({
         where: { id: req.params.user_id },
         attributes: { exclude: ["password", "createdAt"] }, 
-        raw: true, // Retrieve the record as plain JSON data
+        raw: true, 
       });
-      delete updatedRecord.password; // Manually delete the "password" attribute
+      delete updatedRecord.password; 
       delete updatedRecord.createdAt; 
       res.send(updatedRecord);
     } else {
