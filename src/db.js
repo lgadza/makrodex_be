@@ -2,8 +2,8 @@
 
 import { Sequelize } from "sequelize"
 
-// const connectionString = process.env.CONNECTION_STRING;
-const sequelize = new Sequelize("postgres://makronexus_user:RDc7oMPcZ1FFdS4JnxS8CI3IgJGsJnhv@dpg-cjlnbsnv9s6c73b1p92g-a/makronexus",{
+const connectionString = process.env.DATABASE_CONNECTION_STRING;
+const sequelize = new Sequelize(connectionString,{
   dialect: "postgres",
   logging: false,
 })

@@ -26,113 +26,89 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration);
 
-export async function sendWhatsAppMessageWithTemplate(url, headers, phone, name, languageCode = "en_US") {
-  const messagePayload ={
-    "messaging_product": "whatsapp",
-    "recipient_type": "individual",
-    "to": phone,
-    "type": "template",
-    "template": {
-      "name": name,
-      "language": {
-        "code": languageCode
-      },
-      "components": [
-        {
-          "type": "header",
-          "parameters": [
-            {
-              "type": "image",
-              "image": {
-                "link": "https://asset.cloudinary.com/di6cppfze/3bfcaf7e984143027f37fd2ee33ee9d4"
-              }
-            }
-          ]
-        },
-        {
-          "type": "body",
-          "parameters": [
-            {
-              "type": "text",
-              "text": "Welcome to Makronexus! 🎉\n\nWe're excited to be your educational companion. With Makronexa, you'll find quick answers, a wealth of resources, and eco-friendly education—all at your fingertips.\n\nAnd here's the special bit: CALA (Continuous Assessment Learning Activities) made easy. We're here to help you navigate it effortlessly, whether you're a student or a teacher.\n\nGot questions? We've got answers! Reach out anytime.\n\nRegards,\nLouis Gadza\nMakronexus Team"
-            }
-          ]
-        },
-        
-        
-        {
-          "type": "button",
-          "sub_type": "web_url",
-          "index": "0",
-          "parameters": [
-            {
-              "type": "text",
-              "text": "About Makronexus"
-            },
-            {
-              "type": "url",
-              "url": "https://makronexus.com/"
-            }
-          ]
-        },
-        {
-          "type": "footer",
-          "parameters": [
-            {
-              "type": "text",
-              "text": "Copyright © 2023 Makronexus. All rights reserved."
-            }
-          ]
-        },
-      ]
-    }
-  }
-  
-  
+export async function sendWhatsAppMessageWithTemplate(url, headers, phone, name, languageCode = "en_US", user) {
+  let messagePayload;
 
-  
-  // const messagePayload = {
-  //   "messaging_product": "whatsapp",
-  //   "to": phone,
-  //   "type": "template",
-  //   "template": {
-  //     "name": name,
-  //     "language": {
-  //       "code": languageCode
-  //     }
-  //   }
-  // };
-  console.log("Sending WhatsApp Message...");
+  if (name === "makronexus_intro") {
+    messagePayload = {
+      "messaging_product": "whatsapp",
+      "recipient_type": "individual",
+      "to": phone,
+      "type": "template",
+      "template": {
+        "name": name,
+        "language": {
+          "code": languageCode
+        },
+        "components": [
+          {
+            "type": "header",
+            "parameters": [
+              {
+                "type": "image",
+                "image": {
+                  "link": "https://asset.cloudinary.com/di6cppfze/3bfcaf7e984143027f37fd2ee33ee9d4"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    };
+  } else if (name === "call_to_register") {
+    messagePayload = {
+      "messaging_product": "whatsapp",
+      "recipient_type": "individual",
+      "to": phone,
+      "type": "template",
+      "template": {
+        "name": name,
+        "language": {
+          "code": "en_US"
+        },
+        "components": [
+          {
+            "type": "header",
+            "parameters": [
+              {
+                "type": "image",
+                "image": {
+                  "link": "https://asset.cloudinary.com/di6cppfze/3bfcaf7e984143027f37fd2ee33ee9d4"
+                }
+              }
+            ]
+          },
+          {
+            "type": "body",
+            "parameters": [
+              {
+                "type": "text",
+                "text": user
+              }
+            ]
+          }
+        ]
+      }
+    };
+  }
+
   try {
     const response = await fetch(url, {
       method: 'POST',
       headers,
       body: JSON.stringify(messagePayload),
     });
-    console.log("API Response:", response);
     if (response.ok) {
       const responseData = await response.json();
       return responseData;
     } else {
-      console.error('API request failed');
       throw new Error('API request failed');
     }
   } catch (error) {
-    console.error('Error:', error);
     throw error;
   }
 }
 
-whatsAppRouter.get('/webhooks', (req, res) => {
-  if (
-    req.query['hub.mode'] == 'subscribe' &&
-    req.query['hub.verify_token'] == token
-  ) {
-    res.send(req.query['hub.challenge']);
-  } else {
-    res.sendStatus(400);
-  }
-});
 
 whatsAppRouter.post('/whatsapp-message', async (req, res) => {
   try {
@@ -143,7 +119,7 @@ whatsAppRouter.post('/whatsapp-message', async (req, res) => {
       'Content-Type': 'application/json',
     };
 
-    await sendWhatsAppMessageWithTemplate(url, headers, phone, "call_to_register", "en_US");
+    await sendWhatsAppMessageWithTemplate(url, headers, phone, "makronexus_intro", "en");
     res.status(200).json({ message: 'Message sent' });
   } catch (error) {
     console.error('Error:', error);
@@ -179,7 +155,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
             'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}`,
             'Content-Type': 'application/json',
           };
-          sendWhatsAppMessageWithTemplate(url, headers, "+" + from, "call_to_register", "en_US")
+          sendWhatsAppMessageWithTemplate(url, headers, "+" + from, "call_to_register", "en_US","Friend")
         }
         const response = await openai.createChatCompletion({
           model: "gpt-3.5-turbo", 

@@ -34,7 +34,7 @@ userRouter.post("/register",checkUserSchema,triggerBadRequest, async (req, res, 
     } else {
       const new_user = await UserModel.create(req.body);
       if(new_user){
-        sendWhatsAppMessageWithTemplate(url,headers,phone,"call_to_register","en_US")
+        sendWhatsAppMessageWithTemplate(url,headers,phone,"makronexus_intro","en","")
         const {id } = new_user;
         res.status(201).send({success:true,id} );
       }
