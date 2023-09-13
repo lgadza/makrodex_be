@@ -11,6 +11,9 @@ import { JWTAuthMiddleware } from "../lib/auth/jwtAuth.js";
 const fileRouter = express.Router();
 const upload = multer({ dest: 'uploads/' });
 
+// ... (Previous code)
+
+// Update the Multer configuration to use the correct field name
 const cloudinaryUploader = multer({
   storage: new CloudinaryStorage({
     cloudinary,
@@ -19,42 +22,56 @@ const cloudinaryUploader = multer({
     },
   }),
   limits: { fileSize: 1024 * 1024 * 2 },
-}).single("avatar");
+}).single("avatar"); // Ensure "avatar" matches the field name in your form
 
 // Post user Avatar
-fileRouter.post("/:user_id/avatar", JWTAuthMiddleware, cloudinaryUploader,async(req,res,next)=>{
-  try{
-    const user_id=req.params.user_id
-    const url=req.file.path
-    console.log(url,"URL AVATAR")
+// Post user Avatar
+fileRouter.post("/:user_id/avatar", JWTAuthMiddleware, cloudinaryUploader, async (req, res, next) => {
+  try {
+    const user_id = req.params.user_id;
 
-     // Find the user by user_id and update the avatar URL
-     const [updatedRowCount, updatedUser] = await UserModel.update(
+    // Check if req.file is defined
+    if (!req.file) {
+      return next(createHttpError(400, "Avatar file is required."));
+    }
+
+    // Check if the file size exceeds the limit
+    if (req.file.size > 1024 * 1024 * 2) {
+      // File size exceeds the limit
+      return next(createHttpError(400, "Avatar file size exceeds the limit."));
+    }
+
+    const url = req.file.path;
+    console.log(url, "URL AVATAR");
+
+    const [updatedRowCount, updatedUser] = await UserModel.update(
       { avatar: url },
       {
         where: { id: user_id },
-        returning: true, 
+        returning: true,
       }
     );
+
     if (updatedRowCount > 0) {
       const updatedRecord = await UserModel.findOne({
         where: { id: user_id },
-        attributes: { exclude: ["password", "createdAt"] }, 
-        raw: true, 
+        attributes: { exclude: ["password", "createdAt"] },
+        raw: true,
       });
-      delete updatedRecord.password; 
-      delete updatedRecord.createdAt; 
+      delete updatedRecord.password;
+      delete updatedRecord.createdAt;
       res.send(updatedRecord);
     } else {
-      next(
-        createHttpError(404, `User with id ${user_id} not found!`)
-      );
+      next(createHttpError(404, `User with id ${user_id} not found!`));
     }
-
-  }catch(error){
-    console.log(error,"Error")
+  } catch (error) {
+    console.log(error, "Error");
+    next(error);
   }
-})
+});
+
+
+
 
 // Get all files for an user
 fileRouter.get('/:user_id', async (req, res, next) => {
