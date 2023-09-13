@@ -50,7 +50,7 @@ const UserModel = sequelize.define("user", {
     defaultValue:"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
   },
   role: {
-    type: DataTypes.ENUM("student","teacher","social worker","guidance counselor","bus driver","security personnel","technology coordinator","sports coach","user"),
+    type: DataTypes.ENUM("student","teacher","admin","social worker","guidance counselor","bus driver","security personnel","technology coordinator","sports coach","user"),
     allowNull: true,
     defaultValue:"user"
   },

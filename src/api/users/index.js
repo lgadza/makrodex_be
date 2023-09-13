@@ -94,8 +94,9 @@ userRouter.get("/me",JWTAuthMiddleware, async (req, res, next) => {
   }
 });
 
-userRouter.put("/:user_id",JWTAuthMiddleware, async (req, res, next) => {
+userRouter.put("/:user_id", JWTAuthMiddleware, async (req, res, next) => {
   try {
+    console.log("Updating user with ID:", req.params.user_id); // Add this line for debugging
     const [numberOfUpdatedRows] = await UserModel.update(
       req.body,
       {
@@ -103,14 +104,16 @@ userRouter.put("/:user_id",JWTAuthMiddleware, async (req, res, next) => {
         returning: true,
       }
     );
+    console.log("Number of updated rows:", numberOfUpdatedRows); // Add this line for debugging
     if (numberOfUpdatedRows === 1) {
       const updatedRecord = await UserModel.findOne({
         where: { id: req.params.user_id },
-        attributes: { exclude: ["password", "createdAt"] }, 
-        raw: true, 
+        attributes: { exclude: ["password", "createdAt"] },
+        raw: true,
       });
-      delete updatedRecord.password; 
-      delete updatedRecord.createdAt; 
+      console.log("Updated record:", updatedRecord); // Add this line for debugging
+      delete updatedRecord.password;
+      delete updatedRecord.createdAt;
       res.send(updatedRecord);
     } else {
       next(
@@ -121,6 +124,7 @@ userRouter.put("/:user_id",JWTAuthMiddleware, async (req, res, next) => {
     next(error);
   }
 });
+
 userRouter.delete("/me",JWTAuthMiddleware,async (req, res, next) => {
   try {
     const numberOfDeletedRows = await UserModel.destroy({

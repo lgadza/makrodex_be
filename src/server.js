@@ -21,6 +21,7 @@ import chatRouter from "./api/makronexusAI/chats/index.js"
 import router from "./api/makronexusAI/langchain/index.js"
 import aiSettingsRouter from "./api/makronexusAI/aiSettings/index.js"
 import whatsAppRouter from "./api/makronexusAI/whatsapp/index.js"
+import schoolRouter from "./api/schools/index.js"
 
 const server = express()
 const port = process.env.PORT || 3001
@@ -38,6 +39,7 @@ server.use(bodyParser.json())
 // ********************************** ENDPOINTS ****************************************
 
 server.use("/users",userRouter)
+server.use("/schools",schoolRouter)
 server.use("/address", addressRouter)
 server.use("/guardians",guardiansRouter)
 server.use("/users/files",fileRouter)
