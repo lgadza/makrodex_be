@@ -21,11 +21,11 @@ userRouter.post("/register",checkUserSchema,triggerBadRequest, async (req, res, 
     const userByEmail = await UserModel.findOne({ where: { email } });
     const userByPhone = await UserModel.findOne({ where: { country_code, phone_number } });
     if (userByEmail) {
-      res.status(400).send({
+      res.status(201).send({
         message: "This email has already been registered. Please login.",
       });
     } else if (userByPhone) {
-      res.status(400).send({
+      res.status(201).send({
         message: "This phone number has been registered by another user.",
       });
     } else {
