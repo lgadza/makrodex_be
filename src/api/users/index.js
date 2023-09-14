@@ -7,7 +7,9 @@ import { createAccessToken } from "../lib/auth/tools.js";
 import { checkUserSchema, triggerBadRequest } from "./validator.js";
 import {JWTAuthMiddleware} from "../lib/auth/jwtAuth.js"
 import AddressModel from "../address/model.js";
+import { sendRegistrationEmail } from "../../lib/email-tools.js";
 import { sendWhatsAppMessageWithTemplate } from "../makronexusAI/whatsapp/index.js";
+import sgMail from "@sendgrid/mail";
 
 const userRouter = express.Router();
 
@@ -29,9 +31,11 @@ userRouter.post("/register",checkUserSchema,triggerBadRequest, async (req, res, 
     } else {
       const new_user = await UserModel.create(req.body);
       if(new_user){
-        sendWhatsAppMessageWithTemplate(phone,"makronexus_intro")
         const {id } = new_user;
-        res.status(201).send({success:true,id} );
+        sendWhatsAppMessageWithTemplate(phone,"makronexus_intro")
+        await sendRegistrationEmail(email,req.body,id)
+        res.status(201).send({success:true,id,message:
+          "  We've sent a verification link on your email address, please verify the email",} );
       }
     }
   } catch (error) {
@@ -120,6 +124,28 @@ userRouter.put("/:user_id", JWTAuthMiddleware, async (req, res, next) => {
         createHttpError(404, `User with id ${req.params.user_id} is not found!`)
       );
     }
+  } catch (error) {
+    next(error);
+  }
+});
+userRouter.put("/verifyEmail/:user_id", async (req, res, next) => {
+  try {
+    const user_id = req.params.user_id;
+    
+    const updatedUser = await UserModel.update(req.body, {
+      where: { id: user_id },
+      returning: true,
+      plain: true,
+    });
+
+    if (updatedUser[0] === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json({
+      updatedUser: updatedUser[1],
+      message:
+        "Your email is verified, Our team is currently reviewing your request and we will get back to you within the next 24 hours with further information. We kindly ask for your patience while we work on your request. We are committed to providing you with the highest level of service and ensuring that your experience with us is a positive one.",
+    });
   } catch (error) {
     next(error);
   }

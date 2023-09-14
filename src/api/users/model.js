@@ -44,6 +44,11 @@ const UserModel = sequelize.define("user", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  emailVerified: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue:false
+  },
   avatar: {
     type: DataTypes.STRING,
     allowNull: false,
