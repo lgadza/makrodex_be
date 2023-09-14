@@ -7,7 +7,7 @@ import { createAccessToken } from "../lib/auth/tools.js";
 import { checkUserSchema, triggerBadRequest } from "./validator.js";
 import {JWTAuthMiddleware} from "../lib/auth/jwtAuth.js"
 import AddressModel from "../address/model.js";
-import { sendRegistrationEmail } from "../../lib/email-tools.js";
+import { sendRegistrationEmail } from "../lib/email_tool.js"; 
 import { sendWhatsAppMessageWithTemplate } from "../makronexusAI/whatsapp/index.js";
 import sgMail from "@sendgrid/mail";
 
