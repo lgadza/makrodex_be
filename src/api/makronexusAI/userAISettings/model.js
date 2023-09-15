@@ -20,7 +20,7 @@ const UserAISettingsModel = sequelize.define("user_ai_setting", {
   temperature: {
     type: DataTypes.FLOAT,
     allowNull: true,
-    defaultValue:0
+    
   },
   model: {
     type: DataTypes.STRING,
