@@ -18,8 +18,9 @@ const UserAISettingsModel = sequelize.define("user_ai_setting", {
     defaultValue: "Makronexus_EduCenter",
   },
   temperature: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.FLOAT,
     allowNull: true,
+    defaultValue:0
   },
   model: {
     type: DataTypes.STRING,
