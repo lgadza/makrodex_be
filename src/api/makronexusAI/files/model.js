@@ -16,7 +16,7 @@ const AIFileModel = sequelize.define("ai_file", {
     allowNull: false,
   },
   size: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.FLOAT,
     allowNull: false,
   },
 });

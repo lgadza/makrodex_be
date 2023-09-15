@@ -4,7 +4,6 @@ import {DirectoryLoader} from "langchain/document_loaders/fs/directory"
 import { OpenAI } from 'langchain/llms/openai';
 import { RetrievalQAChain, loadQAStuffChain } from 'langchain/chains';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-// import * as dotenv from 'dotenv';
 import { FaissStore } from 'langchain/vectorstores/faiss';
 import { QdrantVectorStore } from 'langchain/vectorstores/qdrant';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
@@ -13,6 +12,7 @@ import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
 import { CSVLoader } from 'langchain/document_loaders/fs/csv';
 import { DocxLoader } from 'langchain/document_loaders/fs/docx';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import {ConversationChain} from"langchain/chains"
@@ -23,7 +23,6 @@ import {
   HumanMessagePromptTemplate,
 } from 'langchain/prompts';
 import { BufferMemory } from 'langchain/memory';
-// QDRANT 
 import {QdrantClient} from '@qdrant/js-client-rest';
 import multer from 'multer';
 import { Tiktoken } from '@dqbd/tiktoken/lite';
@@ -38,7 +37,6 @@ const client = new QdrantClient({
 });
 
 
-// QDRANT 
 function getFilePath(filename) {
   const routerDirectory = path.dirname(fileURLToPath(import.meta.url));
   const fullPath = path.join(routerDirectory, filename);
@@ -57,19 +55,16 @@ const storage = multer.diskStorage({
   }
 });
 const filePath = getFilePath("The Great Gatsby.txt");
-
 const upload = multer({ storage: storage });
 const router = express.Router();
-// dotenv.config();
-
-// POST endpoint to save the file
 router.post('/save',upload.single('file'), async (req, res) => {
   const collectionName="Makronexus_EduCenter"
   try {
-    const { title, description,fileExtension, file, subject, level } = req.body;
     const fileDataAsString = req.file;
+    const fileExtension = path.extname(req.file.originalname);
+   console.log('File Extension:', fileExtension);
     console.log(fileDataAsString,"FILEPAtH");
-    if(fileExtension==='pdf'){
+    if(fileExtension==='.pdf'){
       const filePath = req.file.path;
       console.log(filePath,"FILE PATHS")
       const loader= new DirectoryLoader(getFilePath('../../../../uploads'),{
@@ -78,7 +73,9 @@ router.post('/save',upload.single('file'), async (req, res) => {
       ".txt": (path)=> new  TextLoader(path),
       // ".docx": (path)=> new  DocxLoader(path),
       })
+      console.log(loader,"LOADER")
     const docs = await loader.load();
+    console.log(docs,"DOCUMENTS")
 const calculateCost=async()=>{
   const modelName="gpt-3.5-turbo";
   const modelKey=models[modelName];
@@ -115,39 +112,13 @@ const splitter = new CharacterTextSplitter({
     }
     
     }
-    // const loader = new TextLoader(filePath);
-    // const docs = await loader.load();
-   
-
-    // const splitter = new CharacterTextSplitter({
-    //   chuckSize: 200,
-    //   chunkOverlap: 20,
-    // });
-
-    // const documents = await splitter.splitDocuments(docs);
-    // console.log(documents);
     
-    
-//     const embeddings = new OpenAIEmbeddings();
-//     const vectorstore = await QdrantVectorStore.fromDocuments(documents, embeddings,
-//       {
-//         url: process.env.QDRANT_URL,
-//          collectionName: collectionName,
-//          apiKey:process.env.QDRANT_DB_KEY
-//       });
-//     // const file = await vectorstore.save('./');
-// console.log(vectorstore,"VECTORSTORE")
-//     if (vectorstore) {
-//       res.json({ message: 'File saved successfully' });
-//     }
-// res.json({ message: 'File uploaded and processed successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'An error occurred while saving the file' });
   }
 });
 
-// GET endpoint to query the file
 router.get('/query', async (req, res) => {
   const collectionName="Makronexus_EduCenter"
 
@@ -171,7 +142,7 @@ router.get('/query', async (req, res) => {
     });
 
     const result = await chain.call({
-      query: 'How many calls are being handled daily?', // Get the question from the query parameter
+      query: 'what skills  mentioned?', 
     });
 
     res.json({ text: result.text });
@@ -205,13 +176,16 @@ router.get('/chat', async (req, res) => {
     });
 
     const response = await chain.call({
-      input: 'how old is Mr Gatsby?',
+      input: req.body.question,
     });
-    const response2 = await chain.call({
-      input: 'where does he live?',
-    });
+    // const response = await chain.call({
+    //   input: 'how old is Mr Gatsby?',
+    // });
+    // const response2 = await chain.call({
+    //   input: 'where does he live?',
+    // });
 
-    res.json({ response, response2 });
+    res.json( response );
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'An error occurred while processing the chat' });
