@@ -35,10 +35,6 @@ import { JWTAuthMiddleware } from '../../lib/auth/jwtAuth.js';
 import UserAISettingsModel from '../userAISettings/model.js';
 import UserModel from '../../users/model.js';
 // import {PointStruct} from '@qdrant'
-const client = new QdrantClient({
-  url: 'https://a5a98b7e-35ea-44f9-8e2f-38cf6148a624.us-east-1-0.aws.cloud.qdrant.io:6333',
-  apiKey: '7KXsf0loGbF7clyyLbZ4wFgql0vQyWp2UmsMa0RzAUE7RA4PzIJjRg',
-});
 
 
 function getFilePath(filename) {

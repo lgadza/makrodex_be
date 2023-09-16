@@ -39,6 +39,7 @@ const promptDALLE=async(prompt)=>{
     console.log(error)
   }
 }
+
 const imageSearch = async (query, page = 1, perPage = 10) => {
   const apiKey = process.env.UNSPLASH_ACCESS_KEY; 
   const apiUrl = `https://api.unsplash.com/search/photos/?query=${query}&page=${page}&per_page=${perPage}`;
@@ -144,22 +145,85 @@ AiRouter.get("/models", async (req, res, next) => {
     next(error);
   }
 });
-AiRouter.post("/chats/:chat_id/image-search", async (req, res, next) => {
-  try {
-    const { message, user_id,model } = req.body;
-    const { chat_id } = req.params;
-    const user = await UserModel.findByPk(user_id);
-    const chat = await aiChatModel.findByPk(chat_id);
-    if (!chat) {
-      return res.status(404).json({ error: "Chat not found" });
-    }
-    if(req.body.prompt){
-    const prompt=req.body.prompt
-    // const response=await promptDALLE(prompt)
-    const response=await imageSearch(prompt)
-    const smallImageUrls = response.map((image) => image.urls.small);
+// AiRouter.post("/chats/:chat_id/image-search", async (req, res, next) => {
+//   try {
+//     const {user_id } = req.body;
+//     const { chat_id } = req.params;
+//     const user = await UserModel.findByPk(user_id);
+//     const chat = await aiChatModel.findByPk(chat_id);
+//     if (!chat) {
+//       return res.status(404).json({ error: "Chat not found" });
+//     }
+//     if(req.body.prompt){
+//     const prompt=req.body.prompt
+//     // const response=await promptDALLE(prompt)
+//     const response=await imageSearch(prompt)
+//     const smallImageUrls = response.map((image) => image.urls.small);
 
-    console.log(response,"smallImageUrls")
+//     console.log(response,"smallImageUrls")
+//     const newMakronexaQA = await MakronexaQA.create({
+//       type: "text",
+//       message: prompt,
+//       from: "user",
+//       model: "dalle",
+//       user_id: user_id,
+//       chat_id: chat_id,
+//     });
+
+//     // Associate the user's input with the user
+//     await newMakronexaQA.setUser(user);
+//     const responseString = JSON.stringify(smallImageUrls);
+//     const newResponseMakronexaQA = await MakronexaQA.create({
+//       type: "imageUrl",
+//       message: responseString,
+//       model: "dalle",
+//       user_id: "5959acb3-5469-459c-9387-f9af3970c853", //cloud
+//       // user_id: "5217fbc5-0ce1-4d2b-b966-5ce56da155c1",
+//       chat_id: chat_id,
+//     });
+//     console.log(newResponseMakronexaQA, "newResponseMakronexaQA");
+//     // res.send({message:response})
+//     res.send({ message: responseString });
+
+//   }
+//   } catch (error) {
+//     console.error(error);
+//     next(error);
+//   }
+// });
+
+
+// GOOGLE IMAGE SEARCH
+AiRouter.get('/chats/:chat_id/image-search', async (req, res,next) => {
+  const apiKey=process.env.GOOGLE_IMAGE_SEARCH_KEY
+  const cx=process.env.GOOGLE_IMAGE_SEARCH_ENGINE_ID
+  const {user_id,query } = req.body;
+  const { chat_id } = req.params;
+  const user = await UserModel.findByPk(user_id);
+    const chat = await aiChatModel.findByPk(chat_id);
+
+  if (!query) {
+    return res.status(400).json({ error: 'Query parameter "q" is required.' });
+  }
+  if (!chat) {
+    return res.status(404).json({ error: "Chat not found" });
+  }
+
+  const baseUrl = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&searchType=image&q=${query}`;
+
+  try {
+    const response = await fetch(baseUrl);
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const images = data.items.map(item => ({
+      title: item.title,
+      link: item.link,
+      thumbnail: item.image.thumbnailLink,
+      context: item.image.contextLink,
+    }));
     const newMakronexaQA = await MakronexaQA.create({
       type: "text",
       message: prompt,
@@ -168,10 +232,8 @@ AiRouter.post("/chats/:chat_id/image-search", async (req, res, next) => {
       user_id: user_id,
       chat_id: chat_id,
     });
-
-    // Associate the user's input with the user
     await newMakronexaQA.setUser(user);
-    const responseString = JSON.stringify(smallImageUrls);
+    const responseString = JSON.stringify(images);
     const newResponseMakronexaQA = await MakronexaQA.create({
       type: "imageUrl",
       message: responseString,
@@ -181,24 +243,11 @@ AiRouter.post("/chats/:chat_id/image-search", async (req, res, next) => {
       chat_id: chat_id,
     });
     console.log(newResponseMakronexaQA, "newResponseMakronexaQA");
-    // res.send({message:response})
     res.send({ message: responseString });
-
-  }
   } catch (error) {
-    console.error(error);
-    next(error);
+    console.error('Error fetching images:', error);
+    res.status(500).json({ error: 'An error occurred while fetching images.' });
   }
 });
-
-AiRouter.get("/chats/messages",JWTAuthMiddleware, async (req, res, next) => {
-  try {
-    const messages = await MakronexaQA.findAll();
-    res.json(messages);
-  } catch (error) {
-    console.error(error);
-    next(error);
-  }
-});
-
+// GOOGLE IMAGE SEARCH
 export default AiRouter;
