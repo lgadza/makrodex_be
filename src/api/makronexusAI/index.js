@@ -194,22 +194,22 @@ AiRouter.get("/models", async (req, res, next) => {
 
 
 // GOOGLE IMAGE SEARCH
-AiRouter.get('/chats/:chat_id/image-search', async (req, res,next) => {
+AiRouter.post('/chats/:chat_id/image-search', async (req, res,next) => {
   const apiKey=process.env.GOOGLE_IMAGE_SEARCH_KEY
   const cx=process.env.GOOGLE_IMAGE_SEARCH_ENGINE_ID
-  const {user_id,prompt } = req.body;
+  const {user_id,query } = req.body;
   const { chat_id } = req.params;
   const user = await UserModel.findByPk(user_id);
     const chat = await aiChatModel.findByPk(chat_id);
 
-  if (!prompt) {
+  if (!query) {
     return res.status(400).json({ error: 'Query parameter "q" is required.' });
   }
   if (!chat) {
     return res.status(404).json({ error: "Chat not found" });
   }
 
-  const baseUrl = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&searchType=image&q=${prompt}`;
+  const baseUrl = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&searchType=image&q=${query}`;
 
   try {
     const response = await fetch(baseUrl);
