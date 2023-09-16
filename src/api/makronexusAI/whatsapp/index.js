@@ -232,7 +232,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
           const lowerCaseMessage = text.toLowerCase();
           if (lowerCaseMessage.startsWith("image:")) {
             try {
-              const images = await fetchImagesFromAPI(query);
+              const images = await fetchImagesFromAPI(from);
               for (const image of images) {
                 await sendWhatsAppImage(from, image.link);
               }
