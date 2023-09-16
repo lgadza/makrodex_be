@@ -116,29 +116,92 @@ export async function sendWhatsAppMessageWithTemplate( phone, name) {
     throw error;
   }
 }
+async function fetchImagesFromAPI(query) {
+  const apiKey=process.env.GOOGLE_IMAGE_SEARCH_KEY
+  const cx=process.env.GOOGLE_IMAGE_SEARCH_ENGINE_ID
+  const baseUrl = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&searchType=image&q=${query}`;
+  try {
+    const response = await fetch(baseUrl);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    const images = data.items.map(item => ({
+      title: item.title,
+      link: item.link,
+      thumbnail: item.image.thumbnailLink,
+      context: item.image.contextLink,
+    }));
+    
+    return images;
+  } catch (error) {
+    console.error('Error fetching images:', error);
+    throw error; 
+  }
+}
 
-
-whatsAppRouter.post('/whatsapp-message', async (req, res) => {
+async function sendWhatsAppImage(recipient, URL) {
   const url = process.env.BUSINESS_WHATSAPP_URL;
   const headers = {
     'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}`,
     'Content-Type': 'application/json',
   };
 
+ 
+
+  const messagePayload = {
+    "messaging_product": "whatsapp",
+    "recipient_type": "individual",
+    "to": recipient,
+    "type": "image",
+    "image": {
+      "link": URL
+    },
+  };
+  
+  
+ 
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(messagePayload),
+  });
+  console.log("RESPONSE:",response)
+  if (response.ok) {
+
+    const responseData = await response.json();
+    return responseData;
+  } else {
+    throw new Error('API request failed');
+  }
+}
+whatsAppRouter.post('/whatsapp/images/file', async (req, res) => {
+  const query=req.body.query
+  const phone = "+48794144892";
+if(phone!=="" && query!==""){
+
+  
+  
   try {
-    const phone = "+48794144892";
-    const message = {
-      to: 'RECIPIENT_NUMBER',
-      type: 'image',
-      image: 'https://example.com/image.jpg', // URL to the image
-      caption: 'Check out this image!',
-    };
-    // await sendWhatsAppMessageWithTemplate(phone, "makronexus_intro");
-    res.status(200).json({ message: 'Message sent' });
+    const images = await fetchImagesFromAPI(query);
+    for (const image of images) {
+      await sendWhatsAppImage(phone, image.link);
+    }
+    res.status(200).json({ message: 'Images sent successfully' });
+ 
+
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
+}else{
+  res.status(500).json({ error: 'Internal Server Error' });
+
+}
 });
 
 whatsAppRouter.post('/webhooks', async (req, res) => {
@@ -166,6 +229,22 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
           console.log("USER NOT FOUND")
           sendWhatsAppMessageWithTemplate("+" + from, "call_to_register")
         }else{
+          const lowerCaseMessage = text.toLowerCase();
+          if (lowerCaseMessage.startsWith("image:")) {
+            try {
+              const images = await fetchImagesFromAPI(query);
+              for (const image of images) {
+                await sendWhatsAppImage(from, image.link);
+              }
+              res.status(200).json({ message: 'Images sent successfully' });
+           
+          
+            } catch (error) {
+              console.error('Error:', error);
+              res.status(500).json({ error: 'Internal Server Error' });
+            }
+
+          }else{
         const response = await openai.createChatCompletion({
           model: "gpt-3.5-turbo", 
           messages:[
@@ -187,6 +266,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
         await sendWhatsAppMessage(from, replyMessage);
         res.status(200).json({ message: 'Message sent' });
       }
+    }
       } else {
         res.status(400).json({ error: 'Invalid message data' });
       }

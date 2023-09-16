@@ -40,7 +40,7 @@ const promptDALLE=async(prompt)=>{
   }
 }
 
-const imageSearch = async (query, page = 1, perPage = 10) => {
+export const imageSearch = async (query, page = 1, perPage = 10) => {
   const apiKey = process.env.UNSPLASH_ACCESS_KEY; 
   const apiUrl = `https://api.unsplash.com/search/photos/?query=${query}&page=${page}&per_page=${perPage}`;
 
