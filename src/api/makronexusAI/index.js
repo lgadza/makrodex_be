@@ -226,7 +226,7 @@ AiRouter.post('/chats/:chat_id/image-search', async (req, res,next) => {
     }));
     const newMakronexaQA = await MakronexaQA.create({
       type: "text",
-      message: prompt,
+      message: query,
       from: "user",
       model: "dalle",
       user_id: user_id,

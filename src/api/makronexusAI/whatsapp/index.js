@@ -119,10 +119,21 @@ export async function sendWhatsAppMessageWithTemplate( phone, name) {
 
 
 whatsAppRouter.post('/whatsapp-message', async (req, res) => {
+  const url = process.env.BUSINESS_WHATSAPP_URL;
+  const headers = {
+    'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}`,
+    'Content-Type': 'application/json',
+  };
+
   try {
     const phone = "+48794144892";
-   
-    await sendWhatsAppMessageWithTemplate(phone, "makronexus_intro");
+    const message = {
+      to: 'RECIPIENT_NUMBER',
+      type: 'image',
+      image: 'https://example.com/image.jpg', // URL to the image
+      caption: 'Check out this image!',
+    };
+    // await sendWhatsAppMessageWithTemplate(phone, "makronexus_intro");
     res.status(200).json({ message: 'Message sent' });
   } catch (error) {
     console.error('Error:', error);
