@@ -30,6 +30,10 @@ import { load } from '@dqbd/tiktoken/load';
 import  registry  from '@dqbd/tiktoken/registry.json' assert{type:"json"};
 import  models  from '@dqbd/tiktoken/model_to_encoding.json' assert{type:"json"};
 import { type } from 'os';
+import FileModel from "../files/model.js"
+import { JWTAuthMiddleware } from '../../lib/auth/jwtAuth.js';
+import UserAISettingsModel from '../userAISettings/model.js';
+import UserModel from '../../users/model.js';
 // import {PointStruct} from '@qdrant'
 const client = new QdrantClient({
   url: 'https://a5a98b7e-35ea-44f9-8e2f-38cf6148a624.us-east-1-0.aws.cloud.qdrant.io:6333',
@@ -54,64 +58,100 @@ const storage = multer.diskStorage({
     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
   }
 });
-const filePath = getFilePath("The Great Gatsby.txt");
 const upload = multer({ storage: storage });
 const router = express.Router();
-router.post('/save',upload.single('file'), async (req, res) => {
-  const collectionName="Makronexus_EduCenter"
+
+router.post('/:user_id/:userAISettings_id/files/save',upload.single('file'), async (req, res) => {
+
+  let collectionName="Makronexus_EduCenter"
+
   try {
+
     const fileDataAsString = req.file;
-    const fileExtension = path.extname(req.file.originalname);
-   console.log('File Extension:', fileExtension);
-    console.log(fileDataAsString,"FILEPAtH");
-    if(fileExtension==='.pdf'){
-      const filePath = req.file.path;
-      console.log(filePath,"FILE PATHS")
-      const loader= new DirectoryLoader(getFilePath('../../../../uploads'),{
-      ".pdf": (path)=> new  PDFLoader(path),
-      ".csv": (path)=> new  CSVLoader(path),
-      ".txt": (path)=> new  TextLoader(path),
-      // ".docx": (path)=> new  DocxLoader(path),
-      })
-      console.log(loader,"LOADER")
-    const docs = await loader.load();
-    console.log(docs,"DOCUMENTS")
-const calculateCost=async()=>{
-  const modelName="gpt-3.5-turbo";
-  const modelKey=models[modelName];
-  const model=await load(registry[modelKey])
-  const encoder=new Tiktoken(
-    model.bpe_ranks,
-    model.special_tokens,
-    model.pat_str
-  );
-  const tokens=encoder.encode(JSON.stringify(docs));
-  const tokenCount=tokens.length;
-  const ratePerThousandTokens=0.002
-  const cost=(tokenCount/1000)*ratePerThousandTokens;
-  encoder.free();
-  return cost
-}
-const splitter = new CharacterTextSplitter({
-      chuckSize: 1000,
-      chunkOverlap: 20,
-    });
-    const documents = await splitter.splitDocuments(docs);
-    console.log(documents);
-        const embeddings = new OpenAIEmbeddings();
-    const vectorstore = await QdrantVectorStore.fromDocuments(documents, embeddings,
-      {
-        url: process.env.QDRANT_URL,
-         collectionName: collectionName,
-         apiKey:process.env.QDRANT_DB_KEY
-      });
-      console.log(vectorstore,"VECTORSTORE")
-    if (vectorstore) {
-      fs.unlinkSync(filePath);
-      res.json({ message: 'File saved successfully' });
-    }
+    const fileExtension = path.extname(fileDataAsString.originalname);
+  // SAVA FILE
+  const { originalname, mimetype, size }=fileDataAsString
+  const { user_id,userAISettings_id } = req.params;
+  const user = await UserModel.findByPk(user_id);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  const DataBase = await UserAISettingsModel.findOne({
+    where: { id: userAISettings_id, user_id: user.id },
+  });
+  if (!DataBase) {
+    return res.status(404).json({ message: "Database not found" });
+  }
+  const dataSetJson = DataBase.toJSON();
+  const collectionName = dataSetJson.dataset_name;
+     
+   
+     const file = await FileModel.create({
+       type: mimetype,
+       name: originalname,
+       size,
+       userAISettings_id,
+     });
+     // SAVA FILE
+       if(fileExtension==='.pdf'){
+         const filePath = fileDataAsString.path;
+         const loader= new DirectoryLoader(getFilePath('../../../../uploads'),{
+         ".pdf": (path)=> new  PDFLoader(path),
+         ".csv": (path)=> new  CSVLoader(path),
+         ".txt": (path)=> new  TextLoader(path),
+         // ".docx": (path)=> new  DocxLoader(path),
+         })
     
-    }
+       const docs = await loader.load();
+      //  console.log(docs,"DOCUMENTS")
+   const calculateCost=async()=>{
+     const modelName="gpt-3.5-turbo";
+     const modelKey=models[modelName];
+     const model=await load(registry[modelKey])
+     const encoder=new Tiktoken(
+       model.bpe_ranks,
+       model.special_tokens,
+       model.pat_str
+     );
+     const tokens=encoder.encode(JSON.stringify(docs));
+     const tokenCount=tokens.length;
+     const ratePerThousandTokens=0.002
+     const cost=(tokenCount/1000)*ratePerThousandTokens;
+     encoder.free();
+     return cost
+   }
+   const splitter = new CharacterTextSplitter({
+         chuckSize: 1000,
+         chunkOverlap: 20,
+       });
+       const documents = await splitter.splitDocuments(docs);
+           const embeddings = new OpenAIEmbeddings();
+       const vectorstore = await QdrantVectorStore.fromDocuments(documents, embeddings,
+         {
+           url: process.env.QDRANT_URL,
+            collectionName: collectionName,
+            apiKey:process.env.QDRANT_DB_KEY
+         });
+         console.log(vectorstore,"VECTORSTORE")
+       if (vectorstore) {
+         try {
+          //  fs.unlinkSync(filePath);
+           // Delete all files in the "uploads" folder
+          const uploadFolderPath = getFilePath('../../../../uploads');
+          fs.readdirSync(uploadFolderPath).forEach((file) => {
+            const filePath = path.join(uploadFolderPath, file);
+            fs.unlinkSync(filePath);
+          });
+           res.status(201).json({ message: 'File saved successfully',file:file });
+          } catch (error) {
+            console.error('Error deleting file:', error);
+          }
+        }
+       
+       }
+    
+
+ 
     
   } catch (error) {
     console.error(error);

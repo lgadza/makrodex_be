@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../../db.js";
+import UserAISettingsModel from "../userAISettings/model.js";
 
 const AIFileModel = sequelize.define("ai_file", {
   id: {
@@ -22,7 +23,7 @@ const AIFileModel = sequelize.define("ai_file", {
 });
 
 
-UserSettingsModel.hasMany(AIFileModel, { foreignKey: "userAISettings_id" });
-AIFileModel.belongsTo(UserSettingsModel, { foreignKey: "userAISettings_id" });
+UserAISettingsModel.hasMany(AIFileModel, { foreignKey: "userAISettings_id" });
+AIFileModel.belongsTo(UserAISettingsModel, { foreignKey: "userAISettings_id" });
 
 export default AIFileModel;

@@ -1,38 +1,68 @@
 import express from "express"
-const upload = multer({ dest: "uploads/" }); // specify your upload directory
+import AIFileModel from "./model.js";
+import UserModel from "../../users/model.js";
+import UserAISettingsModel from "../userAISettings/model.js";
+const AIFileRouter=express.Router()
 
-const UserSettingsModel = require("../models/UserSettingsModel");
-const FileModel = require("../models/FileModel");
 
-// POST a new file associated with a user's settings
-router.post("/:userSettingsId/files", upload.single("file"), async (req, res) => {
+
+
+// GET All specific user, specific dataset files
+AIFileRouter.get("/datasets/:user_id/:dataset_id/files", async (req, res, next) => {
   try {
-    const { userSettingsId } = req.params;
-    const { originalname, mimetype, size } = req.file;
+    const { user_id, dataset_id } = req.params;
+    const user = await UserModel.findByPk(user_id);
 
-    // Create a new file record in the database
-    const file = await FileModel.create({
-      type: mimetype,
-      name: originalname,
-      size,
-      userSettingsId,
+    if (!user) {
+      return next(createHttpError(404, `User with id ${user_id} not found!`));
+    }
+
+    const database = await UserAISettingsModel.findOne({
+      where: { id: dataset_id, user_id: user.id },
     });
 
-    res.status(201).json(file);
+    if (!database) {
+      return res.status(404).json({ message: `Database with id ${dataset_id} and user id ${user_id} not found` });
+    }
+
+    const databaseFiles = await UserAISettingsModel.findAll({
+      include: {
+        model: AIFileModel,
+        where: {
+          userAISettings_id: dataset_id,
+        },
+        order: [["createdAt", "ASC"]],
+      },
+    });
+
+    res.json(databaseFiles[0].ai_files);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Error creating file." });
+    res.status(500).json({ error: "Error fetching files." });
   }
 });
 
-// GET a single file by ID
-router.get("/:fileId", async (req, res) => {
+AIFileRouter.get("/datasets/:user_id/:dataset_id/files/:file_id", async (req, res) => {
   try {
-    const { fileId } = req.params;
-    const file = await FileModel.findByPk(fileId);
+    const { user_id, dataset_id, file_id } = req.params;
+    const user = await UserModel.findByPk(user_id);
+
+    if (!user) {
+      return res.status(404).json({ message: `User with id ${user_id} not found` });
+    }
+
+    const database = await UserAISettingsModel.findOne({
+      where: { id: dataset_id, user_id: user.id },
+    });
+
+    if (!database) {
+      return res.status(404).json({ message: `Database with id ${dataset_id} and user id ${user_id} not found` });
+    }
+
+    const file = await AIFileModel.findByPk(file_id);
 
     if (!file) {
-      return res.status(404).json({ error: "File not found." });
+      return res.status(404).json({ message: "File not found." });
     }
 
     res.json(file);
@@ -42,55 +72,46 @@ router.get("/:fileId", async (req, res) => {
   }
 });
 
-// PUT (update) a file by ID
-router.put("/:fileId", async (req, res) => {
-  try {
-    const { fileId } = req.params;
-    const { type, name, size } = req.body; // Assuming you send these fields in the request body
 
-    const file = await FileModel.findByPk(fileId);
 
-    if (!file) {
-      return res.status(404).json({ error: "File not found." });
-    }
-
-    file.type = type;
-    file.name = name;
-    file.size = size;
-
-    await file.save();
-
-    res.json(file);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error updating file." });
-  }
-});
 
 // DELETE a file by ID
-router.delete("/:fileId", async (req, res) => {
+AIFileRouter.delete("/datasets/:user_id/:dataset_id/files/:file_id", async (req, res) => {
   try {
-    const { fileId } = req.params;
-    const file = await FileModel.findByPk(fileId);
+    const { user_id, dataset_id, file_id } = req.params;
+    const user = await UserModel.findByPk(user_id);
 
-    if (!file) {
-      return res.status(404).json({ error: "File not found." });
+    if (!user) {
+      return res.status(404).json({ message: `User with id ${user_id} not found` });
     }
 
-    await file.destroy();
+    const database = await UserAISettingsModel.findOne({
+      where: { id: dataset_id, user_id: user.id },
+    });
 
-    res.status(204).send(); // No content response for successful deletion
+    if (!database) {
+      return res.status(404).json({ message: `Database with id ${dataset_id} and user id ${user_id} not found` });
+    }
+
+    const file = await AIFileModel.findByPk(file_id);
+
+    if (!file) {
+      return res.status(404).json({ message: "File not found." });
+    }
+    await file.destroy();
+    res.status(204).send(); 
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error deleting file." });
   }
 });
 
+
 // GET all files associated with a user's settings
-router.get("/:userSettingsId/files", async (req, res) => {
+AIFileRouter.get("/datasets/:dataset_id/files", async (req, res) => {
   try {
     const { userSettingsId } = req.params;
-    const files = await FileModel.findAll({
+    const files = await AIFileModel.findAll({
       where: { userSettingsId },
     });
 
@@ -101,4 +122,4 @@ router.get("/:userSettingsId/files", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default AIFileRouter;
