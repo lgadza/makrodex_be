@@ -238,10 +238,11 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
           console.log("USER NOT FOUND")
           sendWhatsAppMessageWithTemplate("+" + from, "call_to_register")
         }else{
-          const lowerCaseMessage = text.toLowerCase();
+          const lowerCaseMessage = text.trim().toLowerCase();
+          console.log("LOWERCASE SEARCH:",lowerCaseMessage)
           if (lowerCaseMessage.startsWith("image:")) {
             try {
-              const images = await fetchImagesFromAPI(from);
+              const images = await fetchImagesFromAPI(lowerCaseMessage);
               for (const image of images) {
                 await sendWhatsAppImage(from, image.link);
               }
