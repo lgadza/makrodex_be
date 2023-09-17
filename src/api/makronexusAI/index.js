@@ -217,6 +217,7 @@ AiRouter.post('/chats/:chat_id/image-search', async (req, res,next) => {
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
+    console.log("SAFE SEARCH RESPONSE:",response)
 
     const data = await response.json();
     const images = data.items.map(item => ({
