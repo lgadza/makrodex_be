@@ -117,9 +117,12 @@ export async function sendWhatsAppMessageWithTemplate( phone, name) {
   }
 }
 async function fetchImagesFromAPI(query) {
-  const apiKey=process.env.GOOGLE_IMAGE_SEARCH_KEY
-  const cx=process.env.GOOGLE_IMAGE_SEARCH_ENGINE_ID
-  const baseUrl = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&searchType=image&q=${query}`;
+  const apiKey = process.env.GOOGLE_IMAGE_SEARCH_KEY;
+  const cx = process.env.GOOGLE_IMAGE_SEARCH_ENGINE_ID;
+  const safeSearch = 'medium'; // You can adjust the safeSearch parameter as needed
+
+  const baseUrl = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&searchType=image&q=${query}&safe=${safeSearch}`;
+  
   try {
     const response = await fetch(baseUrl);
     
@@ -128,13 +131,18 @@ async function fetchImagesFromAPI(query) {
     }
     
     const data = await response.json();
-    
-    const images = data.items.map(item => ({
-      title: item.title,
-      link: item.link,
-      thumbnail: item.image.thumbnailLink,
-      context: item.image.contextLink,
-    }));
+   
+    const images = data.items
+      .filter(item => {
+        const mimeType = item.mime;
+        return mimeType === 'image/png' || mimeType === 'image/jpeg';
+      })
+      .map(item => ({
+        title: item.title,
+        link: item.link,
+        thumbnail: item.image.thumbnailLink,
+        context: item.image.contextLink,
+      }));
     
     return images;
   } catch (error) {
@@ -142,6 +150,7 @@ async function fetchImagesFromAPI(query) {
     throw error; 
   }
 }
+
 
 async function sendWhatsAppImage(recipient, URL) {
   const url = process.env.BUSINESS_WHATSAPP_URL;
