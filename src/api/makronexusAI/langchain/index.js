@@ -152,7 +152,7 @@ router.post('/:user_id/:userAISettings_id/files/save',upload.single('file'), asy
   }
 });
 
-router.get('/users/:user_id/:dataset_id/:chat_id/query', async (req, res) => {
+router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
   const collectionName = "Makronexus_EduCenter";
   const { question } = req.body;
   const { chat_id, dataset_id, user_id } = req.params;
@@ -230,7 +230,7 @@ router.get('/users/:user_id/:dataset_id/:chat_id/query', async (req, res) => {
 });
 
 
-router.get('/chat', async (req, res) => {
+router.post('/:user_id/:dataset_id/chats/:chat_id/chat', async (req, res) => {
   try {
     const chat = new ChatOpenAI({ temperature: 0 });
 
