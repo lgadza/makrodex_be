@@ -18,13 +18,10 @@ chatRouter.get("/:user_id/chats/:chat_id",JWTAuthMiddleware, async (req, res, ne
       model: MakronexaQA,
         where: {
           chat_id: chat_id,
+          user_id:user_id,
         },
       order: [["createdAt", "ASC"]],//"DESC"
     } 
-    // const chat = await aiChatModel.findByPk(chat_id,{include:{
-    //   model:MakronexaQA,
-    //   order: [["createdAt", "ASC"]],//"DESC"
-    // } 
   });
   if (chat.length===0) {
     return res.status(404).json({ error: "No messages available for this chat" });
@@ -85,7 +82,7 @@ if(!user_id){
   return res.status(404).json({error:"User not found"})
 }
 const relatedQAs = await MakronexaQA.findAll({
-  where: { chat_id: chat_id },
+  where: { chat_id: chat_id,user_id:user_id },
 });
 
 for (const qa of relatedQAs) {

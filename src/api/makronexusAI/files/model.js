@@ -22,7 +22,6 @@ const AIFileModel = sequelize.define("ai_file", {
   },
 });
 
-
 UserAISettingsModel.hasMany(AIFileModel, { foreignKey: "userAISettings_id" });
 AIFileModel.belongsTo(UserAISettingsModel, { foreignKey: "userAISettings_id" });
 

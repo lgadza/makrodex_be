@@ -6,6 +6,7 @@ import MakronexaQA from "./model.js";
 import aiChatModel from "./chats/model.js";
 import sequelize from "../../db.js";
 import { JWTAuthMiddleware } from "../lib/auth/jwtAuth.js";
+import UserAISettingsModel from "./userAISettings/model.js";
 const makronexaPersonality=`
 Louis Gadza is the owner and CEO at Makronexus tech campany. You're developed at Makronexus and your name is Makronexa
 All mathematical expressions and all equations should be written in latex in your response.
@@ -64,32 +65,34 @@ export const imageSearch = async (query, page = 1, perPage = 10) => {
   }
 };
 
-AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, next) => {
+AiRouter.post("/chats/:chat_id/messages", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const { message, user_id, question,model } = req.body;
+    const { message, user_id, dataset_id, question, model } = req.body;
     const { chat_id } = req.params;
-
-
-       
-
     // Call OpenAI API to generate response
     const response = await openai.createChatCompletion({
       model: model, // Use the correct model name
-      messages:[
+      messages: [
         {
-          "role":"system","content":`${makronexaPersonality}`
+          role: "system",
+          content: `${makronexaPersonality}`
         },
         {
-          role:"user",
-          content:message,
+          role: "user",
+          content: message,
         }
-      ] ,
+      ],
       max_tokens: 500,
       temperature: 0.8,
     });
 
     const user = await UserModel.findByPk(user_id);
     const chat = await aiChatModel.findByPk(chat_id);
+    let dataset = null; // Initialize dataset as null
+
+    if (dataset_id) {
+      dataset = await UserAISettingsModel.findByPk(dataset_id);
+    }
 
     if (!chat) {
       return res.status(404).json({ error: "Chat not found" });
@@ -98,8 +101,7 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    
-    
+
     const aiResponseText = response.data.choices[0].message.content;
 
     // Create a new MakronexaQA instance for the user's input
@@ -110,6 +112,7 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
       model: "gpt-3.5-turbo",
       user_id: user_id,
       chat_id: chat_id,
+      dataset_id: dataset_id // This can be null
     });
 
     // Associate the user's input with the user
@@ -123,6 +126,7 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
       user_id: "5959acb3-5469-459c-9387-f9af3970c853", //cloud
       // user_id: "5217fbc5-0ce1-4d2b-b966-5ce56da155c1",
       chat_id: chat_id,
+      dataset_id: dataset_id // This can be null
     });
 
     console.log(newResponseMakronexaQA, "newResponseMakronexaQA");
@@ -135,6 +139,7 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
     next(error);
   }
 });
+
 
 AiRouter.get("/models", async (req, res, next) => {
   try {

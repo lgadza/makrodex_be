@@ -50,31 +50,22 @@ AIFileRouter.get("/datasets/:user_id/:dataset_id/files/:file_id", async (req, re
     if (!user) {
       return res.status(404).json({ message: `User with id ${user_id} not found` });
     }
-
     const database = await UserAISettingsModel.findOne({
       where: { id: dataset_id, user_id: user.id },
     });
-
     if (!database) {
       return res.status(404).json({ message: `Database with id ${dataset_id} and user id ${user_id} not found` });
     }
-
     const file = await AIFileModel.findByPk(file_id);
-
     if (!file) {
       return res.status(404).json({ message: "File not found." });
     }
-
     res.json(file);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error fetching file." });
   }
 });
-
-
-
-
 // DELETE a file by ID
 AIFileRouter.delete("/datasets/:user_id/:dataset_id/files/:file_id", async (req, res) => {
   try {

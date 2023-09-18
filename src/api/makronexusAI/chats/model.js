@@ -11,7 +11,6 @@ const aiChatModel = sequelize.define("AiChat", {
     defaultValue: DataTypes.UUIDV4,
   },
 });
-
 aiChatModel.belongsToMany(UserModel, {
   through: users_AiChatModel,
   foreignKey: { allowNull: false, name: "chat_id" },
@@ -21,5 +20,4 @@ UserModel.belongsToMany(aiChatModel, {
   foreignKey: { allowNull: false, name: "user_id" },
 });
 aiChatModel.hasMany(MakronexaQA, { foreignKey: "chat_id" });
-
 export default aiChatModel;

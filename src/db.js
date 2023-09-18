@@ -17,8 +17,6 @@ const sequelize = new Sequelize(connectionString,{
 //   dialect: "postgres",
 //   logging: false,
 // })
-
-
 export const pgConnect = async () => {
   try {
     await sequelize.authenticate()
@@ -28,10 +26,8 @@ export const pgConnect = async () => {
     process.exit(1) 
   }
 }
-
 export const syncModels = async () => {
   await sequelize.sync({ alter: true })
   console.log("All tables successfully synchronized!")
 }
-
 export default sequelize
