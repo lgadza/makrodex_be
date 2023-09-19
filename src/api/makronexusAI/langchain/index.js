@@ -64,7 +64,6 @@ router.post('/:user_id/:userAISettings_id/files/save',upload.single('file'), asy
   let collectionName="Makronexus_EduCenter"
 
   try {
-
     const fileDataAsString = req.file;
     const fileExtension = path.extname(fileDataAsString.originalname);
   // SAVA FILE
