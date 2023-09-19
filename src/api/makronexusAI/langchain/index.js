@@ -217,7 +217,7 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
     });
 
     console.log(newResponseMakronexaQA, "newResponseMakronexaQA");
-    res.json({ text: result.text });
+    res.json({ message: result.text });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'An error occurred while querying the file' });
