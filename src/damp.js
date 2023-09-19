@@ -61,7 +61,7 @@ const router = express.Router();
 
 router.post('/:user_id/:userAISettings_id/files/save',upload.single('file'), async (req, res) => {
 
-  // let collectionName="Makronexus_EduCenter"
+  let collectionName="Makronexus_EduCenter"
 
   try {
 
@@ -80,9 +80,8 @@ router.post('/:user_id/:userAISettings_id/files/save',upload.single('file'), asy
   if (!DataBase) {
     return res.status(404).json({ message: "Database not found" });
   }
-  const collectionName="Makronexus_EduCenter"
-  // const dataSetJson = DataBase.toJSON();
-  // const collectionName = dataSetJson.dataset_name;
+  const dataSetJson = DataBase.toJSON();
+  const collectionName = dataSetJson.dataset_name;
      const file = await FileModel.create({
        type: mimetype,
        name: originalname,
@@ -153,8 +152,8 @@ router.post('/:user_id/:userAISettings_id/files/save',upload.single('file'), asy
 });
 
 router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
-  const collectionName = "My Cover letter";
-  const { question } = req.body;
+  // const collectionName = "My Cover letter";
+  const { question,collectionName } = req.body;
   const { message,chat_id, dataset_id, user_id } = req.params;
 
   try {

@@ -118,7 +118,7 @@ router.post('/:user_id/:userAISettings_id/files/save',upload.single('file'), asy
    }
    const splitter = new CharacterTextSplitter({
          chuckSize: 1000,
-         chunkOverlap: 20,
+         chunkOverlap: 0,
        });
        const documents = await splitter.splitDocuments(docs);
            const embeddings = new OpenAIEmbeddings();
@@ -131,7 +131,6 @@ router.post('/:user_id/:userAISettings_id/files/save',upload.single('file'), asy
          console.log(vectorstore,"VECTORSTORE")
        if (vectorstore) {
          try {
-          //  fs.unlinkSync(filePath);
            // Delete all files in the "uploads" folder
           const uploadFolderPath = getFilePath('../../../../uploads');
           fs.readdirSync(uploadFolderPath).forEach((file) => {
@@ -172,6 +171,7 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
     if (!chat) {
       return res.status(404).json({ error: "Chat not found" });
     }
+     
 
     const embeddings = new OpenAIEmbeddings();
     const vectorStore = await QdrantVectorStore.fromExistingCollection(embeddings, {
@@ -204,7 +204,7 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
 
     // If dataset_id is not null and dataset is found, associate it with the newMakronexaQA
     if (dataset_id && dataset) {
-      await newMakronexaQA.setUserAISettingsModel(dataset);
+      await newMakronexaQA.setUserAISettings(dataset)
     }
 
     // Associate the user's input with the user
