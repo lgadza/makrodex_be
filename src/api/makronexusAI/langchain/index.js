@@ -202,11 +202,7 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
       dataset_id: dataset_id,
     });
 
-    // If dataset_id is not null and dataset is found, associate it with the newMakronexaQA
-    if (dataset_id && dataset) {
-      await newMakronexaQA.setUserAISettings(dataset)
-    }
-
+    
     // Associate the user's input with the user
     await newMakronexaQA.setUser(user);
 
