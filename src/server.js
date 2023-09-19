@@ -49,7 +49,7 @@ server.use("/applications",applicationRouter)
 server.use("/guardians/types",guardianTypeRouter)
 server.use("/ai",AiRouter)
 server.use("/ai",chatRouter)
-server.use("/ai",datasetChatRouter)
+server.use("/ai/dataset",datasetChatRouter)
 server.use('/ai', whatsAppRouter);
 server.use('/langchain/qdrant', router);
 server.use('/langchain/qdrant', AIFileRouter);
