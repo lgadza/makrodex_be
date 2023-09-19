@@ -159,7 +159,7 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
     const [user, chat, dataset] = await Promise.all([
       UserModel.findByPk(user_id),
       aiChatModel.findByPk(chat_id),
-      dataset_id = await UserAISettingsModel.findByPk(dataset_id)
+      UserAISettingsModel.findByPk(dataset_id)
 
     ]);
 
@@ -171,8 +171,8 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
     if (!chat) {
       return res.status(404).json({ error: "Chat not found" });
     }
-    if (!dataset_id) {
-      return res.status(404).json({ error: "Chat not found" });
+    if (!dataset) {
+      return res.status(404).json({ error: "Dataset not found" });
     }
      
 
