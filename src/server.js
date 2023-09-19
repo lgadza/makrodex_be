@@ -23,6 +23,7 @@ import whatsAppRouter from "./api/makronexusAI/whatsapp/index.js"
 import schoolRouter from "./api/schools/index.js"
 import userAISettingsRouter from "./api/makronexusAI/userAISettings/index.js"
 import AIFileRouter from "./api/makronexusAI/files/index.js"
+import datasetChatRouter from "./api/makronexusAI/datasetChats/index.js"
 
 const server = express()
 const port = process.env.PORT || 3001
@@ -48,6 +49,7 @@ server.use("/applications",applicationRouter)
 server.use("/guardians/types",guardianTypeRouter)
 server.use("/ai",AiRouter)
 server.use("/ai",chatRouter)
+server.use("/ai",datasetChatRouter)
 server.use('/ai', whatsAppRouter);
 server.use('/langchain/qdrant', router);
 server.use('/langchain/qdrant', AIFileRouter);
