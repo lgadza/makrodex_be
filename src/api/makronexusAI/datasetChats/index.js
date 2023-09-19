@@ -50,7 +50,7 @@ datasetChatRouter.post("/:user_id/chats",JWTAuthMiddleware, async (req, res, nex
 // Get all chats for a specific user
 datasetChatRouter.get("/:user_id/:dataset_id/chats",JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const { user_id } = req.params;
+    const { user_id ,dataset_id} = req.params;
     const user = await UserModel.findByPk(user_id);
     if (!user) {
       return res.status(404).json({ error: "User not found!" });
