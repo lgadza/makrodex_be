@@ -35,7 +35,7 @@ import { JWTAuthMiddleware } from '../../lib/auth/jwtAuth.js';
 import UserAISettingsModel from '../userAISettings/model.js';
 import UserModel from '../../users/model.js';
 import aiChatModel from '../chats/model.js';
-import MakronexaQA from '../model.js';
+import DatasetChatModel from './model.js';
 // import {PointStruct} from '@qdrant'
 
 
@@ -160,7 +160,7 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
     const [user, chat, dataset] = await Promise.all([
       UserModel.findByPk(user_id),
       aiChatModel.findByPk(chat_id),
-      dataset_id ? UserAISettingsModel.findByPk(dataset_id) : null, // Only fetch if dataset_id is provided
+      dataset_id = UserAISettingsModel.findByPk(dataset_id) 
     ]);
 
     // Check for missing user or chat
@@ -169,6 +169,9 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
     }
 
     if (!chat) {
+      return res.status(404).json({ error: "Chat not found" });
+    }
+    if (!dataset_id) {
       return res.status(404).json({ error: "Chat not found" });
     }
      
@@ -180,7 +183,7 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
       apiKey: process.env.QDRANT_DB_KEY,
     });
 
-    const model = new OpenAI({ temperature: 0, model: "gpt-3.5-turbo" });
+    const model = new OpenAI({ temperature: 0.3, model: "gpt-3.5-turbo" });
     const chain = new RetrievalQAChain({
       combineDocumentsChain: loadQAStuffChain(model),
       retriever: vectorStore.asRetriever(),
@@ -191,8 +194,8 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
       query: question,
     });
 
-    // Create a new MakronexaQA instance for the user's input
-    const newMakronexaQA = await MakronexaQA.create({
+    // Create a new DatasetChatModel instance for the user's input
+    const newDatasetChat = await DatasetChatModel.create({
       type: "text",
       message: question,
       from: "user",
@@ -204,10 +207,10 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
 
     
     // Associate the user's input with the user
-    await newMakronexaQA.setUser(user);
+    await newDatasetChat.setUser(user);
 
-    // Create a new MakronexaQA instance for the AI response
-    const newResponseMakronexaQA = await MakronexaQA.create({
+    // Create a new DatasetChatModel instance for the AI response
+    const newResponseDatasetChat = await DatasetChatModel.create({
       type: "text",
       message: result.text,
       model: "gpt-3.5-turbo",
@@ -216,7 +219,7 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
       dataset_id: dataset_id,
     });
 
-    console.log(newResponseMakronexaQA, "newResponseMakronexaQA");
+    console.log(newResponseDatasetChat, "newResponseDatasetChat");
     res.json({ message: result.text });
   } catch (error) {
     console.error(error);

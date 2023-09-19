@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../../db.js";
-import ParentsModel from "../guardians/model.js";
-import UserModel from "../users/model.js";
-const MakronexaQA=sequelize.define("makronexaQA",{
+import sequelize from "../../../db.js";
+import UserModel from "../../users/model.js";
+import UserAISettingsModel from "../userAISettings/model.js";
+const DatasetChatModel=sequelize.define("dataset_chat",{
    
       id: {
         type: DataTypes.UUID,
@@ -26,16 +26,6 @@ const MakronexaQA=sequelize.define("makronexaQA",{
         type:DataTypes.ENUM("makronexa","user"),
         allowNull:false,
         defaultValue:"makronexa"
-      },
-      liked:{
-        type:DataTypes.BOOLEAN,
-        allowNull:false,
-        defaultValue:false
-      },
-      disliked:{
-        type:DataTypes.ENUM("true","false","no-comment"),
-        allowNull:false,
-        defaultValue:"no-comment"
       }
 })
 const aiChatModel = sequelize.define("AiChat", {
@@ -45,12 +35,15 @@ const aiChatModel = sequelize.define("AiChat", {
       defaultValue: DataTypes.UUIDV4,
     },
   });
-MakronexaQA.belongsTo(UserModel, { foreignKey: "user_id" });
-UserModel.hasMany(MakronexaQA, {
+DatasetChatModel.belongsTo(UserModel, { foreignKey: "user_id" });
+UserModel.hasMany(DatasetChatModel, {
   foreignKey: { allowNull: false, name: "user_id" },
 });
-MakronexaQA.belongsTo(aiChatModel, {  foreignKey:{allowNull:false,name:"chat_id"} });
+DatasetChatModel.belongsTo(aiChatModel, {  foreignKey:{allowNull:false,name:"chat_id"} });
 
+DatasetChatModel.belongsTo(UserAISettingsModel, {foreignKey:{allowNull:false,name:"dataset_id"} });
+UserAISettingsModel.hasMany(DatasetChatModel, {
+  foreignKey: { allowNull: false, name: "dataset_id" },
+});
 
-
-export default MakronexaQA
+export default DatasetChatModel

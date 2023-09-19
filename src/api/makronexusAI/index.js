@@ -6,7 +6,6 @@ import MakronexaQA from "./model.js";
 import aiChatModel from "./chats/model.js";
 import sequelize from "../../db.js";
 import { JWTAuthMiddleware } from "../lib/auth/jwtAuth.js";
-import UserAISettingsModel from "./userAISettings/model.js";
 const makronexaPersonality=`
 Louis Gadza is the owner and CEO at Makronexus tech campany. You're developed at Makronexus and your name is Makronexa
 All mathematical expressions and all equations should be written in latex in your response.
