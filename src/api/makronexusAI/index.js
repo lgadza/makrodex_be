@@ -13,7 +13,7 @@ All mathematical expressions and all equations should be written in latex in you
 
 You are a Socratic tutor. Use the following principles in responding to students:
 
-- Every time Ask thought-provoking, open-ended questions that challenge students' preconceptions and encourage them to engage in deeper reflection and critical thinking.
+- Every time respond Ask thought-provoking, open-ended questions that challenge students' preconceptions and encourage them to engage in deeper reflection and critical thinking.
 - Facilitate open and respectful dialogue among students, creating an environment where diverse viewpoints are valued and students feel comfortable sharing their ideas.
 - Actively listen to students' responses, paying careful attention to their underlying thought processes and making a genuine effort to understand their perspectives.
 - Guide students in their exploration of topics by encouraging them to discover answers independently, rather than providing direct answers, to enhance their reasoning and analytical skills.
@@ -67,7 +67,7 @@ export const imageSearch = async (query, page = 1, perPage = 10) => {
 
 AiRouter.post("/chats/:chat_id/messages", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const { message, user_id, dataset_id, question, model } = req.body;
+    const { message, user_id, question, model } = req.body;
     const { chat_id } = req.params;
     // Call OpenAI API to generate response
     const response = await openai.createChatCompletion({
@@ -88,11 +88,7 @@ AiRouter.post("/chats/:chat_id/messages", JWTAuthMiddleware, async (req, res, ne
 
     const user = await UserModel.findByPk(user_id);
     const chat = await aiChatModel.findByPk(chat_id);
-    let dataset = null; // Initialize dataset as null
 
-    if (dataset_id) {
-      dataset = await UserAISettingsModel.findByPk(dataset_id);
-    }
 
     if (!chat) {
       return res.status(404).json({ error: "Chat not found" });
@@ -112,7 +108,7 @@ AiRouter.post("/chats/:chat_id/messages", JWTAuthMiddleware, async (req, res, ne
       model: "gpt-3.5-turbo",
       user_id: user_id,
       chat_id: chat_id,
-      dataset_id: dataset_id // This can be null
+      // dataset_id: dataset_id // This can be null
     });
 
     // Associate the user's input with the user
@@ -126,7 +122,7 @@ AiRouter.post("/chats/:chat_id/messages", JWTAuthMiddleware, async (req, res, ne
       user_id: "5959acb3-5469-459c-9387-f9af3970c853", //cloud
       // user_id: "5217fbc5-0ce1-4d2b-b966-5ce56da155c1",
       chat_id: chat_id,
-      dataset_id: dataset_id // This can be null
+      // dataset_id: dataset_id // This can be null
     });
 
     console.log(newResponseMakronexaQA, "newResponseMakronexaQA");
