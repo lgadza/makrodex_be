@@ -80,7 +80,7 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
           content:message,
         }
       ] ,
-      max_tokens: 500,
+      max_tokens: 200,
       temperature: 0.8,
     });
 
