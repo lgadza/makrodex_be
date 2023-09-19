@@ -18,7 +18,6 @@ chatRouter.get("/:user_id/chats/:chat_id",JWTAuthMiddleware, async (req, res, ne
       model: MakronexaQA,
         where: {
           chat_id: chat_id,
-          user_id:user_id,
         },
       order: [["createdAt", "ASC"]],//"DESC"
     } 

@@ -70,7 +70,7 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
     const { chat_id } = req.params;
     // Call OpenAI API to generate response
     const response = await openai.createChatCompletion({
-      model: model, // Use the correct model name
+      model: "gpt-3.5-turbo", // Use the correct model name
       messages:[
         {
           "role":"system","content":`${makronexaPersonality}`
