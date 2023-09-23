@@ -80,7 +80,7 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
           content:message,
         }
       ] ,
-      max_tokens: 200,
+      max_tokens: 1000,
       temperature: 0.8,
     });
 
@@ -116,8 +116,7 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
       type: "text",
       message: aiResponseText,
       model: "gpt-3.5-turbo",
-      user_id: "5959acb3-5469-459c-9387-f9af3970c853", //cloud
-      // user_id: "5217fbc5-0ce1-4d2b-b966-5ce56da155c1",
+      user_id: process.env.MAKRONEXA_ID, //cloud
       chat_id: chat_id,
     });
 
@@ -142,52 +141,52 @@ AiRouter.get("/models", async (req, res, next) => {
     next(error);
   }
 });
-// AiRouter.post("/chats/:chat_id/image-search", async (req, res, next) => {
-//   try {
-//     const {user_id } = req.body;
-//     const { chat_id } = req.params;
-//     const user = await UserModel.findByPk(user_id);
-//     const chat = await aiChatModel.findByPk(chat_id);
-//     if (!chat) {
-//       return res.status(404).json({ error: "Chat not found" });
-//     }
-//     if(req.body.prompt){
-//     const prompt=req.body.prompt
-//     // const response=await promptDALLE(prompt)
-//     const response=await imageSearch(prompt)
-//     const smallImageUrls = response.map((image) => image.urls.small);
+AiRouter.post("/chats/:chat_id/image-generate", async (req, res, next) => {
+  try {
+    const {user_id } = req.body;
+    const { chat_id } = req.params;
+    const user = await UserModel.findByPk(user_id);
+    const chat = await aiChatModel.findByPk(chat_id);
+    if (!chat) {
+      return res.status(404).json({ error: "Chat not found" });
+    }
+    if(req.body.prompt){
+    const prompt=req.body.prompt
+    const response=await promptDALLE(prompt)
+    // const response=await imageSearch(prompt)
+    const smallImageUrls = response.map((image) => image.urls.small);
 
-//     console.log(response,"smallImageUrls")
-//     const newMakronexaQA = await MakronexaQA.create({
-//       type: "text",
-//       message: prompt,
-//       from: "user",
-//       model: "dalle",
-//       user_id: user_id,
-//       chat_id: chat_id,
-//     });
+    console.log(response,"smallImageUrls")
+    const newMakronexaQA = await MakronexaQA.create({
+      type: "text",
+      message: prompt,
+      from: "user",
+      model: "dalle",
+      user_id: user_id,
+      chat_id: chat_id,
+    });
 
-//     // Associate the user's input with the user
-//     await newMakronexaQA.setUser(user);
-//     const responseString = JSON.stringify(smallImageUrls);
-//     const newResponseMakronexaQA = await MakronexaQA.create({
-//       type: "imageUrl",
-//       message: responseString,
-//       model: "dalle",
-//       user_id: "5959acb3-5469-459c-9387-f9af3970c853", //cloud
-//       // user_id: "5217fbc5-0ce1-4d2b-b966-5ce56da155c1",
-//       chat_id: chat_id,
-//     });
-//     console.log(newResponseMakronexaQA, "newResponseMakronexaQA");
-//     // res.send({message:response})
-//     res.send({ message: responseString });
+    // Associate the user's input with the user
+    await newMakronexaQA.setUser(user);
+    const responseString = JSON.stringify(smallImageUrls);
+    const newResponseMakronexaQA = await MakronexaQA.create({
+      type: "imageUrl",
+      message: responseString,
+      model: "dalle",
+      user_id: "5959acb3-5469-459c-9387-f9af3970c853", //cloud
+      // user_id: "5217fbc5-0ce1-4d2b-b966-5ce56da155c1",
+      chat_id: chat_id,
+    });
+    console.log(newResponseMakronexaQA, "newResponseMakronexaQA");
+    // res.send({message:response})
+    res.send({ message: responseString });
 
-//   }
-//   } catch (error) {
-//     console.error(error);
-//     next(error);
-//   }
-// });
+  }
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
 
 
 // GOOGLE IMAGE SEARCH

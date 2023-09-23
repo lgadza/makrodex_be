@@ -151,7 +151,7 @@ router.post('/:user_id/:userAISettings_id/files/save',upload.single('file'), asy
 
 router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
   // const collectionName = "My Cover letter";
-  const { question,collectionName } = req.body;
+  const { question,collectionName,temperature,personality, } = req.body;
   const { message,chat_id, dataset_id, user_id } = req.params;
 
   try {
@@ -175,7 +175,6 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
       return res.status(404).json({ error: "Dataset not found" });
     }
      
-
     const embeddings = new OpenAIEmbeddings();
     const vectorStore = await QdrantVectorStore.fromExistingCollection(embeddings, {
       url: process.env.QDRANT_URL,
@@ -183,7 +182,7 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
       apiKey: process.env.QDRANT_DB_KEY,
     });
 
-    const model = new OpenAI({ temperature: 0.3, model: "gpt-3.5-turbo" });
+    const model = new OpenAI({ temperature: temperature||0.3, model: "gpt-3.5-turbo", });
     const chain = new RetrievalQAChain({
       combineDocumentsChain: loadQAStuffChain(model),
       retriever: vectorStore.asRetriever(),
@@ -204,7 +203,7 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
       chat_id: chat_id,
       dataset_id: dataset_id,
     });
-
+ 
     
     // Associate the user's input with the user
     await newDatasetChat.setUser(user);
@@ -214,7 +213,7 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
       type: "text",
       message: result.text,
       model: "gpt-3.5-turbo",
-      user_id: "5959acb3-5469-459c-9387-f9af3970c853", //cloud
+      user_id: process.env.MAKRONEXA_ID, //cloud
       chat_id: chat_id,
       dataset_id: dataset_id,
     });
