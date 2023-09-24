@@ -237,6 +237,10 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
         if (!user) {
           console.log("USER NOT FOUND")
           sendWhatsAppMessageWithTemplate("+" + from, "call_to_register")
+        }else if (!['admin', 'teacher', 'student'].includes(user.dataValues.role)) {
+          console.log("USER NOT FOUND")
+          await sendWhatsAppMessage(from, "You do not currently hold the role of a student, teacher, or admin at one of our partnered schools. If you believe this is in error or have any questions, please feel free to contact us on WhatsApp at +48794144892.");
+        res.status(200).json({ message: 'Message sent' });
         }else{
           const lowerCaseMessage = text.trim().toLowerCase();
           console.log("USER:",user)
@@ -269,10 +273,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
           max_tokens: 500,
           temperature: 0.8,
         });
-    
-        
         const replyMessage = response.data.choices[0].message.content;
-
         await sendWhatsAppMessage(from, replyMessage);
         res.status(200).json({ message: 'Message sent' });
       }
