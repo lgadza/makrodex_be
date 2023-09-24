@@ -173,8 +173,7 @@ AiRouter.post("/chats/:chat_id/image-generate", async (req, res, next) => {
       type: "imageUrl",
       message: responseString,
       model: "dalle",
-      user_id: "5959acb3-5469-459c-9387-f9af3970c853", //cloud
-      // user_id: "5217fbc5-0ce1-4d2b-b966-5ce56da155c1",
+      user_id: process.env.MAKRONEXA_ID, 
       chat_id: chat_id,
     });
     console.log(newResponseMakronexaQA, "newResponseMakronexaQA");
@@ -236,7 +235,7 @@ AiRouter.post('/chats/:chat_id/image-search', async (req, res,next) => {
       type: "imageUrl",
       message: responseString,
       model: "dalle",
-      user_id: "5959acb3-5469-459c-9387-f9af3970c853", //cloud
+      user_id: process.env.MAKRONEXA_ID, //cloud
       // user_id: "5217fbc5-0ce1-4d2b-b966-5ce56da155c1",
       chat_id: chat_id,
     });

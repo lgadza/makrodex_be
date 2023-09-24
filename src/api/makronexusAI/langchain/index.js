@@ -213,7 +213,7 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
         - Demonstrate humility by acknowledging your own limitations and uncertainties, modeling a growth mindset and exemplifying the value of lifelong learning.`
       ),
       new MessagesPlaceholder('chat_history'),
-      HumanMessagePromptTemplate.fromTemplate('{query}'),
+      HumanMessagePromptTemplate.fromTemplate('{question}'),
     ]);
     const chain = new ConversationalRetrievalQAChain({
       llm:model,
@@ -228,7 +228,7 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
     );
 
     const result = await chain.call({
-      query: question,
+      question: question,
     });
 
     // Create a new DatasetChatModel instance for the user's input
