@@ -215,16 +215,20 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
       new MessagesPlaceholder('chat_history'),
       HumanMessagePromptTemplate.fromTemplate('{question}'),
     ]);
-    const chain = new ConversationalRetrievalQAChain({
-      llm: model,
+    const chain = new ConversationalRetrievalQAChain(
+      model,
+      vectorStore.asRetriever(),
+      {
       prompt: chatPrompt,
       returnSourceDocuments: true,
-      retriever: vectorStore.asRetriever(),
       memory: new BufferMemory({
         memoryKey: "chat_history",
+        inputKey:"question",
+        outputKey:"text",
         returnMessages: true,
       }),
-    });
+    }
+    );
     
 
     const result = await chain.call({
