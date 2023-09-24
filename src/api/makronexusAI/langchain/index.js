@@ -298,7 +298,7 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
       apiKey: process.env.QDRANT_DB_KEY,
     });
 
-    const model = new OpenAI({ temperature: temperature||0.3, model: "gpt-3.5-turbo", });
+    const model = new OpenAI({ temperature: temperature||0.8, model: "gpt-3.5-turbo", });
     const chain = new RetrievalQAChain({
       combineDocumentsChain: loadQAStuffChain(model),
       retriever: vectorStore.asRetriever(),
