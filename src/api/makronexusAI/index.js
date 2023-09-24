@@ -31,7 +31,7 @@ const promptDALLE=async(prompt)=>{
   try{
     const response=await openai.createImage({
       prompt,
-      n:2,
+      n:3,
       size:"512x512",
     });
     return response.data.data;
@@ -142,6 +142,7 @@ AiRouter.get("/models", async (req, res, next) => {
   }
 });
 AiRouter.post("/chats/:chat_id/image-generate", async (req, res, next) => {
+  console.log("GENERATE IMAGE")
   try {
     const {user_id } = req.body;
     const { chat_id } = req.params;
