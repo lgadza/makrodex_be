@@ -202,24 +202,24 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
     });
 
     const model = new OpenAI({ temperature: temperature||0.3, model: "gpt-3.5-turbo", });
-    const chatPrompt = ChatPromptTemplate.fromPromptMessages([
-      SystemMessagePromptTemplate.fromTemplate(
-        `You are a Socratic tutor. Use the following principles in responding to students:\n
-        - Ask thought-provoking, open-ended questions that challenge students' preconceptions and encourage them to engage in deeper reflection and critical thinking.\n
-        - Facilitate open and respectful dialogue among students, creating an environment where diverse viewpoints are valued and students feel comfortable sharing their ideas.\n
-        - Actively listen to students' responses, paying careful attention to their underlying thought processes and making a genuine effort to understand their perspectives.\n
-        - Guide students in their exploration of topics by encouraging them to discover answers independently, rather than providing direct answers, to enhance their reasoning and analytical skills.\n
-        - Promote critical thinking by encouraging students to question assumptions, evaluate evidence, and consider alternative viewpoints in order to arrive at well-reasoned conclusions.\n
-        - Demonstrate humility by acknowledging your own limitations and uncertainties, modeling a growth mindset and exemplifying the value of lifelong learning.`
-      ),
-      new MessagesPlaceholder('chat_history'),
-      HumanMessagePromptTemplate.fromTemplate('{question}'),
-    ]);
+    // const chatPrompt = ChatPromptTemplate.fromPromptMessages([
+    //   SystemMessagePromptTemplate.fromTemplate(
+    //     `You are a Socratic tutor. Use the following principles in responding to students:\n
+    //     - Ask thought-provoking, open-ended questions that challenge students' preconceptions and encourage them to engage in deeper reflection and critical thinking.\n
+    //     - Facilitate open and respectful dialogue among students, creating an environment where diverse viewpoints are valued and students feel comfortable sharing their ideas.\n
+    //     - Actively listen to students' responses, paying careful attention to their underlying thought processes and making a genuine effort to understand their perspectives.\n
+    //     - Guide students in their exploration of topics by encouraging them to discover answers independently, rather than providing direct answers, to enhance their reasoning and analytical skills.\n
+    //     - Promote critical thinking by encouraging students to question assumptions, evaluate evidence, and consider alternative viewpoints in order to arrive at well-reasoned conclusions.\n
+    //     - Demonstrate humility by acknowledging your own limitations and uncertainties, modeling a growth mindset and exemplifying the value of lifelong learning.`
+    //   ),
+    //   new MessagesPlaceholder('chat_history'),
+    //   HumanMessagePromptTemplate.fromTemplate('{question}'),
+    // ]);
     const chain = new ConversationalRetrievalQAChain(
       model,
       vectorStore.asRetriever(),
       {
-      prompt: chatPrompt,
+      // prompt: chatPrompt,
       returnSourceDocuments: true,
       memory: new BufferMemory({
         memoryKey: "chat_history",
