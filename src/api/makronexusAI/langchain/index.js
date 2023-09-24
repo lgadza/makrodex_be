@@ -215,7 +215,7 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
       new MessagesPlaceholder('chat_history'),
       HumanMessagePromptTemplate.fromTemplate('{question}'),
     ]);
-    const chain = new ConversationalRetrievalQAChain({
+    const chain = new ConversationalRetrievalQAChain.fromLLM({
       llm:model,
       prompt: chatPrompt,
        returnSourceDocuments: true,
