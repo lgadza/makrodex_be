@@ -212,7 +212,7 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
         - Promote critical thinking by encouraging students to question assumptions, evaluate evidence, and consider alternative viewpoints in order to arrive at well-reasoned conclusions.\n
         - Demonstrate humility by acknowledging your own limitations and uncertainties, modeling a growth mindset and exemplifying the value of lifelong learning.`
       ),
-      new MessagesPlaceholder('history'),
+      new MessagesPlaceholder('chat_history'),
       HumanMessagePromptTemplate.fromTemplate('{question}'),
     ]);
     const chain = new ConversationalRetrievalQAChain(
@@ -222,15 +222,13 @@ router.post('/:user_id/:dataset_id/chats/:chat_id/query', async (req, res) => {
       prompt: chatPrompt,
       returnSourceDocuments: true,
       memory: new BufferMemory({
-        memoryKey: "history",
+        memoryKey: "chat_history",
         inputKey:"question",
         outputKey:"text",
         returnMessages: true,
       }),
     }
     );
-    
-
     const result = await chain.call({
       question: question,
     });
