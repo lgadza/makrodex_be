@@ -239,7 +239,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
           sendWhatsAppMessageWithTemplate("+" + from, "call_to_register")
         }else{
           const lowerCaseMessage = text.trim().toLowerCase();
-          console.log("LOWERCASE SEARCH:",lowerCaseMessage)
+          console.log("USER:",user)
           if (lowerCaseMessage.startsWith("image:")) {
             try {
               const images = await fetchImagesFromAPI(lowerCaseMessage);
