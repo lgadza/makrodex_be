@@ -24,6 +24,7 @@ import schoolRouter from "./api/schools/index.js"
 import userAISettingsRouter from "./api/makronexusAI/userAISettings/index.js"
 import AIFileRouter from "./api/makronexusAI/files/index.js"
 import datasetChatRouter from "./api/makronexusAI/datasetChats/index.js"
+import stripeRouter from "./api/payment_gateways/index.js"
 
 const server = express()
 const port = process.env.PORT || 3001
@@ -54,6 +55,7 @@ server.use('/ai', whatsAppRouter);
 server.use('/langchain/qdrant', router);
 server.use('/langchain/qdrant', AIFileRouter);
 server.use('/makronexa', userAISettingsRouter);
+server.use('/create_checkout_section', stripeRouter);
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)
