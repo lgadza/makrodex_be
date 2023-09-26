@@ -14,7 +14,7 @@ stripeRouter.post("/", async (req, res, next) => {
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
-      mode: "subscription",
+      mode: "payment",
       line_items: req.body.items.map((item) => {
         const storeItem = storeItems.get(item.id);
         return {
