@@ -1,7 +1,6 @@
 import { DataTypes } from "sequelize";
 import bcrypt from "bcrypt";
 import sequelize from "../../db.js";
-import AddressModel from "../address/model.js";
 import {GuardianUser, associateModels } from "../intermediate_tables/guardian_user.js";
 import GuardianModel from "../guardians/model.js";
 

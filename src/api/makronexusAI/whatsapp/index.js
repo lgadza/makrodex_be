@@ -1,5 +1,6 @@
 import sequelize from "../../../db.js";
 import qrcode from "qrcode-terminal"
+import { Client }from 'whatsapp-web.js';
 import { Configuration,OpenAIApi } from "openai";
 import { makronexaPersonality } from "../../utils/data.js";
 import express from "express";
@@ -25,6 +26,38 @@ const configuration = new Configuration({
 });
 
 const openai = new OpenAIApi(configuration);
+// // WHATAPP WEB JS
+
+
+// const client = new Client();
+// client.on('qr', qr => {
+//   qrcode.generate(qr, {small: true});
+// });
+// client.on('ready', () => {
+//   console.log('Client is ready!');
+// });
+// // Listen for incoming messages
+// client.on('message', (message) => {
+//   // Capture the sender's contact or group ID
+//   const senderID = message.from;
+
+//   // Define the automated response message
+//   const automatedResponse = "Hello! This is an automated response.";
+
+//   // Send the automated response back to the sender
+//   message.reply(automatedResponse)
+//     .then((response) => {
+//       console.log(`Sent automated response to ${senderID}: ${automatedResponse}`);
+//     })
+//     .catch((error) => {
+//       console.error(`Error sending automated response to ${senderID}: ${error}`);
+//     });
+// });
+
+// // Start the WhatsApp client
+// client.initialize();
+
+// // WHATAPP WEB JS
 
 export async function sendWhatsAppMessageWithTemplate( phone, name) {
   const url = process.env.BUSINESS_WHATSAPP_URL;
