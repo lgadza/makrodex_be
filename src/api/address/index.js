@@ -69,7 +69,6 @@ addressRouter.put("/:user_id/:address_id", JWTAuthMiddleware, async (req, res, n
     if (!user) {
       return res.status(404).send({ error: "User not found" });
     }
-
     // Update the address with the new data
     const [numberOfUpdatedRows] = await AddressModel.update(req.body, {
       where: { id: address_id },

@@ -44,6 +44,10 @@ const AddressModel = sequelize.define("address", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  checked: {
+    type: DataTypes.BOOLEAN,
+    defaultValue:false
+  },
 });
 
 // Define the associations with correct foreign keys

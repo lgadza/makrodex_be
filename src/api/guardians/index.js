@@ -2,6 +2,7 @@ import express from "express";
 import createHttpError from "http-errors";
 import GuardianModel from "./model.js";
 import {GuardianUser} from "../intermediate_tables/guardian_user.js"; // 
+import UserModel from "../users/model.js";
 
 const parentsRouter = express.Router();
 
@@ -17,9 +18,15 @@ parentsRouter.get("/", async (req, res, next) => {
 });
 
 // Get one parent by ID
-parentsRouter.get("/:parent_id", async (req, res, next) => {
+parentsRouter.get("/:user_id", async (req, res, next) => {
   try {
-    const parent = await GuardianModel.findByPk(req.params.parent_id);
+    const user_id = req.params.user_id;
+    const user = await UserModel.findByPk(user_id);
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    const parent = await GuardianModel.findOne({ where: { user_id } });
     if (!parent) {
       createHttpError(404, `Parent with id ${req.params.parent_id} not found!`);
     } else {
@@ -34,13 +41,15 @@ parentsRouter.get("/:parent_id", async (req, res, next) => {
 // Create a new parent and associate with an user
 parentsRouter.post("/:user_id", async (req, res, next) => {
   try {
-    const { user_id } = req.params;
-    const { parent_id } = await GuardianModel.create(req.body);
+    const user_id = req.params.user_id;
+    const user = await UserModel.findByPk(user_id);
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    const { id } = await GuardianModel.create({...req.body,user_id:user_id});
 
-    // Associate the parent with the user in the user-parent table
-    await GuardianUser.create({ user_id, parent_id });
-
-    res.status(201).send(parent_id);
+    res.status(201).send(id);
   } catch (error) {
     res.status(500).json({ error: "Failed to create parent" });
     next(error);
@@ -48,21 +57,35 @@ parentsRouter.post("/:user_id", async (req, res, next) => {
 });
 
 // Update a parent by ID
-parentsRouter.put("/:parent_id", async (req, res, next) => {
+parentsRouter.put("/:user_id/:parent_id", async (req, res, next) => {
   try {
-    const parent = await GuardianModel.findByPk(req.params.parent_id);
+    const parent_id = req.params.parent_id;
+    const parent = await GuardianModel.findByPk(parent_id);
     if (!parent) {
-      createHttpError(404, `Parent with id ${re.params.parent_id} not found!`);
-    } else {
-      await parent.update(req.body);
-      res.json(parent);
+      createHttpError(404, `Parent with id ${parent_id} not found!`);
     }
+       // Get the user ID from the address record
+       const user_id = parent.user_id;
+       // Find the user by ID
+       const user = await UserModel.findByPk(user_id);
+       if (!user) {
+         return res.status(404).send({ error: "User not found" });
+       }
+    // Update the address with the new data
+    const [numberOfUpdatedRows] = await GuardianModel.update(req.body, {
+      where: { id: parent_id },
+      returning: true,
+    });
+    if(numberOfUpdatedRows===0) {
+      return res.status(404).send({ error: "Parent not found" });
+    }
+    await parent.update(req.body);
+    res.json(parent);
   } catch (error) {
     res.status(500).json({ error: "Failed to update parent" });
     next(error);
   }
 });
-
 // Delete a parent by ID
 parentsRouter.delete("/:parent_id", async (req, res, next) => {
   try {
