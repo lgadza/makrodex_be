@@ -22,13 +22,14 @@ parentsRouter.get("/:user_id", async (req, res, next) => {
   try {
     const user_id = req.params.user_id;
     const user = await UserModel.findByPk(user_id);
-    
+
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
+
     const parent = await GuardianModel.findOne({ where: { user_id } });
     if (!parent) {
-      createHttpError(404, `Parent with id ${req.params.parent_id} not found!`);
+      return res.status(404).json({ success: false, message: `Parent with id ${user_id} not found!` });
     } else {
       res.json(parent);
     }
@@ -37,6 +38,7 @@ parentsRouter.get("/:user_id", async (req, res, next) => {
     next(error);
   }
 });
+
 
 // Create a new parent and associate with an user
 parentsRouter.post("/:user_id", async (req, res, next) => {

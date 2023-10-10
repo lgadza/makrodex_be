@@ -34,6 +34,14 @@ const GuardianModel = sequelize.define("guardian", {
     type: DataTypes.BOOLEAN,
     defaultValue:false
   },
+  relationship: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  country_code: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
 });
 
 

@@ -16,6 +16,10 @@ const ApplicationModel = sequelize.define("application", {
     defaultValue: "pending",
     allowNull: false, // Make sure the status is not nullable
   },
+  grade_level: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   // Add more attributes related to applications if needed
 });
 

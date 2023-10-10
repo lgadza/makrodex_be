@@ -1,11 +1,14 @@
 import express from "express"
 import ApplicationModel from "./model.js"
 import ApplicationSchoolModel from "../intermediate_tables/application_school.js";
+import UserModel from "../users/model.js";
 const applicationsRouter = express.Router();
 // GET all applications
 applicationsRouter.get('/', async (req, res) => {
   try {
-    const applications = await ApplicationModel.findAll();
+    const applications = await ApplicationModel.findAll({
+        include: [{ model: UserModel }], // Include the UserModel
+      });
     res.status(200).json(applications);
   } catch (error) {
     console.error(error);
@@ -17,7 +20,9 @@ applicationsRouter.get('/', async (req, res) => {
 applicationsRouter.get('/:application_id', async (req, res) => {
   const { application_id } = req.params;
   try {
-    const application = await ApplicationModel.findByPk(application_id);
+    const application = await ApplicationModel.findByPk(application_id,{
+        include: [{ model: UserModel }], // Include the UserModel
+      });
     if (!application) {
       res.status(404).json({ error: 'Application not found' });
     } else {
@@ -54,14 +59,14 @@ applicationsRouter.post('/:user_id', async (req, res) => {
 // PUT (update) an existing application by ID
 applicationsRouter.put('/:id', async (req, res) => {
   const { id } = req.params;
-  const { application_status, /* Other application attributes */ } = req.body;
+  const { application_status, grade_level} = req.body;
   try {
     const application = await ApplicationModel.findByPk(id);
     if (!application) {
       res.status(404).json({ error: 'Application not found' });
     } else {
       await application.update({
-        application_status,
+        application_status,grade_level
         /* Update other attributes here based on your model */
       });
       res.status(200).json(application);
