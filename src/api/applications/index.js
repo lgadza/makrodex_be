@@ -56,7 +56,7 @@ applicationsRouter.post('/:user_id', async (req, res) => {
   }
 });
 
-// PUT (update) an existing application by ID
+// PUT an existing application by ID
 applicationsRouter.put('/:id', async (req, res) => {
   const { id } = req.params;
   const { application_status, grade_level} = req.body;
