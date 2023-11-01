@@ -57,6 +57,7 @@ server.use('/langchain/qdrant', router);
 server.use('/langchain/qdrant', AIFileRouter);
 server.use('/makronexa', userAISettingsRouter);
 server.use('/create_checkout_section', stripeRouter);
+server.use("/stripe",stripeRouter)
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)

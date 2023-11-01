@@ -1,18 +1,39 @@
-import express from "express"
-import ApplicationModel from "./model.js"
+import express from "express";
+import ApplicationModel from "./model.js";
 import ApplicationSchoolModel from "../intermediate_tables/application_school.js";
 import UserModel from "../users/model.js";
+
 const applicationsRouter = express.Router();
-// GET all applications
-applicationsRouter.get('/', async (req, res) => {
+
+// Middleware to handle errors
+const handleErrors = (res, error) => {
+  console.error(error);
+  res.status(500).json({ error: 'Internal Server Error' });
+};
+
+// GET all applications for a school
+applicationsRouter.get('/school/:school_id', async (req, res) => {
+  const { school_id } = req.params;
   try {
+    const applicationIds = await ApplicationSchoolModel.findAll({
+      where: { school_id },
+    });
+
+    const applicationIdsArray = applicationIds.map(entry => entry.application_id);
+
+    if (applicationIdsArray.length === 0) {
+      res.status(404).json({ error: 'No applications found for this school' });
+      return;
+    }
+
     const applications = await ApplicationModel.findAll({
-        include: [{ model: UserModel }], // Include the UserModel
-      });
+      where: { id: applicationIdsArray },
+      include: [{ model: UserModel }],
+    });
+
     res.status(200).json(applications);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    handleErrors(res, error);
   }
 });
 
@@ -20,60 +41,61 @@ applicationsRouter.get('/', async (req, res) => {
 applicationsRouter.get('/:application_id', async (req, res) => {
   const { application_id } = req.params;
   try {
-    const application = await ApplicationModel.findByPk(application_id,{
-        include: [{ model: UserModel }], // Include the UserModel
-      });
+    const application = await ApplicationModel.findByPk(application_id, {
+      include: [{ model: UserModel }],
+    });
+
     if (!application) {
       res.status(404).json({ error: 'Application not found' });
     } else {
       res.status(200).json(application);
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    handleErrors(res, error);
   }
 });
 
-// POST a new application
-applicationsRouter.post('/:user_id', async (req, res) => {
-  const { school_id } = req.body;
-  const user_id=req.params.user_id
+// POST a new application for a school
+applicationsRouter.post('/school/:school_id/:user_id', async (req, res) => {
+  const { school_id, user_id } = req.params;
   try {
     const newApplication = await ApplicationModel.create({
       school_id,
-      user_id:user_id
-     
+      user_id,
+      ...req.body,
     });
+
     await ApplicationSchoolModel.create({
-        application_id: newApplication.id,
-        school_id,
-        // user_id,
-      });
+      application_id: newApplication.id,
+      school_id,
+    });
+
+    newApplication.setUser(user_id);
     res.status(201).json(newApplication);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    handleErrors(res, error);
   }
 });
 
 // PUT an existing application by ID
 applicationsRouter.put('/:id', async (req, res) => {
   const { id } = req.params;
-  const { application_status, grade_level} = req.body;
+  const { application_status, grade_level } = req.body;
   try {
     const application = await ApplicationModel.findByPk(id);
+
     if (!application) {
       res.status(404).json({ error: 'Application not found' });
     } else {
       await application.update({
-        application_status,grade_level
-        /* Update other attributes here based on your model */
+        application_status,
+        grade_level,
+        // Update other attributes here based on your model
       });
       res.status(200).json(application);
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    handleErrors(res, error);
   }
 });
 
@@ -82,6 +104,7 @@ applicationsRouter.delete('/:id', async (req, res) => {
   const { id } = req.params;
   try {
     const application = await ApplicationModel.findByPk(id);
+
     if (!application) {
       res.status(404).json({ error: 'Application not found' });
     } else {
@@ -89,10 +112,8 @@ applicationsRouter.delete('/:id', async (req, res) => {
       res.status(204).end(); // No content on successful deletion
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    handleErrors(res, error);
   }
 });
 
-
-export default applicationsRouter
+export default applicationsRouter;
