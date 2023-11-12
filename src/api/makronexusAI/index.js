@@ -173,6 +173,7 @@ console.log(result,"RESULTS")
     const newMakronexaQA = await MakronexaQA.create({
       type: "text",
       message: question,
+      imageUrl:imageUrl,
       from: "user",
       model: "gpt-3.5-turbo",
       user_id: user_id,

@@ -27,6 +27,14 @@ const MakronexaQA=sequelize.define("makronexaQA",{
         allowNull:false,
         defaultValue:"makronexa"
       },
+      imageUrl:{
+        type:DataTypes.STRING,
+        allowNull:true,
+      },
+      fileUrl:{
+        type:DataTypes.STRING,
+        allowNull:true,
+      },
       liked:{
         type:DataTypes.BOOLEAN,
         allowNull:false,
