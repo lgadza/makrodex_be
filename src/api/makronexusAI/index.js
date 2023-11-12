@@ -134,7 +134,7 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
 }); 
 AiRouter.post("/chats/:chat_id/analyze-image",JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const { imageUrl,user_id,question } = req.body;
+    const { imageUrl,file,user_id,question } = req.body;
     const { chat_id } = req.params;
     
     const response = await openai.chat.completions.create({
