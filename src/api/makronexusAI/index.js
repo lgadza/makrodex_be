@@ -134,7 +134,7 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
 }); 
 AiRouter.post("/chats/:chat_id/analyze-image",JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const { imageUrl,file,user_id,question } = req.body;
+    const { imageUrl,user_id,question } = req.body;
     const { chat_id } = req.params;
     
     const response = await openai.chat.completions.create({
@@ -187,8 +187,7 @@ console.log(result,"RESULTS")
       type: "text",
       message: result.message.content,
       model: "gpt-4-vision-preview",
-      // user_id: process.env.MAKRONEXA_ID, //cloud
-      user_id: "6761c4d1-8bde-443f-a1a2-a6d9bfdf8971", //cloud
+      user_id: process.env.MAKRONEXA_ID, //cloud
       chat_id: chat_id,
     });
 
