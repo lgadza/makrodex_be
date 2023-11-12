@@ -1,13 +1,13 @@
 import sequelize from "../../../db.js";
 import qrcode from "qrcode-terminal"
 import { Client }from 'whatsapp-web.js';
-import { Configuration,OpenAIApi } from "openai";
+import { OpenAI } from "openai";
 import { makronexaPersonality } from "../../utils/data.js";
 import express from "express";
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import {ConversationChain} from "langchain/chains"
 import { BufferMemory } from 'langchain/memory';
-import { OpenAI } from 'langchain/llms/openai';
+// import { OpenAI } from 'langchain/llms/openai';
 import {
   MessagesPlaceholder,
   SystemMessagePromptTemplate,
@@ -20,12 +20,12 @@ import UserModel from "../../users/model.js";
 const whatsAppRouter = express.Router();
 const token = process.env.WHATSAPP_VERIFY_TOKEN;
 
-const configuration = new Configuration({
-  organization:process.env.OPENAI_ORGANIZATION_KEY,
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// const configuration = new Configuration({
+//   organization:process.env.OPENAI_ORGANIZATION_KEY,
+//   apiKey: process.env.OPENAI_API_KEY,
+// });
 
-const openai = new OpenAIApi(configuration);
+const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY,});
 // // WHATAPP WEB JS
 
 
@@ -252,11 +252,12 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
     const bodyParam = req.body;
     console.log(JSON.stringify(bodyParam, null, 2));
 
-    if (isValidWebhookRequest(bodyParam)) {
+    if (isValidWebhookRequest(bodyParam) || isImageWebhookRequest(bodyParam)) {
       const messageData = extractMessageData(bodyParam);
+      const imageData=extractImageMessageData(bodyParam)
 
-      if (messageData) {
-        const { from, text } = messageData;
+      if (messageData || imageData) {
+        const from = (messageData || imageData).from;
         const phone_number = from.slice(-9);
         console.log(phone_number,"FROM PHONE_NUMBER")
         const country_code = from.slice(0, -9);
@@ -291,8 +292,32 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
               res.status(500).json({ error: 'Internal Server Error' });
             }
 
-          }else{
-        const response = await openai.createChatCompletion({
+          }else if((imageData)){
+            const response = await openai.chat.completions.create({
+              model: "gpt-4-vision-preview",
+              messages: [
+                {
+                  role: "user",
+                  content: [
+                    { type: "text", text: imageData.caption },
+                    {
+                      type: "image_url",
+                      image_url: {
+                        url: imageData.imageFile,
+                      },
+                    },
+                  ],
+                },
+              ],
+            });
+            console.log("THIS IS THE IMAGE RECIEVED FROM WHATSAPP")
+            const replyMessage = response.choices[0].message.content;
+        await sendWhatsAppMessage(from, replyMessage);
+        res.status(200).json({ message: 'Message sent' });
+          }
+          
+          else{
+        const response = await openai.chat.completions.create({
           model: "gpt-3.5-turbo", 
           messages:[
             {
@@ -300,13 +325,13 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
             },
             {
               role:"user",
-              content:text,
+              content:messageData.text,
             }
           ] ,
-          max_tokens: 500,
+          max_tokens: 1500,
           temperature: 0.8,
         });
-        const replyMessage = response.data.choices[0].message.content;
+        const replyMessage = response.choices[0].message.content;
         await sendWhatsAppMessage(from, replyMessage);
         res.status(200).json({ message: 'Message sent' });
       }
@@ -337,9 +362,27 @@ function isValidWebhookRequest(body) {
     Array.isArray(body.entry[0].changes[0].value.messages) &&
     body.entry[0].changes[0].value.messages.length > 0 &&
     body.entry[0].changes[0].value.messages[0].text &&
-    body.entry[0].changes[0].value.messages[0].text.body
+    body.entry[0].changes[0].value.messages[0].text.body!== undefined
   );
 }
+function isImageWebhookRequest(body) {
+  return (
+    body &&
+    body.entry &&
+    Array.isArray(body.entry) &&
+    body.entry.length > 0 &&
+    body.entry[0].changes &&
+    Array.isArray(body.entry[0].changes) &&
+    body.entry[0].changes.length > 0 &&
+    body.entry[0].changes[0].value &&
+    body.entry[0].changes[0].value.messages &&
+    Array.isArray(body.entry[0].changes[0].value.messages) &&
+    body.entry[0].changes[0].value.messages.length > 0 &&
+    body.entry[0].changes[0].value.messages[0].image &&
+    body.entry[0].changes[0].value.messages[0].image.file!== undefined
+  );
+}
+
 
 function extractMessageData(body) {
   const message = body.entry[0].changes[0].value.messages[0];
@@ -347,6 +390,14 @@ function extractMessageData(body) {
   const text = message.text.body;
 
   return { from, text };
+}
+function extractImageMessageData(body) {
+  const message = body.entry[0].changes[0].value.messages[0];
+  const from = message.from;
+  const imageFile = message.image.file;
+  const caption = message.image.caption;
+
+  return { from, imageFile, caption };
 }
 
 async function sendWhatsAppMessage(recipient, message) {

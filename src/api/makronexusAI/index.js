@@ -1,5 +1,5 @@
 
-import { Configuration, OpenAIApi } from "openai";
+import {  OpenAI } from "openai";
 import express from "express";
 import UserModel from "../users/model.js";
 import MakronexaQA from "./model.js";
@@ -19,12 +19,13 @@ You are a Socratic tutor. Use the following principles in responding to students
 - Promote critical thinking by encouraging students to question assumptions, evaluate evidence, and consider alternative viewpoints in order to arrive at well-reasoned conclusions.
 - Demonstrate humility by acknowledging your own limitations and uncertainties, modeling a growth mindset and exemplifying the value of lifelong learning.`
 
-const configuration = new Configuration({
-  organization:process.env.OPENAI_ORGANIZATION_KEY,
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// const configuration = new Configuration({
+//   organization:process.env.OPENAI_ORGANIZATION_KEY,
+//   apiKey: process.env.OPENAI_API_KEY,
+// });
 
-const openai = new OpenAIApi(configuration);
+
+const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY});
 
 const AiRouter = express.Router();
 const promptDALLE=async(prompt)=>{
@@ -69,8 +70,8 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
     const { message, user_id, question,model } = req.body;
     const { chat_id } = req.params;
     // Call OpenAI API to generate response
-    const response = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo", // Use the correct model name
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo", 
       messages:[
         {
           "role":"system","content":`${makronexaPersonality}`
@@ -96,7 +97,8 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
     }
     
     
-    const aiResponseText = response.data.choices[0].message.content;
+    const aiResponseText = response.choices[0].message.content;
+    console.log(aiResponseText,"RESPOSNE")
 
     // Create a new MakronexaQA instance for the user's input
     const newMakronexaQA = await MakronexaQA.create({
@@ -124,6 +126,76 @@ AiRouter.post("/chats/:chat_id/messages",JWTAuthMiddleware, async (req, res, nex
 
     res.json({
       message: aiResponseText,
+    });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+}); 
+AiRouter.post("/chats/:chat_id/analyze-image",JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const { imageUrl,user_id,question } = req.body;
+    const { chat_id } = req.params;
+    
+    const response = await openai.chat.completions.create({
+      model: "gpt-4-vision-preview",
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: question },
+            {
+              type: "image_url",
+              image_url: {
+                url: imageUrl,
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    const user = await UserModel.findByPk(user_id);
+    const chat = await aiChatModel.findByPk(chat_id);
+
+    if (!chat) {
+      return res.status(404).json({ error: "Chat not found" });
+    }
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    
+    const result = response.choices[0];
+console.log(result,"RESULTS")
+    // Create a new MakronexaQA instance for the user's input
+    const newMakronexaQA = await MakronexaQA.create({
+      type: "text",
+      message: question,
+      from: "user",
+      model: "gpt-3.5-turbo",
+      user_id: user_id,
+      chat_id: chat_id,
+    });
+
+    // Associate the user's input with the user
+    await newMakronexaQA.setUser(user);
+
+    // Create a new MakronexaQA instance for the AI response
+    const newResponseMakronexaQA = await MakronexaQA.create({
+      type: "text",
+      message: result.message.content,
+      model: "gpt-4-vision-preview",
+      // user_id: process.env.MAKRONEXA_ID, //cloud
+      user_id: "6761c4d1-8bde-443f-a1a2-a6d9bfdf8971", //cloud
+      chat_id: chat_id,
+    });
+
+    console.log(newResponseMakronexaQA, "newResponseMakronexaQA");
+
+    res.json({
+      message: result,
     });
   } catch (error) {
     console.error(error);

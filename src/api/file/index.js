@@ -6,12 +6,12 @@ import createHttpError from "http-errors";
 import UserModel from "../users/model.js";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { JWTAuthMiddleware } from "../lib/auth/jwtAuth.js";
+// import PdfParse from "pdf-parse";
 
 
 const fileRouter = express.Router();
 const upload = multer({ dest: 'uploads/' });
 
-// ... (Previous code)
 
 // Update the Multer configuration to use the correct field name
 const cloudinaryUploader = multer({
@@ -86,6 +86,20 @@ fileRouter.get('/:user_id', async (req, res, next) => {
     next(error);
   }
 });
+// // Extract text from pdf
+// fileRouter.post("/extract-text", upload.single("pdfFile"), async (req, res, next) => {
+//   try {
+
+//     if (!req.file) {
+//       return next(createHttpError(400, "PDF file is required."));
+//     }
+
+//     const pdfText = await PdfParse(req.file.path);
+//     res.send(pdfText.text);
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 
 // Get one file by ID for an user
 fileRouter.get('/:user_id/:file_id', async (req, res, next) => {
