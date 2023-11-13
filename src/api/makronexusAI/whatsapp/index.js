@@ -252,7 +252,10 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
     const bodyParam = req.body;
     console.log(JSON.stringify(bodyParam, null, 2));
 
-    if (isValidWebhookRequest(bodyParam) || isImageWebhookRequest(bodyParam)) {
+    if (isValidWebhookRequest(bodyParam))
+    // if (isValidWebhookRequest(bodyParam) || isImageWebhookRequest(bodyParam))
+    
+    {
       const messageData = extractMessageData(bodyParam);
       const imageData=extractImageMessageData(bodyParam)
 
