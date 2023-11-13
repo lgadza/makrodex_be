@@ -257,7 +257,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
     
     {
       const messageData = extractMessageData(bodyParam);
-      const imageData=extractImageMessageData(bodyParam)
+      // const imageData=extractImageMessageData(bodyParam)
 
       // if (messageData || imageData) 
       if (messageData) {
@@ -397,14 +397,14 @@ function extractMessageData(body) {
 
   return { from, text };
 }
-function extractImageMessageData(body) {
-  const message = body.entry[0].changes[0].value.messages[0];
-  const from = message.from;
-  const imageFile = message.image.file;
-  const caption = message.image.caption;
+// function extractImageMessageData(body) {
+//   const message = body.entry[0].changes[0].value.messages[0];
+//   const from = message.from;
+//   const imageFile = message.image.file;
+//   const caption = message.image.caption;
 
-  return { from, imageFile, caption };
-}
+//   return { from, imageFile, caption };
+// }
 
 async function sendWhatsAppMessage(recipient, message) {
   const url = process.env.BUSINESS_WHATSAPP_URL;
