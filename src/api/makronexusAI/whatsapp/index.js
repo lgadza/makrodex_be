@@ -445,7 +445,7 @@ async function generateImage(prompt) {
       size: "1024x1024",
     });
 
-    const imageUrl = response.data.data[0].url;
+    const imageUrl = response.data[0].url;
     return imageUrl;
   } catch (error) {
     console.error("Error generating image:", error);
