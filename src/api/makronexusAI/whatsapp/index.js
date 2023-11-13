@@ -256,7 +256,8 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
       const messageData = extractMessageData(bodyParam);
       const imageData=extractImageMessageData(bodyParam)
 
-      if (messageData || imageData) {
+      // if (messageData || imageData) 
+      if (messageData) {
         const {from,text} = messageData;
         // const from = (messageData || imageData).from;
         const phone_number = from.slice(-9);
