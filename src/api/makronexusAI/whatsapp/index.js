@@ -204,8 +204,6 @@ async function sendWhatsAppImage(recipient, URL) {
     },
   };
   
-  
- 
 
   const response = await fetch(url, {
     method: 'POST',
@@ -297,6 +295,16 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
               res.status(500).json({ error: 'Internal Server Error' });
             }
 
+          }else if(lowerCaseMessage.startsWith("generate:" || "create:")){
+            try{
+
+              const image_url = await generateImage(text);
+              await sendWhatsAppImage(from,image_url)
+              res.status(200).json({ message: 'Images sent successfully' });
+            }catch (error) {
+              console.error('Error:', error);
+              res.status(500).json({ error: 'Internal Server Error' });
+            }
           }
         //   else if((imageData)){
         //     const response = await openai.chat.completions.create({
@@ -389,7 +397,6 @@ function isImageWebhookRequest(body) {
   );
 }
 
-
 function extractMessageData(body) {
   const message = body.entry[0].changes[0].value.messages[0];
   const from = message.from;
@@ -432,6 +439,27 @@ async function sendWhatsAppMessage(recipient, message) {
     throw new Error('API request failed');
   }
 }
+async function generateImage(prompt) {
+  try {
+    const response = await openai.createImage({
+      model: "dall-e-3",
+      prompt: prompt,
+      n: 1,
+      size: "1024x1024",
+    });
+
+    const imageUrl = response.data.data[0].url;
+    return imageUrl;
+  } catch (error) {
+    console.error("Error generating image:", error);
+    throw error;
+  }
+}
+
+// Example usage:
+const prompt = "a white siamese cat";
+const image_url = await generateImage(prompt);
+console.log(image_url);
 
 export default whatsAppRouter;
 
