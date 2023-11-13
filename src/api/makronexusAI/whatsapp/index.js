@@ -223,9 +223,6 @@ whatsAppRouter.post('/whatsapp/images/file', async (req, res) => {
   const query=req.body.query
   const phone = "+48794144892";
 if(phone!=="" && query!==""){
-
-  
-  
   try {
     const images = await fetchImagesFromAPI(query);
     for (const image of images) {
@@ -297,7 +294,6 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
 
           }else if(lowerCaseMessage.startsWith("generate:" || "create:")){
             try{
-
               const image_url = await generateImage(text);
               await sendWhatsAppImage(from,image_url)
               res.status(200).json({ message: 'Images sent successfully' });
@@ -441,7 +437,7 @@ async function sendWhatsAppMessage(recipient, message) {
 }
 async function generateImage(prompt) {
   try {
-    const response = await openai.createImage({
+    const response = await openai.images.generate({
       model: "dall-e-3",
       prompt: prompt,
       n: 1,
