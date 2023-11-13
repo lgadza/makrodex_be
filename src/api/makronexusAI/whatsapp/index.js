@@ -445,6 +445,7 @@ async function generateImage(prompt) {
       model: "dall-e-3",
       prompt: prompt,
       n: 1,
+      quality:"standard",
       size: "1024x1024",
     });
 
