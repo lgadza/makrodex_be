@@ -257,7 +257,8 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
       const imageData=extractImageMessageData(bodyParam)
 
       if (messageData || imageData) {
-        const from = (messageData || imageData).from;
+        const {from,text} = messageData;
+        // const from = (messageData || imageData).from;
         const phone_number = from.slice(-9);
         console.log(phone_number,"FROM PHONE_NUMBER")
         const country_code = from.slice(0, -9);
@@ -292,29 +293,30 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
               res.status(500).json({ error: 'Internal Server Error' });
             }
 
-          }else if((imageData)){
-            const response = await openai.chat.completions.create({
-              model: "gpt-4-vision-preview",
-              messages: [
-                {
-                  role: "user",
-                  content: [
-                    { type: "text", text: imageData.caption },
-                    {
-                      type: "image_url",
-                      image_url: {
-                        url: imageData.imageFile,
-                      },
-                    },
-                  ],
-                },
-              ],
-            });
-            console.log("THIS IS THE IMAGE RECIEVED FROM WHATSAPP")
-            const replyMessage = response.choices[0].message.content;
-        await sendWhatsAppMessage(from, replyMessage);
-        res.status(200).json({ message: 'Message sent' });
           }
+        //   else if((imageData)){
+        //     const response = await openai.chat.completions.create({
+        //       model: "gpt-4-vision-preview",
+        //       messages: [
+        //         {
+        //           role: "user",
+        //           content: [
+        //             { type: "text", text: imageData.caption },
+        //             {
+        //               type: "image_url",
+        //               image_url: {
+        //                 url: imageData.imageFile,
+        //               },
+        //             },
+        //           ],
+        //         },
+        //       ],
+        //     });
+        //     console.log("THIS IS THE IMAGE RECIEVED FROM WHATSAPP")
+        //     const replyMessage = response.choices[0].message.content;
+        // await sendWhatsAppMessage(from, replyMessage);
+        // res.status(200).json({ message: 'Message sent' });
+        //   }
           
           else{
         const response = await openai.chat.completions.create({
@@ -325,7 +327,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
             },
             {
               role:"user",
-              content:messageData.text,
+              content:text,
             }
           ] ,
           max_tokens: 1500,
@@ -362,7 +364,7 @@ function isValidWebhookRequest(body) {
     Array.isArray(body.entry[0].changes[0].value.messages) &&
     body.entry[0].changes[0].value.messages.length > 0 &&
     body.entry[0].changes[0].value.messages[0].text &&
-    body.entry[0].changes[0].value.messages[0].text.body!== undefined
+    body.entry[0].changes[0].value.messages[0].text.body
   );
 }
 function isImageWebhookRequest(body) {
