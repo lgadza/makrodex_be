@@ -153,6 +153,7 @@ AiRouter.post("/chats/:chat_id/analyze-image",JWTAuthMiddleware, async (req, res
           ],
         },
       ],
+      max_tokens:1500,
     });
 
     const user = await UserModel.findByPk(user_id);
