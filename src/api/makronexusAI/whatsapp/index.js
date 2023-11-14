@@ -294,7 +294,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
 
           }else if(lowerCaseMessage.startsWith("generate:" || "create:")){
             try{
-              if(!["admin","teacher"]){
+              if(!["admin","teacher"].includes(user.dataValues.role)){
                 await sendWhatsAppMessage(from, " Access to Makronexus image generation is currently restricted. Upgrade to the premium version now for uninterrupted service. For more information, please contact us at +48794144892.");
                 res.status(200).json({ message: 'Message sent' });
 
