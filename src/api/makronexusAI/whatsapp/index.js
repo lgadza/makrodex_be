@@ -271,6 +271,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
         if (!user) {
           console.log("USER NOT FOUND")
           sendWhatsAppMessageWithTemplate("+" + from, "call_to_register")
+          
         }else if (!['admin', 'teacher','user', 'student'].includes(user.dataValues.role)) {
           console.log("USER NOT FOUND")
           await sendWhatsAppMessage(from, "You do not currently hold the role of a student, teacher, or admin at one of our partnered schools. If you believe this is in error or have any questions, please feel free to contact us on WhatsApp at +48794144892.");
@@ -415,7 +416,7 @@ function extractMessageData(body) {
 //   return { from, imageFile, caption };
 // }
 
-async function sendWhatsAppMessage(recipient, message) {
+export async function sendWhatsAppMessage(recipient, message) {
   const url = process.env.BUSINESS_WHATSAPP_URL;
   const headers = {
     'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}`,
@@ -463,6 +464,7 @@ async function generateImage(prompt) {
 const prompt = "a white siamese cat";
 const image_url = await generateImage(prompt);
 console.log(image_url);
+
 
 export default whatsAppRouter;
 

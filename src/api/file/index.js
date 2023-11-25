@@ -6,6 +6,7 @@ import createHttpError from "http-errors";
 import UserModel from "../users/model.js";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { JWTAuthMiddleware } from "../lib/auth/jwtAuth.js";
+import { s3 } from "../../s3Service.js";
 // import PdfParse from "pdf-parse";
 
 
@@ -18,7 +19,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-
 // Configure Multer to use Cloudinary as storage
 const storage = new CloudinaryStorage({
   cloudinary,
@@ -28,10 +28,73 @@ const storage = new CloudinaryStorage({
     public_id: (req, file) => `${Date.now()}-${file.originalname}`, // Optional: Set the public_id to prevent overwriting files with the same name
   },
 });
-const upload = multer({ storage: storage , limits: {
-  fileSize: 1024 * 1024 * 20, // 20 MB limit
-},});
-// Post user Avatar
+// ! This is for the above cloudinary storage
+// const upload = multer({ 
+//   storage: storage , limits: {
+//   fileSize: 1024 * 1024 * 20, // 20 MB limit
+// },});
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 1024 * 1024 * 20, // 20 MB limit
+  },
+});
+const uploadFileToS3 = (buffer, name, type) => {
+  const params = {
+    Body: buffer,
+    Bucket: process.env.AWS_S3_BUCKET_NAME,
+    ContentType: type,
+    Key: name
+  };
+  return s3.upload(params).promise();
+};
+// Upload files to Amazon S3
+fileRouter.post('/amazon_cloud/:user_id', JWTAuthMiddleware, upload.single('file'), async (req, res, next) => {
+  try {
+    const user_id = req.params.user_id;
+    const file = req.file;
+    console.log(file,"FILE UPLOADED")
+    // Upload the file to S3
+    // Upload one file for an user
+    const result = await uploadFileToS3(file.buffer, file.originalname, file.mimetype);
+
+    // Save file reference in the database
+    const newFile = await FileUploadModel.create({
+      user_id,
+      filename: file.originalname,
+      url: result.Location // URL of the uploaded file
+    });
+
+    res.status(201).json(newFile);
+  } catch (error) {
+    next(error);
+  }
+});
+// Upload multiple files for an user
+fileRouter.post('/amazon_cloud/:user_id/multiple', JWTAuthMiddleware, upload.array('files', 10), async (req, res, next) => {
+  try {
+    const user_id = req.params.user_id;
+    const files = req.files;
+
+    const uploadPromises = files.map((file) =>
+      uploadFileToS3(file.buffer, file.originalname, file.mimetype)
+    );
+
+    const uploadResults = await Promise.all(uploadPromises);
+
+    const newFiles = await FileUploadModel.bulkCreate(
+      uploadResults.map((uploadResult, index) => ({
+        user_id,
+        filename: files[index].originalname,
+        url: uploadResult.Location // URL of the uploaded file
+      }))
+    );
+
+    res.status(201).json(newFiles);
+  } catch (error) {
+    next(error);
+  }
+});
 // Post user Avatar
 fileRouter.post("/:user_id/avatar", JWTAuthMiddleware, async (req, res, next) => {
   try {
@@ -77,9 +140,6 @@ fileRouter.post("/:user_id/avatar", JWTAuthMiddleware, async (req, res, next) =>
   }
 });
 
-
-
-
 // Get all files for an user
 fileRouter.get('/:user_id', async (req, res, next) => {
   try {
@@ -93,22 +153,7 @@ fileRouter.get('/:user_id', async (req, res, next) => {
     next(error);
   }
 });
-// // Extract text from pdf
-// fileRouter.post("/extract-text", upload.single("pdfFile"), async (req, res, next) => {
-//   try {
 
-//     if (!req.file) {
-//       return next(createHttpError(400, "PDF file is required."));
-//     }
-
-//     const pdfText = await PdfParse(req.file.path);
-//     res.send(pdfText.text);
-//   } catch (error) {
-//     next(error);
-//   }
-// });
-
-// Get one file by ID for an user
 fileRouter.get('/:user_id/:file_id', async (req, res, next) => {
   try {
     const file = await FileUploadModel.findOne({
@@ -126,25 +171,9 @@ fileRouter.get('/:user_id/:file_id', async (req, res, next) => {
   }
 });
 
-// Upload one file for an user
-// fileRouter.post('/:user_id', upload.single('file'), async (req, res, next) => {
-//   try {
-//     const result = await cloudinary.uploader.upload(req.file.path);
-//     const file = await FileUploadModel.create({
-//       user_id: req.params.user_id,
-//       filename: req.file.originalname,
-//       url: result.secure_url,
-//     });
-//     res.status(201).json(file);
-//   } catch (error) {
-//     console.log(error,"ERROES")
-//     next(error);
-//   }
-// });
 fileRouter.post('/:user_id', upload.single('file'), async (req, res, next) => {
   try {
     const result = req.file; // Use req.file instead of req.body
-    console.log(result, "RESLSBSKJSHBN");
     const file = await FileUploadModel.create({
       user_id: req.params.user_id,
       filename: result.originalname,
