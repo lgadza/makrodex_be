@@ -6,7 +6,8 @@ import createHttpError from "http-errors";
 import UserModel from "../users/model.js";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { JWTAuthMiddleware } from "../lib/auth/jwtAuth.js";
-import { s3 } from "../../s3Service.js";
+import { generateSignedUrl, s3 } from "../../s3Service.js";
+
 // import PdfParse from "pdf-parse";
 
 
@@ -148,6 +149,17 @@ fileRouter.get('/:user_id', async (req, res, next) => {
         user_id: req.params.user_id,
       },
     });
+    res.json(files);
+  } catch (error) {
+    next(error);
+  }
+});
+fileRouter.get('/', async (req, res, next) => {
+  // Generate a signed URL for accessing the file
+const signedUrl = await generateSignedUrl('makronexus', 'Melly.pdf', 60 * 5); // URL expires in 5 minutes
+console.log(signedUrl,"TJDHQVJAFJHFA")
+  try {
+    const files = await FileUploadModel.findAll();
     res.json(files);
   } catch (error) {
     next(error);

@@ -25,6 +25,7 @@ import userAISettingsRouter from "./api/makronexusAI/userAISettings/index.js"
 import AIFileRouter from "./api/makronexusAI/files/index.js"
 import datasetChatRouter from "./api/makronexusAI/datasetChats/index.js"
 import stripeRouter from "./api/payment_gateways/index.js"
+import fileSystemManagement from "./api/file/filesystem-server.js"
 
 const server = express()
 const port = process.env.PORT || 3001
@@ -38,6 +39,9 @@ server.use(cors(
 ))
 // server.use(express.json())
 server.use(bodyParser.json())
+server.use(bodyParser.urlencoded({
+  extended: true
+}));
 
 // ********************************** ENDPOINTS ****************************************
 
@@ -57,7 +61,8 @@ server.use('/langchain/qdrant', router);
 server.use('/langchain/qdrant', AIFileRouter);
 server.use('/makronexa', userAISettingsRouter);
 server.use('/create_checkout_section', stripeRouter);
-server.use("/stripe",stripeRouter)
+server.use("/stripe",stripeRouter);
+server.use("/fileManager",fileSystemManagement);
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)
