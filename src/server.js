@@ -28,7 +28,7 @@ import stripeRouter from "./api/payment_gateways/index.js"
 import fileSystemManagement from "./api/file/filesystem-server.js"
 
 const server = express()
-const port = process.env.PORT || 3001
+const port = process.env.PORT || 3001 
 
 // ********************************* MIDDLEWARES ***************************************
 server.use(cors(

@@ -27,6 +27,7 @@
     "@dqbd/tiktoken": "^1.0.7",
     "@qdrant/js-client-rest": "^1.4.0",
     "@sendgrid/mail": "^7.7.0",
+    "@syncfusion/ej2-filemanager-node-filesystem": "^18.1.54",
     "aws-sdk": "^2.1502.0",
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.2",

@@ -1,27 +1,30 @@
 /*jshint esversion: 8 */
 import express from 'express';
-import yargs from 'yargs';
-import multerS3 from 'multer-s3';
-import path from 'path';
+import bodyParser from 'body-parser';
 import archiver from 'archiver';
 import multer from 'multer';
 import fs from 'fs';
+import cors from 'cors';
+import yargs from 'yargs';
+import path from 'path';
+import multerS3 from 'multer-s3';
 import { s3 } from '../../s3Service.js';
-
-let size = 0;
-let copyName = "";
-let location = "";
-let isRenameChecking = false;
-let accessDetails = null;
-const  fileSystemManagement=express.Router()
-
+const fileSystemManagementRouter=express.Router();
+var size = 0;
+var copyName = "";
+var location = "";
+var isRenameChecking = false;
+var accessDetails = null;
 const pattern = /(\.\.\/)/g;
 
-let contentRootPath = yargs.argv.d||"default/path";
-contentRootPath=contentRootPath.replace("../","");
+
+// Assuming you have yargs configured correctly
+const contentRootPath = yargs.argv.d ? yargs.argv.d.replace("../", "") : "default/path";
 
 
-const Permission = {
+
+
+var Permission = {
     Allow: "allow",
     Deny: "deny"
 };
@@ -796,27 +799,45 @@ function FileManagerDirectoryContent(req, res, filepath, searchFilterPath) {
 //Multer to upload the files to the server
 var fileName = [];
 //MULTER CONFIG: to get file photos to temp server storage
-const upload = multer({
+const multerConfig = {
+    //specify diskStorage (another option is memory)
     storage: multerS3({
-      s3: s3,
-      bucket: process.env.AWS_S3_BUCKET_NAME,
-      metadata: function (req, file, cb) {
-        cb(null, {fieldName: file.fieldname});
-      },
-      key: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix);
-      }
-    })
-  });
+        //specify destination
+        s3: s3,
+        bucket: process.env.AWS_S3_BUCKET_NAME,
+        key: function (req, file, cb) {
+            cb(null, Date.now().toString() + '_' + file.originalname);
+          },
+        destination: function (req, file, next) {
+            next(null, './');
+        },
+
+        //specify the filename to be unique
+        filename: function (req, file, next) {
+            fileName.push(file.originalname);
+            next(null, file.originalname);
+
+        }
+    }),
+
+    // filter out and prevent non-image files.
+    fileFilter: function (req, file, next) {
+        next(null, true);
+    }
+};
+
 function replaceRequestParams(req, res) {
     req.body.path = (req.body.path && req.body.path.replace(pattern, ""));
 }
 /**
  * Gets the imageUrl from the client
  */
-fileSystemManagement.get('/GetImage', function (req, res) {
+fileSystemManagementRouter.get('/GetImage', function (req, res) {
     replaceRequestParams(req, res);
+    if (typeof req.query.path === 'undefined') {
+        res.status(400).send({ error: "The path query parameter is required." });
+        return;
+    }
     var image = req.query.path.split("/").length > 1 ? req.query.path : "/" + req.query.path;
     const resolvedPath = path.resolve(contentRootPath + image.substr(0, image.lastIndexOf("/")), image.substr(image.lastIndexOf("/") + 1, image.length - 1));
     const fullPath = (contentRootPath + image).replace(/[\\/]/g, "\\");
@@ -851,7 +872,7 @@ fileSystemManagement.get('/GetImage', function (req, res) {
 /**
  * Handles the upload request
  */
-fileSystemManagement.post('/Upload', upload.any('uploadFiles'), function (req, res) {
+fileSystemManagementRouter.post('/Upload', multer(multerConfig).any('uploadFiles'), function (req, res) {
     replaceRequestParams(req, res);
     const checkTraversalPath = path.resolve(contentRootPath + req.body.path).replace(/[\\/]/g, "\\\\")+"\\\\";
     const actualPath = (contentRootPath + req.body.path).replace(/\//g, "\\\\");
@@ -860,7 +881,7 @@ fileSystemManagement.post('/Upload', upload.any('uploadFiles'), function (req, r
         var errorMsg = new Error();
         errorMsg.message = "Access denied for Directory-traversal";
         errorMsg.code = "401";
-        let response = { error: errorMsg };
+        response = { error: errorMsg };
         response = JSON.stringify(response);
         res.setHeader('Content-Type', 'application/json');
         res.json(response);
@@ -959,7 +980,7 @@ fileSystemManagement.post('/Upload', upload.any('uploadFiles'), function (req, r
 /**
  * Download a file or folder
  */
-fileSystemManagement.post('/Download', function (req, res) {
+fileSystemManagementRouter.post('/Download', function (req, res) {
     replaceRequestParams(req, res);
     var downloadObj = JSON.parse(req.body.downloadInput);
     var permission; var permissionDenied = false;
@@ -1029,7 +1050,7 @@ fileSystemManagement.post('/Download', function (req, res) {
 /**
  * Handles the read request
  */
-fileSystemManagement.post('/FileOperations', function (req, res) {
+fileSystemManagementRouter.post('/', function (req, res) {
     replaceRequestParams(req, res);
     req.setTimeout(0);
     function getRules() {
@@ -1287,4 +1308,4 @@ fileSystemManagement.post('/FileOperations', function (req, res) {
     }
 
 });
-export default fileSystemManagement
+export default fileSystemManagementRouter
