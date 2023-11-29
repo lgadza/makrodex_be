@@ -62,7 +62,7 @@ server.use('/langchain/qdrant', AIFileRouter);
 server.use('/makronexa', userAISettingsRouter);
 server.use('/create_checkout_section', stripeRouter);
 server.use("/stripe",stripeRouter);
-server.use("/fileManager",fileSystemManagement);
+// server.use("/fileManager",fileSystemManagement);
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)
