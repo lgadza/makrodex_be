@@ -1,5 +1,4 @@
-
-
+import fs from "fs"
 import { Sequelize } from "sequelize"
 
 // const connectionString = process.env.DATABASE_CONNECTION_STRING;
@@ -15,6 +14,13 @@ const sequelize = new Sequelize({
   database: PG_DB,
   username: PG_USER,
   dialect: "postgres",
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: true,
+      ca: fs.readFileSync("./us-east-1-bundle.pem")
+    }
+  },
   logging: false,
 })
 export const pgConnect = async () => {
