@@ -336,21 +336,21 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
         //   }
           
           else{
-        const response = await openai.chat.completions.create({
-          model: "gpt-3.5-turbo", 
-          messages:[
-            {
-              "role":"system","content":`${makronexaPersonality}`
-            },
-            {
-              role:"user",
-              content:text,
-            }
-          ] ,
-          max_tokens: 1500,
-          temperature: 0.8,
-        });
-        // ! Resply from openai
+                    // ! Resply from openai
+        // const response = await openai.chat.completions.create({
+        //   model: "gpt-3.5-turbo", 
+        //   messages:[
+        //     {
+        //       "role":"system","content":`${makronexaPersonality}`
+        //     },
+        //     {
+        //       role:"user",
+        //       content:text,
+        //     }
+        //   ] ,
+        //   max_tokens: 1500,
+        //   temperature: 0.8,
+        // });
         // const replyMessage = response.choices[0].message.content;
         const replyMessage = `Temporary Service Interruption for Major Upgrades,
 
