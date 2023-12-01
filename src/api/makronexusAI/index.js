@@ -136,28 +136,9 @@ AiRouter.post("/chats/:chat_id/analyze-image",JWTAuthMiddleware, async (req, res
   try {
     const { imageUrl,user_id,question } = req.body;
     const { chat_id } = req.params;
-    
-    const response = await openai.chat.completions.create({
-      model: "gpt-4-vision-preview",
-      messages: [
-        {
-          role: "user",
-          content: [
-            { type: "text", text: question },
-            {
-              type: "image_url",
-              image_url: {
-                url: imageUrl,
-              },
-            },
-          ],
-        },
-      ],
-      max_tokens:1500,
-    });
-
     const user = await UserModel.findByPk(user_id);
     const chat = await aiChatModel.findByPk(chat_id);
+  
 
     if (!chat) {
       return res.status(404).json({ error: "Chat not found" });
@@ -167,37 +148,61 @@ AiRouter.post("/chats/:chat_id/analyze-image",JWTAuthMiddleware, async (req, res
       return res.status(404).json({ error: "User not found" });
     }
     
-    
-    const result = response.choices[0];
-console.log(result,"RESULTS")
-    // Create a new MakronexaQA instance for the user's input
-    const newMakronexaQA = await MakronexaQA.create({
-      type: "text",
-      message: question,
-      imageUrl:imageUrl,
-      from: "user",
-      model: "gpt-3.5-turbo",
-      user_id: user_id,
-      chat_id: chat_id,
-    });
+    if(["admin","teacher"].includes(user.dataValues.role)){
 
-    // Associate the user's input with the user
-    await newMakronexaQA.setUser(user);
+      const response = await openai.chat.completions.create({
+        model: "gpt-4-vision-preview",
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: question },
+              {
+                type: "image_url",
+                image_url: {
+                  url: imageUrl,
+                },
+              },
+            ],
+          },
+        ],
+        max_tokens:1500,
+      });
+      const result = response.choices[0];
+      console.log(result,"RESULTS")
+          // Create a new MakronexaQA instance for the user's input
+          const newMakronexaQA = await MakronexaQA.create({
+            type: "text",
+            message: question,
+            imageUrl:imageUrl,
+            from: "user",
+            model: "gpt-3.5-turbo",
+            user_id: user_id,
+            chat_id: chat_id,
+          });
+      
+          // Associate the user's input with the user
+          await newMakronexaQA.setUser(user);
+      
+          // Create a new MakronexaQA instance for the AI response
+          const newResponseMakronexaQA = await MakronexaQA.create({
+            type: "text",
+            message: result.message.content,
+            model: "gpt-4-vision-preview",
+            user_id: process.env.MAKRONEXA_ID, //cloud
+            chat_id: chat_id,
+          });
+      
+          console.log(newResponseMakronexaQA, "newResponseMakronexaQA");
+      
+          res.json({
+            message: result,
+          });
 
-    // Create a new MakronexaQA instance for the AI response
-    const newResponseMakronexaQA = await MakronexaQA.create({
-      type: "text",
-      message: result.message.content,
-      model: "gpt-4-vision-preview",
-      user_id: process.env.MAKRONEXA_ID, //cloud
-      chat_id: chat_id,
-    });
+    }else{
+      return res.status(404).json({ error: "Access to Makronexus image interpreter is currently restricted. Upgrade to the premium version now for uninterrupted service" });
+    }
 
-    console.log(newResponseMakronexaQA, "newResponseMakronexaQA");
-
-    res.json({
-      message: result,
-    });
   } catch (error) {
     console.error(error);
     next(error);

@@ -350,7 +350,16 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
           max_tokens: 1500,
           temperature: 0.8,
         });
-        const replyMessage = response.choices[0].message.content;
+        // ! Resply from openai
+        // const replyMessage = response.choices[0].message.content;
+        const replyMessage = `Temporary Service Interruption for Major Upgrades,
+
+        We are currently upgrading our [service/platform] to serve you better. During this time, you may experience temporary service interruptions. We are working swiftly to complete this upgrade and apologize for any inconvenience caused.
+        
+        Thank you for your patience and understanding. We are excited to bring you enhanced features and improved performance very soon!
+        
+        Best regards,
+        Makronexus Team`
         await sendWhatsAppMessage(from, replyMessage);
         res.status(200).json({ message: 'Message sent' });
       }
