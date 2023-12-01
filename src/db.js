@@ -9,11 +9,11 @@ import { Sequelize } from "sequelize"
 // })
 const { PG_DB, PG_USER, PG_PASSWORD, PG_HOST, PG_PORT } = process.env
 const sequelize = new Sequelize({
+  host: PG_HOST,
+  password: PG_PASSWORD,
+  port: PG_PORT,
   database: PG_DB,
   username: PG_USER,
-  password: PG_PASSWORD,
-  host: PG_HOST,
-  port: PG_PORT,
   dialect: "postgres",
   logging: false,
 })

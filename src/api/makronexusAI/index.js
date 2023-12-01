@@ -226,8 +226,8 @@ AiRouter.post("/chats/:chat_id/image-generate", async (req, res, next) => {
     }
     if(req.body.prompt){
     const prompt=req.body.prompt
-    const response=await promptDALLE(prompt)
-    // const response=await imageSearch(prompt)
+    // ! CREDITS CONSUMER
+    // const response=await promptDALLE(prompt)
     const smallImageUrls = response.map((image) => image.urls.small);
 
     console.log(response,"smallImageUrls")

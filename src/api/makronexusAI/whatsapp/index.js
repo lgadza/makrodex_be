@@ -299,11 +299,13 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
                 await sendWhatsAppMessage(from, " Access to Makronexus image generation is currently restricted. Upgrade to the premium version now for uninterrupted service. For more information, please contact us at +48794144892.");
                 res.status(200).json({ message: 'Message sent' });
 
-              }else{
-                const image_url = await generateImage(text);
-                await sendWhatsAppImage(from,image_url)
-                res.status(200).json({ message: 'Images sent successfully' });
               }
+              // ! GENERATE IMAGE Function
+              // else{
+              //   const image_url = await generateImage(text);
+              //   await sendWhatsAppImage(from,image_url)
+              //   res.status(200).json({ message: 'Images sent successfully' });
+              // }
             }catch (error) {
               console.error('Error:', error);
               res.status(500).json({ error: 'Internal Server Error' });
@@ -442,28 +444,29 @@ export async function sendWhatsAppMessage(recipient, message) {
     throw new Error('API request failed');
   }
 }
-async function generateImage(prompt) {
-  try {
-    const response = await openai.images.generate({
-      model: "dall-e-3",
-      prompt: prompt,
-      n: 1,
-      quality:"standard",
-      size: "1024x1024",
-    });
+// ! GENERATE IMAGE Function
+// async function generateImage(prompt) {
+//   try {
+//     const response = await openai.images.generate({
+//       model: "dall-e-3",
+//       prompt: prompt,
+//       n: 1,
+//       quality:"standard",
+//       size: "1024x1024",
+//     });
 
-    const imageUrl = response.data[0].url;
-    return imageUrl;
-  } catch (error) {
-    console.error("Error generating image:", error);
-    throw error;
-  }
-}
+//     const imageUrl = response.data[0].url;
+//     return imageUrl;
+//   } catch (error) {
+//     console.error("Error generating image:", error);
+//     throw error;
+//   }
+// }
 
-// Example usage:
-const prompt = "a white siamese cat";
-const image_url = await generateImage(prompt);
-console.log(image_url);
+// // Example usage:
+// const prompt = "a white siamese cat";
+// const image_url = await generateImage(prompt);
+// console.log(image_url);
 
 
 export default whatsAppRouter;
