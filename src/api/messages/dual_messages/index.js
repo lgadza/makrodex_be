@@ -6,7 +6,7 @@ import UserModel from '../../users/model.js';
 
 const messageRouter = express.Router();
 
-// Get all messages
+//! Get all messages
 messageRouter.get('/retrieve-messages', [
    
     query('user1_id').isUUID().withMessage('User1 ID must be a valid UUID'),
@@ -59,7 +59,7 @@ messageRouter.get('/retrieve-messages', [
     }
 });
 
-// Get one message
+//! Get one message
 messageRouter.get('/:id', async (req, res, next) => {
     try {
         const message = await MessageModel.findByPk(req.params.id);
@@ -72,7 +72,7 @@ messageRouter.get('/:id', async (req, res, next) => {
         next(error);
     }
 });
-// Endpoint to mark a message as read
+//!1 Endpoint to mark a message as read
 messageRouter.post('/mark-message-read', [
     body('message_id').isUUID().withMessage('Message ID must be a valid UUID'),
     body('user_id').isUUID().withMessage('User ID must be a valid UUID')
@@ -109,7 +109,7 @@ messageRouter.post('/mark-message-read', [
         res.status(500).json({ error: error.message || 'Internal Server Error' });
     }
 });
-// Create a new message
+//! Create a new message
 messageRouter.post('/send-message', [
     body('sender_id').isUUID().withMessage('Sender ID must be a valid UUID'),
     body('receiver_id').isUUID().withMessage('Receiver ID must be a valid UUID'),
@@ -151,9 +151,7 @@ messageRouter.post('/send-message', [
         res.status(500).json({ error: error.message || 'Internal Server Error' });
     }
 });
-
-
-// Update a message
+//! Update a message
 messageRouter.put('/update-message', [
     body('message_id').isUUID().withMessage('Message ID must be a valid UUID'),
     body('user_id').isUUID().withMessage('User ID must be a valid UUID'),
@@ -191,7 +189,7 @@ messageRouter.put('/update-message', [
     }
 });
 
-// Delete a message
+// !Delete a message
 messageRouter.post('/delete-message', [
     body('message_id').isUUID().withMessage('Message ID must be a valid UUID'),
     body('user_id').isUUID().withMessage('User ID must be a valid UUID')
@@ -231,7 +229,7 @@ messageRouter.post('/delete-message', [
         res.status(500).json({ error: error.message || 'Internal Server Error' });
     }
 });
-// Endpoint to list messages sent by a user
+// !Endpoint to list messages sent by a user
 messageRouter.get('/list-sent-messages', [
     query('user_id').isUUID().withMessage('User ID must be a valid UUID')
 ], async (req, res) => {
@@ -261,7 +259,7 @@ messageRouter.get('/list-sent-messages', [
         res.status(500).json({ error: error.message || 'Internal Server Error' });
     }
 });
-// Endpoint to list messages received by a user
+//! Endpoint to list messages received by a user
 messageRouter.get('/list-received-messages', [
     query('user_id').isUUID().withMessage('User ID must be a valid UUID')
 ], async (req, res) => {
