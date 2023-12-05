@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../../db.js';
+import sequelize from '../../../db.js';
 
 const ConversationModel = sequelize.define('conversation', {
     conversation_id: {
@@ -11,10 +11,6 @@ const ConversationModel = sequelize.define('conversation', {
         type: DataTypes.STRING,
         allowNull: true
     },
-    created_at: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW
-    },
     last_message_id: {
         type: DataTypes.UUID,
         allowNull: true,
@@ -24,9 +20,9 @@ const ConversationModel = sequelize.define('conversation', {
         }
     },
     // Optional: Auditing fields
-    created_by: {
+    creator_id: {
         type: DataTypes.UUID,
-        allowNull: true,
+        allowNull: false,
         references: {
             model: 'users',
             key: 'id'
@@ -47,8 +43,6 @@ const ConversationModel = sequelize.define('conversation', {
 }, {
     // Enable soft deletes
     paranoid: true,
-    // Enable automatic handling of created_at and updated_at
-    timestamps: true,
     // Indexes for performance optimization
     indexes: [
         {
