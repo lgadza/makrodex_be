@@ -1,27 +1,19 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../../db.js';
+
 const ConversationModel = sequelize.define('conversation', {
     conversation_id: {
         type: DataTypes.UUID,
         primaryKey: true,
-        autoIncrement: true
+        defaultValue: DataTypes.UUIDV4
     },
     conversation_name: {
         type: DataTypes.STRING,
-        // allowNull can be true if you want to allow conversations without explicit names
         allowNull: true
     },
-    timestamp: {
+    created_at: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW
-    },
-    creator_id: {
-        type: DataTypes.UUID,
-        allowNull: false,
-        references: {
-            model: 'users',
-            key: 'id'
-        }
     },
     last_message_id: {
         type: DataTypes.UUID,
@@ -31,12 +23,47 @@ const ConversationModel = sequelize.define('conversation', {
             key: 'message_id'
         }
     },
-    created_at: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW
+    // Optional: Auditing fields
+    created_by: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+            model: 'users',
+            key: 'id'
+        }
     },
+    updated_by: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+            model: 'users',
+            key: 'id'
+        }
+    },
+    // Optional: Soft Delete
+    deletedAt: {
+        type: DataTypes.DATE
+    }
 }, {
-    // Additional model options
+    // Enable soft deletes
+    paranoid: true,
+    // Enable automatic handling of created_at and updated_at
+    timestamps: true,
+    // Indexes for performance optimization
+    indexes: [
+        {
+            fields: ['creator_id']
+        },
+        {
+            fields: ['last_message_id']
+        }
+    ]
 });
+
+// Optional: Model associations
+ConversationModel.associate = (models) => {
+    ConversationModel.belongsTo(models.User, { as: 'Creator', foreignKey: 'creator_id' });
+    ConversationModel.belongsTo(models.Message, { as: 'LastMessage', foreignKey: 'last_message_id' });
+};
 
 export default ConversationModel;

@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../../../db.js'; 
+import sequelize from '../../../db.js';
 
 const MessageModel = sequelize.define('message', {
     message_id: {
@@ -11,7 +11,7 @@ const MessageModel = sequelize.define('message', {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
-            model: 'users', 
+            model: 'users',
             key: 'id'
         }
     },
@@ -19,8 +19,8 @@ const MessageModel = sequelize.define('message', {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
-            model: 'users', 
-            key: 'id'  
+            model: 'users',
+            key: 'id'
         }
     },
     content: {
@@ -34,8 +34,32 @@ const MessageModel = sequelize.define('message', {
     read_status: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
+    },
+    // Optional: Soft Delete
+    deletedAt: {
+        type: DataTypes.DATE
     }
-  
+}, {
+    // Optional: Enable soft deletes
+    paranoid: true,
+    // Optional: Indexes for performance optimization
+    indexes: [
+        {
+            fields: ['sender_id']
+        },
+        {
+            fields: ['receiver_id']
+        },
+        {
+            fields: ['timestamp']
+        }
+    ]
 });
+
+// Optional: Model associations
+MessageModel.associate = (models) => {
+    MessageModel.belongsTo(models.User, { as: 'Sender', foreignKey: 'sender_id' });
+    MessageModel.belongsTo(models.User, { as: 'Receiver', foreignKey: 'receiver_id' });
+};
 
 export default MessageModel;

@@ -29,6 +29,7 @@ import stripeRouter from "./api/payment_gateways/index.js"
 import fileSystemManagement from "./api/file/filesystem-server.js"
 import initializeSocket from "./socket.js";
 import messageRouter from "./api/messages/dual_messages/index.js";
+import conversationRouter from "./api/messages/conversations/index.js";
 
 const server = express()
 const httpServer = http.createServer(server);
@@ -72,6 +73,7 @@ server.use('/makronexa', userAISettingsRouter);
 // server.use("/stripe",stripeRouter);
 // server.use("/file",fileSystemManagement);
 server.use("/messages",messageRouter);
+server.use("/conversations",conversationRouter);
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)
