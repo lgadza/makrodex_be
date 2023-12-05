@@ -1,5 +1,6 @@
 import express from "express"
 import cors from "cors"
+import http from 'http';
 import listEndpoints from "express-list-endpoints"
 import { pgConnect, syncModels } from "./db.js"
 import {
@@ -26,10 +27,17 @@ import AIFileRouter from "./api/makronexusAI/files/index.js"
 import datasetChatRouter from "./api/makronexusAI/datasetChats/index.js"
 import stripeRouter from "./api/payment_gateways/index.js"
 import fileSystemManagement from "./api/file/filesystem-server.js"
+import initializeSocket from "./socket.js";
+import messageRouter from "./api/messages/dual_messages/index.js";
 
 const server = express()
+const httpServer = http.createServer(server);
+const io = initializeSocket(httpServer);
 const port = process.env.PORT || 3001 
-
+server.use((req, res, next) => {
+  req.io = io;
+  next();
+});
 // ********************************* MIDDLEWARES ***************************************
 server.use(cors(
   {
@@ -60,9 +68,10 @@ server.use('/ai', whatsAppRouter);
 server.use('/langchain/qdrant', router);
 server.use('/langchain/qdrant', AIFileRouter);
 server.use('/makronexa', userAISettingsRouter);
-server.use('/create_checkout_section', stripeRouter);
-server.use("/stripe",stripeRouter);
-// server.use("/fileManager",fileSystemManagement);
+// server.use('/create_checkout_section', stripeRouter);
+// server.use("/stripe",stripeRouter);
+// server.use("/file",fileSystemManagement);
+server.use("/messages",messageRouter);
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)

@@ -16,7 +16,23 @@
     "type": "git",
     "url": "git+https://github.com/lgadza/makrodex_be.git"
   },
-  "keywords": [],
+  "keywords": [
+    "ej2",
+    "syncfusion",
+    "ej2 file manager",
+    "Nodejs",
+    "File system",
+    "File explorer",
+    "File access rule",
+    "File system provider",
+    "Local/physical file storage",
+    "Folders/directory",
+    "file path",
+    "file upload",
+    "File access permission",
+    "file browser",
+    "folder drag and drop"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {
@@ -29,6 +45,7 @@
     "@qdrant/js-client-rest": "^1.4.0",
     "@sendgrid/mail": "^7.7.0",
     "@syncfusion/ej2-filemanager-node-filesystem": "^18.1.54",
+    "archiver": "^6.0.1",
     "aws-sdk": "^2.1502.0",
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.2",
@@ -39,9 +56,9 @@
     "express-list-endpoints": "^6.0.0",
     "express-validator": "^7.0.1",
     "faiss-node": "^0.2.3",
-    "file-system": "^2.2.2",
     "http-errors": "^2.0.0",
     "i": "^0.3.7",
+    "jshint-stylish": "^2.2.1",
     "jsonwebtoken": "^9.0.1",
     "langchain": "^0.0.127",
     "morgan": "^1.10.0",
@@ -52,6 +69,7 @@
     "openai": "^4.17.4",
     "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0",
+    "path": "^0.12.7",
     "pdf-parse": "^1.1.1",
     "pg": "^8.9.0",
     "pg-promise": "^11.5.3",
@@ -59,6 +77,7 @@
     "qdrant": "^1.3.1",
     "qrcode-terminal": "^0.12.0",
     "sequelize": "^6.28.0",
+    "socket.io": "^4.7.2",
     "stripe": "^13.7.0",
     "tiktoken": "^1.0.10",
     "uuid": "^9.0.0",
@@ -67,12 +86,6 @@
   },
   "devDependencies": {
     "dotenv": "^16.3.1",
-    "gulp": "^3.9.1",
-    "gulp-jshint": "^2.1.0",
-    "jshint": "^2.13.6",
-    "nodemon": "^2.0.20",
-    "require-dir": "^0.3.2",
-    "requirejs": "^2.3.6",
-    "shelljs": "^0.7.8"
+    "nodemon": "^2.0.20"
   }
 }

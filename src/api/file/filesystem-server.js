@@ -832,7 +832,7 @@ function replaceRequestParams(req, res) {
 /**
  * Gets the imageUrl from the client
  */
-fileSystemManagementRouter.get('/GetImage', function (req, res) {
+fileSystemManagementRouter.get('GetImage', function (req, res) {
     replaceRequestParams(req, res);
     if (typeof req.query.path === 'undefined') {
         res.status(400).send({ error: "The path query parameter is required." });
@@ -872,7 +872,7 @@ fileSystemManagementRouter.get('/GetImage', function (req, res) {
 /**
  * Handles the upload request
  */
-fileSystemManagementRouter.post('/Upload', multer(multerConfig).any('uploadFiles'), function (req, res) {
+fileSystemManagementRouter.post('Upload', multer(multerConfig).any('uploadFiles'), function (req, res) {
     replaceRequestParams(req, res);
     const checkTraversalPath = path.resolve(contentRootPath + req.body.path).replace(/[\\/]/g, "\\\\")+"\\\\";
     const actualPath = (contentRootPath + req.body.path).replace(/\//g, "\\\\");
@@ -980,7 +980,7 @@ fileSystemManagementRouter.post('/Upload', multer(multerConfig).any('uploadFiles
 /**
  * Download a file or folder
  */
-fileSystemManagementRouter.post('/Download', function (req, res) {
+fileSystemManagementRouter.post('Download', function (req, res) {
     replaceRequestParams(req, res);
     var downloadObj = JSON.parse(req.body.downloadInput);
     var permission; var permissionDenied = false;
@@ -1050,7 +1050,7 @@ fileSystemManagementRouter.post('/Download', function (req, res) {
 /**
  * Handles the read request
  */
-fileSystemManagementRouter.post('/', function (req, res) {
+fileSystemManagementRouter.post('', function (req, res) {
     replaceRequestParams(req, res);
     req.setTimeout(0);
     function getRules() {
