@@ -3,6 +3,7 @@ import MessageModel from './model.js';
 import { Op } from 'sequelize';
 import { body, query, validationResult } from 'express-validator';
 import UserModel from '../../users/model.js';
+import ConversationModel from '../conversations/model.js';
 
 const messageRouter = express.Router();
 
@@ -113,6 +114,7 @@ messageRouter.post('/mark-message-read', [
 messageRouter.post('/send-message', [
     body('sender_id').isUUID().withMessage('Sender ID must be a valid UUID'),
     body('receiver_id').isUUID().withMessage('Receiver ID must be a valid UUID'),
+    body('conversation_id').isUUID().withMessage('Conversation ID must be a valid UUID'),
     body('content').trim().isLength({ min: 1 }).withMessage('Message content cannot be empty'),
 ], async (req, res) => {
     // Check for validation errors
@@ -121,12 +123,13 @@ messageRouter.post('/send-message', [
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { sender_id, receiver_id, content } = req.body;
+    const { sender_id, receiver_id, content,conversation_id } = req.body;
 
     try {
         // Validate existence of users
         const senderExists = await UserModel.findByPk(sender_id);
         const receiverExists = await UserModel.findByPk(receiver_id);
+        const conversationExists = await ConversationModel.findByPk(conversation_id);
 
         if (!receiverExists) {
             return res.status(404).json({ error: 'Receiver id not found' });
@@ -134,11 +137,15 @@ messageRouter.post('/send-message', [
         if (!senderExists ) {
             return res.status(404).json({ error: 'Sender id not found' });
         }
+        if (!conversationExists ) {
+            return res.status(404).json({ error: 'Conversation id not found' });
+        }
 
         // Create a new message
         const message = await MessageModel.create({
             sender_id,
             receiver_id,
+            conversation_id,
             content,
         });
 

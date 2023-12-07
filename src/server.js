@@ -1,6 +1,10 @@
 import express from "express"
 import cors from "cors"
 import http from 'http';
+import { Server } from "socket.io";
+import morgan from "morgan";
+import dotenv from "dotenv";
+import { initializeSocket } from "./socket.js";
 import listEndpoints from "express-list-endpoints"
 import { pgConnect, syncModels } from "./db.js"
 import {
@@ -27,18 +31,29 @@ import AIFileRouter from "./api/makronexusAI/files/index.js"
 import datasetChatRouter from "./api/makronexusAI/datasetChats/index.js"
 import stripeRouter from "./api/payment_gateways/index.js"
 import fileSystemManagement from "./api/file/filesystem-server.js"
-import initializeSocket from "./socket.js";
 import messageRouter from "./api/messages/dual_messages/index.js";
 import conversationRouter from "./api/messages/conversations/index.js";
+import messengerParticipantRouter from "./api/messages/participants/index.js";
+
+// Load environment variables
+dotenv.config();
 
 const server = express()
-const httpServer = http.createServer(server);
-const io = initializeSocket(httpServer);
 const port = process.env.PORT || 3001 
-server.use((req, res, next) => {
-  req.io = io;
-  next();
+// Create an HTTP server and pass the Express app
+const httpServer = http.createServer(server);
+const io = new Server(httpServer, {
+  cors: {
+    origin: ['http://localhost:300'],
+    methods: ["GET", "POST"]
+  }
 });
+
+io.on("connection", (socket) => {
+  console.log('Socket.IO client connected');
+  initializeSocket(io); // Pass the io instance to your function
+});
+
 // ********************************* MIDDLEWARES ***************************************
 server.use(cors(
   {
@@ -51,6 +66,7 @@ server.use(bodyParser.json())
 server.use(bodyParser.urlencoded({
   extended: true
 }));
+server.use(morgan('dev'));
 
 // ********************************** ENDPOINTS ****************************************
 
@@ -74,6 +90,7 @@ server.use('/makronexa', userAISettingsRouter);
 // server.use("/file",fileSystemManagement);
 server.use("/messages",messageRouter);
 server.use("/conversations",conversationRouter);
+server.use("/messenger",messengerParticipantRouter);
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)
@@ -85,8 +102,7 @@ server.use(genericErrorHandler)
 await pgConnect()
 await syncModels()
 
-server.listen(port, () => {
-  console.table(listEndpoints(server))
-  console.log(`Server is running on port ${port}`)
-})
-// await pool()
+httpServer.listen(port, () => {
+  console.table(listEndpoints(server));
+  console.log(`Server is running on port ${port}`);
+});

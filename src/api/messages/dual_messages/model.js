@@ -15,6 +15,15 @@ const MessageModel = sequelize.define('message', {
             key: 'id'
         }
     },
+ 
+    conversation_id: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        references: {
+            model: 'conversations', // This should match the table name for conversations
+            key: 'conversation_id'
+        }
+    },
     receiver_id: {
         type: DataTypes.UUID,
         allowNull: false,
