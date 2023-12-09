@@ -278,8 +278,10 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
     // If no session exists, create a new one
     if (!userSession) {
         userSession = sessionManager.createSession(from);
-      await  sendWhatsAppMessageWithTemplate(from,"register_to_makronexus")
-        sendWhatsAppMessage(from, "To get started with our services, we need a few details from you. First, could you please tell us your first name? We appreciate using your real name to maintain a professional record, e.g John");
+      // await  sendWhatsAppMessageWithTemplate(from,"register_to_makronexus")
+        sendWhatsAppMessage(from, `🌟 Welcome to Makronexus! 🌟
+        
+        To get started with our services, we need a few details from you. First, could you please tell us your first name? We appreciate using your real name to maintain a professional record, e.g John`);
         return;
     }
 
