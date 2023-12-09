@@ -444,11 +444,11 @@ if (userSession.step === 'awaiting_country_code') {
 }
  // ?If the session is waiting for the gender
  if (userSession.step === 'awaiting_gender') {
-  const dateOfBirth = text.trim(); // Extract and trim the text from the message
+  const gender = text.trim(); // Extract and trim the text from the message
 
   // Check if we are waiting for a confirmation
   if (userSession.awaitingConfirmation) {
-      if (dateOfBirth.toLowerCase() === 'y') {
+      if (gender.toLowerCase() === 'y') {
           userSession.awaitingConfirmation = false;
           userSession.step = "awaiting_phone_number"; // Move to the next attribute
 
@@ -465,7 +465,7 @@ if (userSession.step === 'awaiting_country_code') {
 
   // Validate the gender
   if (['male', 'female'].includes(gender)) {
-      userSession.update({ gender: dateOfBirth }, 'awaiting_gender');
+      userSession.update({ gender: gender }, 'awaiting_gender');
       userSession.awaitingConfirmation = true;
 
       // Send a message asking for confirmation
