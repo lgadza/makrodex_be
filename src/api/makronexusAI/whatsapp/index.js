@@ -348,7 +348,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
 
       // Validate the last name (basic validation, adjust regex as needed)
       if (/^[a-zA-Z]{1,15}$/.test(lastName)) {
-          userSession.update({ last_name: lastName,email:userSession.data.first_name+lastName+"@makronexus.com",password:generatePassword() }, 'awaiting_last_name');
+          userSession.update({ last_name: lastName,email:userSession.data.first_name+lastName+"@makronexus.com",password:generatePassword(),data_process_acceptance:true }, 'awaiting_last_name');
           userSession.awaitingConfirmation = true;
 
           // Send a message asking for confirmation
@@ -535,7 +535,7 @@ if (userSession.step === 'awaiting_country_code') {
       userSession.awaitingConfirmation = true;
 
       // Send a message asking for confirmation
-      sendWhatsAppMessage(from, `Just to make sure, your number is 0${phone_number},.`);
+      sendWhatsAppMessage(from, `Just to make sure, your number is 0${phone_number}.`);
       sendWhatsAppMessage(from, `If  correct? Type 'Y' or 'N'.`);
 
       res.status(200).send('OK');
