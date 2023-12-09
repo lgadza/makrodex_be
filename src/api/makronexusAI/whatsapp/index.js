@@ -15,6 +15,7 @@ import {
   HumanMessagePromptTemplate,
 } from 'langchain/prompts';
 import UserModel from "../../users/model.js";
+import sessionManager from "./sessionManager.js";
 
 
 const whatsAppRouter = express.Router();
@@ -242,6 +243,7 @@ if(phone!=="" && query!==""){
 });
 
 whatsAppRouter.post('/webhooks', async (req, res) => {
+  
   try {
   
     const bodyParam = req.body;
@@ -269,6 +271,254 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
           },
         });
         if (!user) {
+
+          // ! REGISTERING USER THROUGH WHATS UP
+       let userSession = sessionManager.getSession(from);
+
+    // If no session exists, create a new one
+    if (!userSession) {
+        userSession = sessionManager.createSession(from);
+        sendWhatsAppMessage(from, "Welcome aboard! 🚀 Let's start easy - what's your first name? Please, no monikers like 'TheTerminator123'!");
+        return;
+    }
+
+    // ?If the session is waiting for the first name
+    if (userSession.step === 'awaiting_first_name') {
+        const firstName = text.trim(); // Extract and trim the text from the message
+
+        // Check if we are waiting for a confirmation
+        if (userSession.awaitingConfirmation) {
+            if (firstName.toLowerCase() === 'yes') {
+                userSession.awaitingConfirmation = false;
+                userSession.step = "awaiting_last_name"; // Move to the next attribute
+
+                // Personalized confirmation message
+                sendWhatsAppMessage(from, `Awesome, ${userSession.data.first_name}! 🌟  Now, what's your last name? Hopefully, it's easier to spell than 'Schwarzenegger 😄`);
+            } else {
+                userSession.awaitingConfirmation = false;
+                sendWhatsAppMessage(from, "Oops! Let's try your first name again, and make it snappy! 😄");
+            }
+
+            res.status(200).send('OK');
+            return;
+        }
+
+        // Validate the first name (basic validation, adjust regex as needed)
+        if (/^[a-zA-Z]{1,15}$/.test(firstName)) {
+            userSession.update({ first_name: firstName }, 'awaiting_first_name');
+            userSession.awaitingConfirmation = true;
+
+            // Send a message asking for confirmation
+            sendWhatsAppMessage(from, `Got it! Your first name is ${firstName}, right? Just reply with 'Yes' or 'No'.`);
+
+            res.status(200).send('OK');
+            return;
+        } else {
+            // Send error message for invalid first name
+            sendWhatsAppMessage(from, "Hmm, that doesn't sound like a real first name. 🤔 Try again, and keep it simple this time!");
+        }
+    }
+    // ?If the session is waiting for the last name
+    if (userSession.step === 'awaiting_last_name') {
+      const lastName = text.trim(); // Extract and trim the text from the message
+
+      // Check if we are waiting for a confirmation
+      if (userSession.awaitingConfirmation) {
+          if (lastName.toLowerCase() === 'yes') {
+              userSession.awaitingConfirmation = false;
+              userSession.step = "awaiting_country_code"; // Move to the next attribute
+
+              // Personalized confirmation message
+              sendWhatsAppMessage(from, `Great, So far so good, Now we want your country code, e.g +263 or +27 `);
+          } else {
+              userSession.awaitingConfirmation = false;
+              sendWhatsAppMessage(from, "Oops! Let's try your last name again, and make it snappy! 😄");
+          }
+
+          res.status(200).send('OK');
+          return;
+      }
+
+      // Validate the last name (basic validation, adjust regex as needed)
+      if (/^[a-zA-Z]{1,15}$/.test(lastName)) {
+          userSession.update({ last_name: lastName,email:userSession.data.first_name+lastName+"@makronexus.com",password:generatePassword() }, 'awaiting_last_name');
+          userSession.awaitingConfirmation = true;
+
+          // Send a message asking for confirmation
+          sendWhatsAppMessage(from, `Awesome, ${lastName}! You're doing great. Just reply with 'Yes' or 'No'.`);
+
+          res.status(200).send('OK');
+          return;
+      } else {
+          // Send error message for invalid last name
+          sendWhatsAppMessage(from, "Hmm, that doesn't sound like a real last name. 🤔 Try again, and keep it simple this time!");
+      }
+  }
+// ?If the session is waiting for the country_code
+if (userSession.step === 'awaiting_country_code') {
+  const countryCode = text.trim(); // Extract and trim the text from the message
+
+  // Check if we are waiting for a confirmation
+  if (userSession.awaitingConfirmation) {
+      if (countryCode.toLowerCase() === 'y') {
+          userSession.awaitingConfirmation = false;
+          userSession.step = "awaiting_date_of_birth"; // Move to the next attribute
+
+          // Personalized confirmation message
+       
+          sendWhatsAppMessage(from, ` 🎉 Now, let's talk about your special day! Could you please share your date of birth with me? Just the format DD_MM_YYYY would be perfect. This will help us celebrate you when the time comes! 🎂`);
+      } else {
+          userSession.awaitingConfirmation = false;
+          sendWhatsAppMessage(from, "Oops Error! Let's try your country code again");
+      }
+
+      res.status(200).send('OK');
+      return;
+  }
+
+  // Validate the last name (basic validation, adjust regex as needed)
+  if (/^\+\d{1,3}$/.test(countryCode)) {
+      userSession.update({ country_code: countryCode }, 'awaiting_country_code');
+      userSession.awaitingConfirmation = true;
+
+      // Send a message asking for confirmation
+      let confirmationMessage = "";
+      switch (userSession.data.country_code) {
+          case '+263':
+              confirmationMessage = "Ooh, you're Zimbabwean! Land of the mighty Victoria Falls. 🌍, Just reply with 'Y' or 'N'";
+              break;
+          case '+27':
+              confirmationMessage = "Lovely, you're from South Africa! Home of the breathtaking Table Mountain. 🏞️, Just reply with 'Y' or 'N'";
+              break;
+          default:
+              confirmationMessage = `Thanks! Your country code is ${userSession.data.country_code}, Just reply with 'Y' or 'N'`;
+              break;
+      }
+      sendWhatsAppMessage(from, confirmationMessage);
+
+      res.status(200).send('OK');
+      return;
+  } else {
+      // Send error message for invalid country code
+      sendWhatsAppMessage(from, "Hmm, that doesn't look quite right. Could you please enter your country code e.g +263 or +27");
+  }
+}
+ // ?If the session is waiting for the date of birth
+ if (userSession.step === 'awaiting_date_of_birth') {
+  const dateOfBirth = text.trim(); // Extract and trim the text from the message
+
+  // Check if we are waiting for a confirmation
+  if (userSession.awaitingConfirmation) {
+      if (dateOfBirth.toLowerCase() === 'yes') {
+          userSession.awaitingConfirmation = false;
+          userSession.step = "awaiting_gender"; // Move to the next attribute
+
+          // Personalized confirmation message
+          sendWhatsAppMessage(from, `Awesome, ${userSession.data.first_name}! Now, let's get to know you a bit better. Could you kindly share your gender with us? Just type 'male' or 'female'`);
+      } else {
+          userSession.awaitingConfirmation = false;
+          sendWhatsAppMessage(from, "Oops! Let's try your date of birth again,  😄");
+      }
+
+      res.status(200).send('OK');
+      return;
+  }
+
+  // Validate the date of birth (basic validation, adjust regex as needed)
+  if (/^\d{2}-\d{2}-\d{4}$/.test(dateOfBirth)) {
+      userSession.update({ date_of_birth: dateOfBirth }, 'awaiting_date_of_birth');
+      userSession.awaitingConfirmation = true;
+
+      // Send a message asking for confirmation
+      sendWhatsAppMessage(from, `Got it! Your date of birth is ${dateOfBirth}, right? Just reply with 'Yes' or 'No'.`);
+
+      res.status(200).send('OK');
+      return;
+  } else {
+      // Send error message for invalid date of birth
+      sendWhatsAppMessage(from, "Hmm, that doesn't sound like a real date of birth. 🤔 Try again!");
+  }
+}
+ // ?If the session is waiting for the gender
+ if (userSession.step === 'awaiting_gender') {
+  const dateOfBirth = text.trim(); // Extract and trim the text from the message
+
+  // Check if we are waiting for a confirmation
+  if (userSession.awaitingConfirmation) {
+      if (dateOfBirth.toLowerCase() === 'y') {
+          userSession.awaitingConfirmation = false;
+          userSession.step = "awaiting_phone_number"; // Move to the next attribute
+
+          // Personalized confirmation message
+          sendWhatsAppMessage(from, `Great, 📱 Time to connect your phone! Could you please share your phone number with us? Just type it as a 10-digit number, like 0732323236. We'll use this number only for essential communication`);
+      } else {
+          userSession.awaitingConfirmation = false;
+          sendWhatsAppMessage(from, "Oops Error! Let's try your gender again, e.g male or female  😄");
+      }
+
+      res.status(200).send('OK');
+      return;
+  }
+
+  // Validate the gender
+  if (['male', 'female'].includes(gender)) {
+      userSession.update({ gender: dateOfBirth }, 'awaiting_gender');
+      userSession.awaitingConfirmation = true;
+
+      // Send a message asking for confirmation
+      sendWhatsAppMessage(from, `Just to make sure, you are ${gender === 'male' ? 'a gentleman' : 'a lady'}, correct? Type 'Y' or 'N'.`);
+
+      res.status(200).send('OK');
+      return;
+  } else {
+      // Send error message for invalid date of birth
+      sendWhatsAppMessage(from, "Hmm, gender has to be male or female. 🤔 Try again!");
+  }
+}
+ // ?If the session is waiting for the phone number
+ if (userSession.step === 'awaiting_phone_number') {
+  const phoneNumber = text.trim(); // Extract and trim the text from the message
+
+  // Check if we are waiting for a confirmation
+  if (userSession.awaitingConfirmation) {
+      if (phoneNumber.toLowerCase() === 'y') {
+          userSession.awaitingConfirmation = false;
+          userSession.step = "registration_complete"; // Move to the next attribute
+
+             // Call the registerUser function to create the user record
+             registerUser(userSession.data).then(() => {
+              sendWhatsAppMessage(from, `🎉 All set! Your registration is complete. Welcome aboard!  🚀`)
+              sendWhatsAppMessageWithTemplate(from,"makronexus_intro")
+          }).catch((error) => {
+              sendWhatsAppMessage(from, "Oops, something went wrong with the registration. Please try again.");
+              console.error('Registration Error:', error);
+          });
+
+      } else {
+          userSession.awaitingConfirmation = false;
+          sendWhatsAppMessage(from, "Oops Error! Let's try your phone_number again, e.g male or female  😄");
+      }
+
+      res.status(200).send('OK');
+      return;
+  }
+
+  // Validate the phone_number
+  if (/^\d{10}$/.test(phoneNumber)) {
+    const modifiedPhoneNumber = phoneNumber.substring(1);
+      userSession.update({ phone_number: modifiedPhoneNumber }, 'awaiting_phone_number');
+      userSession.awaitingConfirmation = true;
+
+      // Send a message asking for confirmation
+      sendWhatsAppMessage(from, `Just to make sure, your number is ${phone_number}, correct? Type 'Y' or 'N'.`);
+
+      res.status(200).send('OK');
+      return;
+  } else {
+      // Send error message for invalid date of birth
+      sendWhatsAppMessage(from, "That doesn't look like a valid phone number. Please enter it in the format 0788883376. 🤔 Try again!");
+  }
+}
           console.log("USER NOT FOUND")
           sendWhatsAppMessageWithTemplate("+" + from, "call_to_register")
           
@@ -477,6 +727,27 @@ export async function sendWhatsAppMessage(recipient, message) {
 // const image_url = await generateImage(prompt);
 // console.log(image_url);
 
+function generatePassword(length = 12) {
+  const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
+  let password = "";
+  for (let i = 0, n = charset.length; i < length; ++i) {
+      password += charset.charAt(Math.floor(Math.random() * n));
+  }
+  return password;
+}
+
+async function registerUser(sessionData) {
+  try {
+      const newUser = await UserModel.create(sessionData);
+
+      if (newUser) {
+          console.log('User successfully registered:', newUser);
+          
+      }
+  } catch (error) {
+      console.error('Error registering user:', error);
+  }
+}
 
 export default whatsAppRouter;
 

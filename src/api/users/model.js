@@ -73,6 +73,7 @@ const UserModel = sequelize.define("user", {
  
 });
 
+
 UserModel.beforeCreate(async (user) => {
 // CUSTOM ID
   // const schoolId = "BC-FHS-0001";
@@ -110,12 +111,7 @@ UserModel.checkCredentials = async function (email, password) {
     return null;
   }
 };
-// UserModel.belongsToMany(GuardianModel, {
-//   through: GuardianUser,
-//   foreignKey: { allowNull: false, name: "user_id" },
-// });
-// UserModel.hasOne(AddressModel, { foreignKey: "user_id" });
-// AddressModel.belongsTo(UserModel, { foreignKey: "user_id" });
+
 
 export default UserModel;
 

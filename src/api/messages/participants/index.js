@@ -17,7 +17,7 @@ messengerParticipantRouter.get('/participants', async (req, res) => {
 messengerParticipantRouter.post('/add-participant', [
     body('user_id').isUUID().withMessage('User ID must be a valid UUID'),
     body('conversation_id').isUUID().withMessage('Conversation ID must be a valid UUID'),
-    body('role').isIn(['member', 'moderator', 'admin']).withMessage('Invalid role')
+    // body('role').isIn(['member', 'moderator', 'admin']).withMessage('Invalid role')
 ], async (req, res) => {
     // Check for validation errors
     const errors = validationResult(req);

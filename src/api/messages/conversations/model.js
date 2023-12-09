@@ -1,5 +1,8 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../../../db.js';
+import ParticipantModel from '../participants/model.js';
+import UserModel from '../../users/model.js';
+import MessageModel from '../dual_messages/model.js';
 
 const ConversationModel = sequelize.define('conversation', {
     conversation_id: {
@@ -55,9 +58,14 @@ const ConversationModel = sequelize.define('conversation', {
 });
 
 // Optional: Model associations
-ConversationModel.associate = (models) => {
-    ConversationModel.belongsTo(models.User, { as: 'Creator', foreignKey: 'creator_id' });
-    ConversationModel.belongsTo(models.Message, { as: 'LastMessage', foreignKey: 'last_message_id' });
-};
+// ConversationModel.associate = (models) => {
+//     ConversationModel.belongsTo(models.User, { as: 'creator', foreignKey: 'creator_id' });
+//     ConversationModel.belongsTo(models.Message, { as: 'lastMessage', foreignKey: 'last_message_id' });
+// };
+ConversationModel.hasMany(ParticipantModel, { as: 'participants', foreignKey: 'conversation_id' });
+ParticipantModel.belongsTo(UserModel, { as: 'user', foreignKey: 'user_id' });
+ConversationModel.belongsTo(MessageModel, { as: 'lastMessage', foreignKey: 'last_message_id' });
+
+
 
 export default ConversationModel;

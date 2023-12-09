@@ -59,7 +59,6 @@ messageRouter.get('/retrieve-messages', [
         res.status(500).json({ error: error.message || 'Internal Server Error' });
     }
 });
-
 //! Get one message
 messageRouter.get('/:id', async (req, res, next) => {
     try {
@@ -148,6 +147,11 @@ messageRouter.post('/send-message', [
             conversation_id,
             content,
         });
+          // Update the last_message_id in the ConversationModel
+          await ConversationModel.update(
+            { last_message_id: message.message_id },
+            { where: { conversation_id: conversation_id } }
+        );
 
         res.status(201).json({
             message: 'Message sent successfully',
@@ -195,7 +199,6 @@ messageRouter.put('/update-message', [
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
 // !Delete a message
 messageRouter.post('/delete-message', [
     body('message_id').isUUID().withMessage('Message ID must be a valid UUID'),
@@ -288,6 +291,44 @@ messageRouter.get('/list-received-messages', [
 
         res.status(200).json({
             message: 'Messages received by user retrieved successfully',
+            data: messages
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message || 'Internal Server Error' });
+    }
+});
+//! Endpoint to get all messages for a specific conversation
+messageRouter.get('/get-messages/:conversation_id', [
+    query('conversation_id').isUUID().withMessage('Conversation ID must be a valid UUID'),
+], async (req, res) => {
+    const { conversation_id } = req.params;
+
+    try {
+        // Retrieve all messages for the specified conversation
+        const messages = await MessageModel.findAll({
+            where: { conversation_id },
+            include: [
+                {
+                    model: UserModel,
+                    as: 'sender',
+                    attributes: ['id', 'first_name', 'last_name', 'email',"avatar"]
+                },
+                {
+                    model: UserModel,
+                    as: 'receiver',
+                    attributes: ['id', 'first_name', 'last_name', 'email',"avatar"]
+                }
+            ],
+            order: [['timestamp', 'ASC']] // Optional: Order by timestamp
+        });
+
+        if (!messages) {
+            return res.status(404).json({ error: 'No messages found for this conversation' });
+        }
+
+        res.status(200).json({
+            message: 'Messages retrieved successfully',
             data: messages
         });
     } catch (error) {

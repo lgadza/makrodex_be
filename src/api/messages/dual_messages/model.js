@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../../../db.js';
+import UserModel from '../../users/model.js';
 
 const MessageModel = sequelize.define('message', {
     message_id: {
@@ -20,7 +21,7 @@ const MessageModel = sequelize.define('message', {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
-            model: 'conversations', // This should match the table name for conversations
+            model: 'conversations', 
             key: 'conversation_id'
         }
     },
@@ -67,8 +68,15 @@ const MessageModel = sequelize.define('message', {
 
 // Optional: Model associations
 MessageModel.associate = (models) => {
-    MessageModel.belongsTo(models.User, { as: 'Sender', foreignKey: 'sender_id' });
-    MessageModel.belongsTo(models.User, { as: 'Receiver', foreignKey: 'receiver_id' });
+    MessageModel.belongsTo(models.User, { as: 'sender', foreignKey: 'sender_id' });
+    MessageModel.belongsTo(models.User, { as: 'receiver', foreignKey: 'receiver_id' });
+    // MessageModel.hasOne(models.Conversation, { as: 'lastMessageOf', foreignKey: 'last_message_id' });
 };
+MessageModel.belongsTo(UserModel, { as: 'sender', foreignKey: 'sender_id' });
+MessageModel.belongsTo(UserModel, { as: 'receiver', foreignKey: 'receiver_id' });
+UserModel.hasMany(MessageModel, { as: 'sentMessages', foreignKey: 'sender_id' });
+UserModel.hasMany(MessageModel, { as: 'receivedMessages', foreignKey: 'receiver_id' });
+
+
 
 export default MessageModel;

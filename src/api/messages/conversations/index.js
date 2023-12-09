@@ -3,6 +3,7 @@ import { body, query, validationResult } from 'express-validator';
 import ConversationModel from './model.js';
 import UserModel from '../../users/model.js';
 import ParticipantModel from '../participants/model.js';
+import MessageModel from '../dual_messages/model.js';
 
 
 const conversationRouter = express.Router();
@@ -46,7 +47,6 @@ conversationRouter.post('/create-conversation', [
 conversationRouter.get('/retrieve-conversations', [
     query('user_id').isUUID().withMessage('User ID must be a valid UUID'),
 ], async (req, res) => {
-    // Check for validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -54,15 +54,51 @@ conversationRouter.get('/retrieve-conversations', [
 
     const { user_id } = req.query;
 
+
     try {
-        // Validate existence of users
         const user = await UserModel.findByPk(user_id);
-        if (!user ) {
-          return res.status(404).json({ error: 'User id not found' });
-      }
-        // Retrieve conversations created by the user
-        const conversations = await ConversationModel.findAll({
-            where: { creator_id: user_id }
+        if (!user) {
+            return res.status(404).json({ error: 'User id not found' });
+        }
+
+        // Retrieve conversations along with participants
+       let conversations = await ConversationModel.findAll({
+            where: { creator_id: user_id },
+            include: [
+                {
+                model: ParticipantModel,
+                as: 'participants', // Ensure this alias is set in your associations
+                include: [{
+                    model: UserModel,
+                    as: 'user', // Alias for user model association
+                    attributes: ['id', 'first_name','last_name', 'email',"avatar"], // Select specific user attributes
+                }]
+            },
+            {
+                model: MessageModel,
+                as: 'lastMessage', // Ensure this alias matches your association
+                attributes: ['content', 'read_status'], // Include only the content and read_status
+                include: [
+                    {
+                        model: UserModel,
+                        as: 'sender', // Alias for the sender in Message model
+                        attributes: ['id', 'first_name', 'last_name']
+                    }
+                ]
+            }
+        ]
+        });
+
+         // Filter out the user with id == user_id from participants of each conversation
+         conversations = conversations.map(conversation => {
+            const filteredParticipants = conversation.participants.filter(participant => 
+                participant.user_id !== user_id
+            );
+
+            return {
+                ...conversation.get({ plain: true }),
+                participants: filteredParticipants
+            };
         });
 
         res.status(200).json({
@@ -199,6 +235,41 @@ conversationRouter.post('/add-user-to-conversation/:conversation_id', [
     res.status(201).json({
         message: 'Participants added to conversation successfully',
     });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message || 'Internal Server Error' });
+    }
+});
+//! Endpoint to retrieve a single conversation
+conversationRouter.get('/get-conversation/:conversation_id', [
+    query('conversation_id').isUUID().withMessage('Conversation ID must be a valid UUID'),
+], async (req, res) => {
+    const { conversation_id } = req.params;
+
+    try {
+        // Retrieve the conversation with the specified ID, including its participants
+        const conversation = await ConversationModel.findByPk(conversation_id, {
+            include: [
+                {
+                model: ParticipantModel,
+                as: 'participants',
+                include: [{
+                    model: UserModel,
+                    as: 'user',
+                    attributes: ['id', 'first_name', 'last_name', 'email']
+                }]
+            }
+        ]
+        });
+
+        if (!conversation) {
+            return res.status(404).json({ error: 'Conversation not found' });
+        }
+
+        res.status(200).json({
+            message: 'Conversation retrieved successfully',
+            data: conversation
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: error.message || 'Internal Server Error' });
