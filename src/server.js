@@ -88,9 +88,9 @@ server.use('/makronexa', userAISettingsRouter);
 // server.use('/create_checkout_section', stripeRouter);
 // server.use("/stripe",stripeRouter);
 // server.use("/file",fileSystemManagement);
-server.use("/messages",messageRouter);
-server.use("/conversations",conversationRouter);
-server.use("/messenger",messengerParticipantRouter);
+// server.use("/messages",messageRouter);
+// server.use("/conversations",conversationRouter);
+// server.use("/messenger",messengerParticipantRouter);
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)
