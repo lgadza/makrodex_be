@@ -457,7 +457,7 @@ if (userSession.step === 'awaiting_country_code') {
 }
  // ?If the session is waiting for the gender
  if (userSession.step === 'awaiting_gender') {
-  const gender = text.trim(); // Extract and trim the text from the message
+  const gender = text.toLowerCase().trim(); // Extract and trim the text from the message
 
   // Check if we are waiting for a confirmation
   if (userSession.awaitingConfirmation) {
@@ -505,13 +505,18 @@ if (userSession.step === 'awaiting_country_code') {
           userSession.step = "registration_complete"; // Move to the next attribute
 
              // Call the registerUser function to create the user record
-             registerUser(userSession.data).then(() => {
-              sendWhatsAppMessage(from, `🎉 All set! Your registration is complete. Welcome aboard!  🚀`)
+             registerUser(userSession.data,from).then((newUser) => {
+              sendWhatsAppMessage(from,`🎉 Congratulations, ${newUser.first_name}! Your registration is complete. Welcome aboard Makronexus! 🚀`)
+              sendWhatsAppMessage(from, userSession.data)
               sendWhatsAppMessageWithTemplate(from,"makronexus_intro")
               
           }).catch((error) => {
+            if (error.name === 'SequelizeUniqueConstraintError') {
+              sendWhatsAppMessage(from, "It seems this email or phone number is already registered. Please try again with different credentials.");
+          } else {
               sendWhatsAppMessage(from, "Oops, something went wrong with the registration. Please try again.");
-              console.error('Registration Error:', error);
+          }
+          console.error('Registration Error:', error);
           });
 
       } else {
@@ -530,7 +535,7 @@ if (userSession.step === 'awaiting_country_code') {
       userSession.awaitingConfirmation = true;
 
       // Send a message asking for confirmation
-      sendWhatsAppMessage(from, `Just to make sure, your number is ${phone_number},.`);
+      sendWhatsAppMessage(from, `Just to make sure, your number is 0${phone_number},.`);
       sendWhatsAppMessage(from, `If  correct? Type 'Y' or 'N'.`);
 
       res.status(200).send('OK');
@@ -757,16 +762,19 @@ function generatePassword(length = 12) {
   return password;
 }
 
-async function registerUser(sessionData) {
+async function registerUser(sessionData,from) {
   try {
       const newUser = await UserModel.create(sessionData);
 
       if (newUser) {
           console.log('User successfully registered:', newUser);
-          
+          return newUser;
+      }else{
+        sendWhatsAppMessage(from, "Registration failed. You could not be registered")
       }
   } catch (error) {
       console.error('Error registering user:', error);
+      throw error;
   }
 }
 
