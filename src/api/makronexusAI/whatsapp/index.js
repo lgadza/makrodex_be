@@ -279,9 +279,10 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
     if (!userSession) {
         userSession = sessionManager.createSession(from);
       // await  sendWhatsAppMessageWithTemplate(from,"register_to_makronexus")
-        sendWhatsAppMessage(from, `🌟 Welcome to Makronexus! 🌟
-        
-        To get started with our services, we need a few details from you. First, could you please tell us your first name? We appreciate using your real name to maintain a professional record, e.g John`);
+      await  sendWhatsAppMessage(from, `🌟 Welcome to Makronexus! 🌟`);
+      await  sendWhatsAppMessage(from, `To get started with our services, we need a few details from you.`);
+      await  sendWhatsAppMessage(from, `First, could you please tell us your first name? `);
+      await  sendWhatsAppMessage(from, `We appreciate using your real name to maintain a professional record, e.g John! `);
         return;
     }
 
@@ -296,7 +297,8 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
                 userSession.step = "awaiting_last_name"; // Move to the next attribute
 
                 // Personalized confirmation message
-                sendWhatsAppMessage(from, `Awesome, ${userSession.data.first_name}! 🌟  Now, what's your last name? Hopefully, it's easier to spell than 'Schwarzenegger 😄`);
+              await  sendWhatsAppMessage(from, `Awesome, ${userSession.data.first_name}! 🌟  Now, what's your last name? `);
+             await   sendWhatsAppMessage(from, `Hopefully, it's easier to spell than 'Schwarzenegger 😄`);
             } else {
                 userSession.awaitingConfirmation = false;
                 sendWhatsAppMessage(from, "Oops! Let's try your first name again, and make it snappy! 😄");
@@ -312,7 +314,8 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
             userSession.awaitingConfirmation = true;
 
             // Send a message asking for confirmation
-            sendWhatsAppMessage(from, `Got it! Your first name is ${firstName}, right? Just reply with 'Yes' or 'No'.`);
+           await sendWhatsAppMessage(from, `Got it! Your first name is ${firstName}, right? .`);
+            sendWhatsAppMessage(from, `Just reply with 'Yes' or 'No'.`);
 
             res.status(200).send('OK');
             return;
@@ -332,7 +335,8 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
               userSession.step = "awaiting_country_code"; // Move to the next attribute
 
               // Personalized confirmation message
-              sendWhatsAppMessage(from, `Great, So far so good, Now we want your country code, e.g +263 or +27 `);
+              await sendWhatsAppMessage(from, `Great, So far so good. `);
+              sendWhatsAppMessage(from, ` Now we want your country code, e.g +263 or +27 `);
           } else {
               userSession.awaitingConfirmation = false;
               sendWhatsAppMessage(from, "Oops! Let's try your last name again, and make it snappy! 😄");
@@ -348,13 +352,15 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
           userSession.awaitingConfirmation = true;
 
           // Send a message asking for confirmation
-          sendWhatsAppMessage(from, `Awesome, ${lastName}! You're doing great. Just reply with 'Yes' or 'No'.`);
+         await sendWhatsAppMessage(from, `Awesome, ${lastName}! You're doing great. `);
+         await sendWhatsAppMessage(from, `To confirm just reply with 'Yes' or 'No'. `);
 
           res.status(200).send('OK');
           return;
       } else {
           // Send error message for invalid last name
-          sendWhatsAppMessage(from, "Hmm, that doesn't sound like a real last name. 🤔 Try again, and keep it simple this time!");
+         await sendWhatsAppMessage(from, "Hmm, that doesn't sound like a real last name. 🤔 ");
+         await sendWhatsAppMessage(from, "Try again, and keep it simple this time! ");
       }
   }
 // ?If the session is waiting for the country_code
@@ -369,7 +375,10 @@ if (userSession.step === 'awaiting_country_code') {
 
           // Personalized confirmation message
        
-          sendWhatsAppMessage(from, ` 🎉 Now, let's talk about your special day! Could you please share your date of birth with me? Just the format DD_MM_YYYY would be perfect. This will help us celebrate you when the time comes! 🎂`);
+         await sendWhatsAppMessage(from, ` 🎉 Now, let's talk about your special day! `);
+        await   sendWhatsAppMessage(from, ` Could you please share your date of birth with me? `);
+         await sendWhatsAppMessage(from, ` Just the format DD-MM-YYYY would be perfect. `);
+          sendWhatsAppMessage(from, ` This will help us celebrate you when the time comes! 🎂 `);
       } else {
           userSession.awaitingConfirmation = false;
           sendWhatsAppMessage(from, "Oops Error! Let's try your country code again");
@@ -388,22 +397,24 @@ if (userSession.step === 'awaiting_country_code') {
       let confirmationMessage = "";
       switch (userSession.data.country_code) {
           case '+263':
-              confirmationMessage = "Ooh, you're Zimbabwean! Land of the mighty Victoria Falls. 🌍, Just reply with 'Y' or 'N'";
+              confirmationMessage = "Ooh, you're Zimbabwean! Land of the mighty Victoria Falls. 🌍.";
               break;
           case '+27':
-              confirmationMessage = "Lovely, you're from South Africa! Home of the breathtaking Table Mountain. 🏞️, Just reply with 'Y' or 'N'";
+              confirmationMessage = "Lovely, you're from South Africa! Home of the breathtaking Table Mountain. 🏞️.";
               break;
           default:
-              confirmationMessage = `Thanks! Your country code is ${userSession.data.country_code}, Just reply with 'Y' or 'N'`;
+              confirmationMessage = `Thanks! Your country code is ${userSession.data.country_code}.`;
               break;
       }
-      sendWhatsAppMessage(from, confirmationMessage);
+     await sendWhatsAppMessage(from, confirmationMessage);
+      sendWhatsAppMessage(from, "Just reply with 'Y' or 'N'");
 
       res.status(200).send('OK');
       return;
   } else {
       // Send error message for invalid country code
-      sendWhatsAppMessage(from, "Hmm, that doesn't look quite right. Could you please enter your country code e.g +263 or +27");
+      await sendWhatsAppMessage(from, "Hmm, that doesn't look quite right. ");
+      await sendWhatsAppMessage(from, "Could you please enter your country code e.g +263 or +27");
   }
 }
  // ?If the session is waiting for the date of birth
@@ -417,7 +428,8 @@ if (userSession.step === 'awaiting_country_code') {
           userSession.step = "awaiting_gender"; // Move to the next attribute
 
           // Personalized confirmation message
-          sendWhatsAppMessage(from, `Awesome, ${userSession.data.first_name}! Now, let's get to know you a bit better. Could you kindly share your gender with us? Just type 'male' or 'female'`);
+        await sendWhatsAppMessage(from, `Awesome, ${userSession.data.first_name}! Now, let's get to know you a bit better. `);
+        await sendWhatsAppMessage(from, `Could you kindly share your gender with us? Just type 'male' or 'female'`);
       } else {
           userSession.awaitingConfirmation = false;
           sendWhatsAppMessage(from, "Oops! Let's try your date of birth again,  😄");
@@ -433,7 +445,8 @@ if (userSession.step === 'awaiting_country_code') {
       userSession.awaitingConfirmation = true;
 
       // Send a message asking for confirmation
-      sendWhatsAppMessage(from, `Got it! Your date of birth is ${dateOfBirth}, right? Just reply with 'Yes' or 'No'.`);
+     await sendWhatsAppMessage(from, `Got it! Your date of birth is ${dateOfBirth}, right? .`);
+      sendWhatsAppMessage(from, `To confirm just reply with 'Yes' or 'No'`);
 
       res.status(200).send('OK');
       return;
@@ -453,7 +466,9 @@ if (userSession.step === 'awaiting_country_code') {
           userSession.step = "awaiting_phone_number"; // Move to the next attribute
 
           // Personalized confirmation message
-          sendWhatsAppMessage(from, `Great, 📱 Time to connect your phone! Could you please share your phone number with us? Just type it as a 10-digit number, like 0732323236. We'll use this number only for essential communication`);
+         await sendWhatsAppMessage(from, `Great, 📱 Time to connect your phone!  `);
+         await sendWhatsAppMessage(from, `Could you please share your phone number with us? Just type it as a 10-digit number, like 0732323236.  `);
+          sendWhatsAppMessage(from, `We'll use this number only for essential communication `);
       } else {
           userSession.awaitingConfirmation = false;
           sendWhatsAppMessage(from, "Oops Error! Let's try your gender again, e.g male or female  😄");
@@ -469,7 +484,8 @@ if (userSession.step === 'awaiting_country_code') {
       userSession.awaitingConfirmation = true;
 
       // Send a message asking for confirmation
-      sendWhatsAppMessage(from, `Just to make sure, you are ${gender === 'male' ? 'a gentleman' : 'a lady'}, correct? Type 'Y' or 'N'.`);
+     await sendWhatsAppMessage(from, `Just to make sure, you are ${gender === 'male' ? 'a gentleman' : 'a lady'}, .`);
+      sendWhatsAppMessage(from, `If correct? Type 'Y' or 'N''}, .`);
 
       res.status(200).send('OK');
       return;
@@ -514,7 +530,8 @@ if (userSession.step === 'awaiting_country_code') {
       userSession.awaitingConfirmation = true;
 
       // Send a message asking for confirmation
-      sendWhatsAppMessage(from, `Just to make sure, your number is ${phone_number}, correct? Type 'Y' or 'N'.`);
+      sendWhatsAppMessage(from, `Just to make sure, your number is ${phone_number},.`);
+      sendWhatsAppMessage(from, `If  correct? Type 'Y' or 'N'.`);
 
       res.status(200).send('OK');
       return;
