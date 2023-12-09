@@ -278,7 +278,8 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
     // If no session exists, create a new one
     if (!userSession) {
         userSession = sessionManager.createSession(from);
-        sendWhatsAppMessage(from, "Welcome aboard! 🚀 Let's start easy - what's your first name? Please, no monikers like 'TheTerminator123'!");
+      await  sendWhatsAppMessageWithTemplate(from,"register_to_makronexus")
+        sendWhatsAppMessage(from, "To get started with our services, we need a few details from you. First, could you please tell us your first name? We appreciate using your real name to maintain a professional record, e.g John");
         return;
     }
 
@@ -489,6 +490,7 @@ if (userSession.step === 'awaiting_country_code') {
              registerUser(userSession.data).then(() => {
               sendWhatsAppMessage(from, `🎉 All set! Your registration is complete. Welcome aboard!  🚀`)
               sendWhatsAppMessageWithTemplate(from,"makronexus_intro")
+              
           }).catch((error) => {
               sendWhatsAppMessage(from, "Oops, something went wrong with the registration. Please try again.");
               console.error('Registration Error:', error);
