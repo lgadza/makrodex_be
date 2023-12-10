@@ -34,7 +34,7 @@ const UserFeatureUsageModel = sequelize.define("user_feature_usage", {
 });
 
 // Associations
-UserFeatureUsageModel.belongsTo(UserModel, { foreignKey: 'userId' });
-UserModel.hasMany(UserFeatureUsageModel, { foreignKey: 'userId' });
+UserFeatureUsageModel.belongsTo(UserModel, { foreignKey: 'user_id' });
+UserModel.hasMany(UserFeatureUsageModel, { foreignKey: 'user_id' });
 
 export default UserFeatureUsageModel;
