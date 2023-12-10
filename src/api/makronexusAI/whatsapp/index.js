@@ -640,6 +640,7 @@ if (userSession.step === 'awaiting_country_code') {
           else{
             // ! Resply from openai
             // Check the conversation limit
+            const CONVERSATION_LIMIT = process.env.CONVERSATION_LIMIT;
   const usageStatus = await handleFeatureUsage(user.dataValues.id, 'conversation', CONVERSATION_LIMIT||50);
   if(usageStatus.limitReached){
     sendWhatsAppMessage(from,"Conversation limit reached. Please upgrade to premium or wait until the beginning of next month.")
