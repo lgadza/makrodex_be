@@ -32,20 +32,31 @@ export async function handleFeatureUsage(user_id, feature_type, limit) {
     where: {
       user_id: user_id,
       feature_type: feature_type,
-      last_used_at: {
-        [Op.gte]: firstDayOfMonth
-      }
     },
-    defaults: { user_id, feature_type, current_month_usage_count: 0, total_usage_count: 0 }
+    defaults: {
+      user_id,
+      feature_type,
+      current_month_usage_count: 0,
+      total_usage_count: 0,
+      last_used_at: currentDate // Use currentDate for new records
+    }
   });
 
+  // Reset monthly count if the record was last used in a previous month
   if (!created && usageRecord.last_used_at < firstDayOfMonth) {
-    usageRecord.current_month_usage_count = 0;
-    usageRecord.last_used_at = currentDate;
+    await usageRecord.update({
+      current_month_usage_count: 0,
+      last_used_at: currentDate
+    });
   }
 
-  await usageRecord.increment('current_month_usage_count', { by: 1 });
-  await usageRecord.increment('total_usage_count', { by: 1 });
+  // Increment usage counts
+  await usageRecord.increment({
+    current_month_usage_count: 1,
+    total_usage_count: 1
+  });
+
+  // Update last used time
   await usageRecord.update({ last_used_at: currentDate });
 
   return {
