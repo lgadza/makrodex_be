@@ -150,7 +150,7 @@ export async function sendWhatsAppMessageWithTemplate( phone, name) {
               {
                 "type": "image",
                 "image": {
-                  "link": "https://asset.cloudinary.com/di6cppfze/8207f60c6d0c23659a312b31e5ec690b"
+                  "link": "https://scontent-waw1-1.xx.fbcdn.net/v/t39.30808-6/409613937_1143001783745777_1368364420575454888_n.jpg?stp=dst-jpg_s960x960&_nc_cat=100&ccb=1-7&_nc_sid=3635dc&_nc_ohc=AEQdAiJttfkAX8J_v03&_nc_ht=scontent-waw1-1.xx&oh=00_AfDC-PWWIhS-1_IxrYGqxbME5RKWooFuXNOYQ_o0i7ZVWQ&oe=657A0AEE"
                 }
               }
             ]
@@ -306,7 +306,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
     // If no session exists, create a new one
     if (!userSession) {
         userSession = sessionManager.createSession(from);
-      // await  sendWhatsAppMessageWithTemplate(from,"register_to_makronexus")
+      await  sendWhatsAppMessageWithTemplate(from,"register_to_makronexus")
       await  sendWhatsAppMessage(from, `🌟 Welcome to Makronexus! 🌟`);
       await  sendWhatsAppMessage(from, `To get started with our services, we need a few details from you.`);
       await  sendWhatsAppMessage(from, `Firstly, could you please tell us your first name? e.g John! `);
