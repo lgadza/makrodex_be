@@ -87,7 +87,7 @@ export async function sendWhatsAppMessageWithTemplate( phone, name) {
               {
                 "type": "image",
                 "image": {
-                  "link": "https://asset.cloudinary.com/di6cppfze/8207f60c6d0c23659a312b31e5ec690b"
+                  "link": "https://media.licdn.com/dms/image/D4D22AQF1yKSjibQcew/feedshare-shrink_2048_1536/0/1702169359433?e=1704931200&v=beta&t=U3oWfGujsnMfQPe2Lgk1tApttQkm0g0dxCZWsaj4UQ8"
                 }
               }
             ]
@@ -532,8 +532,7 @@ if (userSession.step === 'awaiting_country_code') {
 
              // Call the registerUser function to create the user record
              registerUser(userSession.data,from).then((newUser) => {
-              sendWhatsAppMessage(from,`🎉 Congratulations, ${newUser.first_name}! Your registration is complete. Welcome aboard Makronexus! 🚀`)
-              sendWhatsAppMessage(from, userSession.data)
+             sendWhatsAppMessage(from,`🎉 Congratulations, ${newUser.first_name}! Your registration is complete. Welcome aboard Makronexus! 🚀`)
               sendWhatsAppMessageWithTemplate(from,"makronexus_intro")
               
           }).catch((error) => {
@@ -561,7 +560,7 @@ if (userSession.step === 'awaiting_country_code') {
       userSession.awaitingConfirmation = true;
 
       // Send a message asking for confirmation
-      sendWhatsAppMessage(from, `Just to make sure, your number is 0${phone_number}.`);
+     await sendWhatsAppMessage(from, `Just to make sure, your number is 0${phone_number}.`);
       sendWhatsAppMessage(from, `If  correct? Type 'Y' or 'N'.`);
 
       res.status(200).send('OK');
