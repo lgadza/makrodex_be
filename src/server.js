@@ -34,6 +34,7 @@ import fileSystemManagement from "./api/file/filesystem-server.js"
 import messageRouter from "./api/messages/dual_messages/index.js";
 import conversationRouter from "./api/messages/conversations/index.js";
 import messengerParticipantRouter from "./api/messages/participants/index.js";
+import usageRouter from "./api/makronexusAI/ai_usage/index.js";
 
 // Load environment variables
 dotenv.config();
@@ -91,6 +92,7 @@ server.use('/makronexa', userAISettingsRouter);
 // server.use("/messages",messageRouter);
 // server.use("/conversations",conversationRouter);
 // server.use("/messenger",messengerParticipantRouter);
+// server.use("/ai_usage",usageRouter)
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)

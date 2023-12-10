@@ -16,6 +16,7 @@ import {
 } from 'langchain/prompts';
 import UserModel from "../../users/model.js";
 import sessionManager from "./sessionManager.js";
+import { handleFeatureUsage } from "../ai_usage/index.js";
 
 
 const whatsAppRouter = express.Router();
@@ -579,7 +580,7 @@ if (userSession.step === 'awaiting_country_code') {
         res.status(200).json({ message: 'Message sent' });
         }else{
           const lowerCaseMessage = text.trim().toLowerCase();
-          console.log("USER:",user)
+          console.log("USER:",user.dataValues.id)
           if (lowerCaseMessage.startsWith("image:")) {
             try {
               const images = await fetchImagesFromAPI(lowerCaseMessage);
@@ -637,7 +638,12 @@ if (userSession.step === 'awaiting_country_code') {
         //   }
           
           else{
-                    // ! Resply from openai
+            // ! Resply from openai
+            // Check the conversation limit
+  const usageStatus = await handleFeatureUsage(user.dataValues.id, 'conversation', CONVERSATION_LIMIT||50);
+  if(usageStatus.limitReached){
+    sendWhatsAppMessage(from,"Conversation limit reached. Please upgrade to premium or wait until the beginning of next month.")
+  }else{
         const response = await openai.chat.completions.create({
           model: "gpt-3.5-turbo", 
           messages:[
@@ -662,8 +668,12 @@ if (userSession.step === 'awaiting_country_code') {
         // Best regards,
         // Makronexus Team`
         await sendWhatsAppMessage(from, replyMessage);
+        if(usageStatus.currentUsageCount%10===0){
+          await sendWhatsAppMessage(from, `You have used ${usageStatus.currentUsageCount} out of ${CONVERSATION_LIMIT||50} conversations for this month.`);
+        }
         res.status(200).json({ message: 'Message sent' });
       }
+    }
     }
       } else {
         res.status(400).json({ error: 'Invalid message data' });
