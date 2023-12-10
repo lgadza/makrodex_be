@@ -272,7 +272,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
         });
         if (!user) {
 
-          // ! REGISTERING USER THROUGH WHATS UP
+          // ! REGISTERING USER THROUGH WHATSAPP
        let userSession = sessionManager.getSession(from);
 
     // If no session exists, create a new one
@@ -281,8 +281,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
       // await  sendWhatsAppMessageWithTemplate(from,"register_to_makronexus")
       await  sendWhatsAppMessage(from, `🌟 Welcome to Makronexus! 🌟`);
       await  sendWhatsAppMessage(from, `To get started with our services, we need a few details from you.`);
-      await  sendWhatsAppMessage(from, `First, could you please tell us your first name? `);
-      await  sendWhatsAppMessage(from, `We appreciate using your real name to maintain a professional record, e.g John! `);
+      await  sendWhatsAppMessage(from, `Firstly, could you please tell us your first name? e.g John! `);
         return;
     }
 
@@ -348,7 +347,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
 
       // Validate the last name (basic validation, adjust regex as needed)
       if (/^[a-zA-Z]{1,15}$/.test(lastName)) {
-          userSession.update({ last_name: lastName,email:userSession.data.first_name+lastName+"@makronexus.com",password:generatePassword(),data_process_acceptance:true }, 'awaiting_last_name');
+          userSession.update({ last_name: lastName,email:userSession.data.first_name.toLowerCase()+lastName.toLowerCase()+"@makronexus.com",password:generatePassword(),data_process_acceptance:true }, 'awaiting_last_name');
           userSession.awaitingConfirmation = true;
 
           // Send a message asking for confirmation
