@@ -87,7 +87,7 @@ export async function sendWhatsAppMessageWithTemplate( phone, name) {
               {
                 "type": "image",
                 "image": {
-                  "link": "https://media.licdn.com/dms/image/D4D22AQGmKvoLUHk-kg/feedshare-shrink_800/0/1694598891620?e=1697673600&v=beta&t=ejreU3bE7sUT8htftow4d2w8njphSAbmmbIWSUHV1ao"
+                  "link": "https://asset.cloudinary.com/di6cppfze/8207f60c6d0c23659a312b31e5ec690b"
                 }
               }
             ]
@@ -131,7 +131,34 @@ export async function sendWhatsAppMessageWithTemplate( phone, name) {
         ]
       }
     }
-  }    
+  }else if (name === "register_to_makronexus") {
+    messagePayload ={
+      "messaging_product": "whatsapp",
+      "recipient_type": "individual",
+      "to": phone,
+      "type": "template",
+      "template": {
+        "name": "register_to_makronexus",
+        "language": {
+          "code": "en"
+        },
+        "components": [
+          {
+            "type": "header",
+            "parameters": [
+              {
+                "type": "image",
+                "image": {
+                  "link": "https://asset.cloudinary.com/di6cppfze/8207f60c6d0c23659a312b31e5ec690b"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+    
+  }   
 
   try {
     const response = await fetch(url, {
