@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import UserFeatureUsageModel from "../makronexusAI/ai_usage/model.js";
 import ReferralModel from "../makronexusAI/ai_usage/referral_model.js";
 import { sendWhatsAppMessage } from "../makronexusAI/whatsapp/index.js";
@@ -87,7 +88,7 @@ export async function resetReferrerUsageCount(referrerId) {
     where: {
       user_id: referrerId,
       last_used_at: {
-        [sequelize.Op.lt]: firstDayOfMonth
+        [Op.lt]: firstDayOfMonth
       }
     }
   });
