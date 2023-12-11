@@ -10,6 +10,7 @@ import AddressModel from "../address/model.js";
 import { sendRegistrationEmail } from "../lib/email_tool.js"; 
 import { sendWhatsAppMessageWithTemplate } from "../makronexusAI/whatsapp/index.js";
 import sgMail from "@sendgrid/mail";
+import { generateReferralCode } from "../utils/utils.js";
 
 const userRouter = express.Router();
 
@@ -31,8 +32,19 @@ userRouter.post("/register", checkUserSchema, triggerBadRequest, async (req, res
         message: "This phone number has been registered by another user.",
       });
     }
+    // Generate a unique referral code for the new user
+    let referral_code;
+    let isUnique = false;
+    while (!isUnique) {
+      referral_code = generateReferralCode();
+      const existingUser = await UserModel.findOne({ where: { referral_code } });
+      if (!existingUser) {
+        isUnique = true;
+      }
+    }
 
-    const newUser = await UserModel.create(req.body);
+    // Include the referral code in the user creation
+    const newUser = await UserModel.create({ ...req.body, referral_code });
 
     // Asynchronous operations
     if (newUser) {
@@ -96,6 +108,36 @@ userRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
     next(createHttpError(500, "Internal server error"));
   }
 });
+
+userRouter.post('/generate-referral-codes', async (req, res) => {
+  try {
+    await assignReferralCodesToExistingUsers();
+    res.status(200).send('Referral codes generated successfully.');
+  } catch (error) {
+    console.error('Error generating referral codes:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+async function assignReferralCodesToExistingUsers() {
+  const users = await UserModel.findAll({ where: { referral_code: null } });
+
+  for (const user of users) {
+    let referral_code;
+    let isUnique = false;
+
+    while (!isUnique) {
+      referral_code = generateReferralCode();
+      const existingUser = await UserModel.findOne({ where: { referral_code } });
+      if (!existingUser) {
+        isUnique = true;
+      }
+    }
+
+    user.referral_code = referral_code;
+    await user.save();
+  }
+}
 
 
 // userRouter.put("/:user_id", JWTAuthMiddleware, async (req, res, next) => {

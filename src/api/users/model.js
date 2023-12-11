@@ -70,6 +70,10 @@ const UserModel = sequelize.define("user", {
     type: DataTypes.BOOLEAN,
     allowNull: false,
   },
+  referral_code: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
  
 });
 

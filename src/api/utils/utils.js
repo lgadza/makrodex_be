@@ -1,4 +1,5 @@
-import { sendWhatsAppMessage } from "../makronexusAI/whatsapp";
+import ReferralModel from "../makronexusAI/ai_usage/referral_model.js";
+import { sendWhatsAppMessage } from "../makronexusAI/whatsapp/index.js";
 
 export async function collectUserDataForRegistration(recipient) {
     let newUser = {};
@@ -52,4 +53,27 @@ if (newUser.email) {
   }
   
 
-  
+ export function generateReferralCode(length = 8) {
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+} 
+
+/**
+ * Validates a referral code by checking if it exists in the database.
+ * @param {string} code - The referral code to validate.
+ * @returns {Promise<boolean>} - True if the code is valid, false otherwise.
+ */
+export async function validateReferralCode(code) {
+  try {
+    const referral = await ReferralModel.findOne({ where: { code } });
+    return referral !== null;
+  } catch (error) {
+    console.error("Error in validateReferralCode:", error);
+    throw new Error('Error validating referral code');
+  }
+}

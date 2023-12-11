@@ -408,3 +408,56 @@ router.get('/chat', async (req, res) => {
 
 // export default router;
 // LANGNAIN
+
+
+
+ // ?If the session is waiting for the phone number
+ if (userSession.step === 'awaiting_phone_number') {
+  const phoneNumber = text.trim(); // Extract and trim the text from the message
+
+  // Check if we are waiting for a confirmation
+  if (userSession.awaitingConfirmation) {
+      if (phoneNumber.toLowerCase() === 'y') {
+          userSession.awaitingConfirmation = false;
+          userSession.step = "registration_complete"; // Move to the next attribute
+
+             // Call the registerUser function to create the user record
+             registerUser(userSession.data,from).then((newUser) => {
+             sendWhatsAppMessage(from,`🎉 Congratulations, ${newUser.first_name}! Your registration is complete. Welcome aboard Makronexus! 🚀`)
+              sendWhatsAppMessageWithTemplate(from,"makronexus_intro")
+              
+          }).catch((error) => {
+            if (error.name === 'SequelizeUniqueConstraintError') {
+              sendWhatsAppMessage(from, "It seems this email or phone number is already registered. Please try again with different credentials.");
+          } else {
+              sendWhatsAppMessage(from, "Oops, something went wrong with the registration. Please try again.");
+          }
+          console.error('Registration Error:', error);
+          });
+
+      } else {
+          userSession.awaitingConfirmation = false;
+          sendWhatsAppMessage(from, "Oops Error! Let's try your phone_number again, e.g male or female  😄");
+      }
+
+      res.status(200).send('OK');
+      return;
+  }
+
+  // Validate the phone_number
+  if (/^\d{10}$/.test(phoneNumber)) {
+    const modifiedPhoneNumber = phoneNumber.substring(1);
+      userSession.update({ phone_number: modifiedPhoneNumber }, 'awaiting_phone_number');
+      userSession.awaitingConfirmation = true;
+
+      // Send a message asking for confirmation
+     await sendWhatsAppMessage(from, `Just to make sure, your number is 0${phone_number}.`);
+      sendWhatsAppMessage(from, `If  correct? Type 'Y' or 'N'.`);
+
+      res.status(200).send('OK');
+      return;
+  } else {
+      // Send error message for invalid date of birth
+      sendWhatsAppMessage(from, "That doesn't look like a valid phone number. Please enter it in the format 0788883376. 🤔 Try again!");
+  }
+}

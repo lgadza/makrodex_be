@@ -17,6 +17,8 @@ import {
 import UserModel from "../../users/model.js";
 import sessionManager from "./sessionManager.js";
 import { handleFeatureUsage } from "../ai_usage/index.js";
+import { validateReferralCode } from "../../utils/utils.js";
+import ReferralModel from "../ai_usage/referral_model.js";
 
 
 const whatsAppRouter = express.Router();
@@ -529,21 +531,11 @@ if (userSession.step === 'awaiting_country_code') {
   if (userSession.awaitingConfirmation) {
       if (phoneNumber.toLowerCase() === 'y') {
           userSession.awaitingConfirmation = false;
-          userSession.step = "registration_complete"; // Move to the next attribute
+          userSession.step = "awaiting_referral_code"; // Move to the next attribute
 
-             // Call the registerUser function to create the user record
-             registerUser(userSession.data,from).then((newUser) => {
-             sendWhatsAppMessage(from,`🎉 Congratulations, ${newUser.first_name}! Your registration is complete. Welcome aboard Makronexus! 🚀`)
-              sendWhatsAppMessageWithTemplate(from,"makronexus_intro")
-              
-          }).catch((error) => {
-            if (error.name === 'SequelizeUniqueConstraintError') {
-              sendWhatsAppMessage(from, "It seems this email or phone number is already registered. Please try again with different credentials.");
-          } else {
-              sendWhatsAppMessage(from, "Oops, something went wrong with the registration. Please try again.");
-          }
-          console.error('Registration Error:', error);
-          });
+          await sendWhatsAppMessage(from, `Do you have a referral code? Please enter the 8-character code (for example, "m8rt5xKh") if you do. If you don't have a referral code, simply type 'N'.`);
+          res.status(200).send('OK');
+          return;
 
       } else {
           userSession.awaitingConfirmation = false;
@@ -570,6 +562,45 @@ if (userSession.step === 'awaiting_country_code') {
       // Send error message for invalid date of birth
       sendWhatsAppMessage(from, "That doesn't look like a valid phone number. Please enter it in the format 0788883376. 🤔 Try again!");
   }
+}
+// ?If the session is waiting for the referral code
+if (userSession.step === 'awaiting_referral_code') {
+  const referralCode = text.trim(); // Extract and trim the text from the message
+
+  if (referralCode.toLowerCase() !== 'n') {
+    try {
+      // Validate the referral code
+      const isValidReferralCode = await validateReferralCode(referralCode);
+      if (isValidReferralCode) {
+        userSession.update({ referral_code: referralCode }, 'awaiting_referral_code');
+      } else {
+        await sendWhatsAppMessage(from, "The referral code you entered is not valid. Please check and try again or type 'N' if you don't have one.");
+        return;
+      }
+    } catch (error) {
+      console.error("Error validating referral code:", error);
+      await sendWhatsAppMessage(from, "There was an error processing your referral code. Please try again.");
+      return;
+    }
+  }
+  userSession.step = "registration_complete"; // Move to the next attribute
+
+  // Call the registerUser function to create the user record with referral code
+  registerUser(userSession.data,from).then((newUser) => {
+    sendWhatsAppMessage(from,`🎉 Congratulations, ${newUser.first_name}! Your registration is complete. Welcome aboard Makronexus! 🚀`)
+     sendWhatsAppMessageWithTemplate(from,"makronexus_intro")
+     
+ }).catch((error) => {
+   if (error.name === 'SequelizeUniqueConstraintError') {
+     sendWhatsAppMessage(from, "It seems this email or phone number is already registered. Please try again with different credentials.");
+ } else {
+     sendWhatsAppMessage(from, "Oops, something went wrong with the registration. Please try again.");
+ }
+ console.error('Registration Error:', error);
+ });
+
+  res.status(200).send('OK');
+  return;
 }
           console.log("USER NOT FOUND")
           sendWhatsAppMessageWithTemplate("+" + from, "call_to_register")
@@ -798,21 +829,63 @@ function generatePassword(length = 12) {
   return password;
 }
 
-async function registerUser(sessionData,from) {
-  try {
-      const newUser = await UserModel.create(sessionData);
+// async function registerUser(sessionData,from) {
+//   try {
+//       const newUser = await UserModel.create(sessionData);
 
-      if (newUser) {
-          console.log('User successfully registered:', newUser);
-          return newUser;
-      }else{
-        sendWhatsAppMessage(from, "Registration failed. You could not be registered")
+//       if (newUser) {
+//           console.log('User successfully registered:', newUser);
+//           return newUser;
+//       }else{
+//         sendWhatsAppMessage(from, "Registration failed. You could not be registered")
+//       }
+//   } catch (error) {
+//       console.error('Error registering user:', error);
+//       throw error;
+//   }
+// }
+async function registerUser(sessionData, from) {
+  try {
+      // Check if a referral code is provided in the session data
+      if (sessionData.referral_code) {
+          const referral = await ReferralModel.findOne({ where: { code: sessionData.referral_code } });
+          const referrer = await UserModel.findOne({ where: { referral_code: sessionData.referral_code } });
+          if (!referrer) {
+              // Handle the case where the referral code is invalid
+              await sendWhatsAppMessage(from, "The referral code is invalid. Proceeding with registration without referral.");
+          } else {
+              // Create the new user with the referral code
+              const newUser = await UserModel.create(sessionData);
+              if (newUser) {
+                  console.log('User successfully registered:', newUser);
+
+                  // Update the referral entry with the ID of the referred user
+                  referral.referred_id = newUser.dataValues.id;
+                  referral.referrer_id = referrer.dataValues.id;
+                  await referral.save();
+
+                  // Handle any post-registration logic for referrals here (e.g., rewarding the referrer)
+                  return newUser;
+              } else {
+                  await sendWhatsAppMessage(from, "Registration failed. You could not be registered");
+              }
+          }
+      } else {
+          // Create the new user without a referral code
+          const newUser = await UserModel.create(sessionData);
+          if (newUser) {
+              console.log('User successfully registered:', newUser);
+              return newUser;
+          } else {
+              await sendWhatsAppMessage(from, "Registration failed. You could not be registered");
+          }
       }
   } catch (error) {
       console.error('Error registering user:', error);
       throw error;
   }
 }
+
 
 export default whatsAppRouter;
 
