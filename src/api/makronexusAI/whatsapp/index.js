@@ -17,7 +17,7 @@ import {
 import UserModel from "../../users/model.js";
 import sessionManager from "./sessionManager.js";
 import { handleFeatureUsage } from "../ai_usage/index.js";
-import { validateReferralCode } from "../../utils/utils.js";
+import { getUserReferralCode, resetReferrerUsageCount, validateReferralCode } from "../../utils/utils.js";
 import ReferralModel from "../ai_usage/referral_model.js";
 
 
@@ -674,7 +674,17 @@ if (userSession.step === 'awaiting_referral_code') {
             const CONVERSATION_LIMIT = process.env.CONVERSATION_LIMIT;
   const usageStatus = await handleFeatureUsage(user.dataValues.id, 'conversation', CONVERSATION_LIMIT||50);
   if(usageStatus.limitReached){
-    sendWhatsAppMessage(from,"Conversation limit reached. Please upgrade to premium or wait until the beginning of next month.")
+   await  sendWhatsAppMessage(from,`🔒 Conversation limit reached. 
+
+      To continue enjoying our services without waiting for next month, you have an exciting option! 🌟 
+      
+      Refer Makronexus to a friend and if they join using your referral code, we'll reset your current month's usage count to zero! 😊
+      
+      Alternatively, consider upgrading to our premium plan for uninterrupted access.
+      
+      Thank you for being with Makronexus!`)
+      const referralCode = await getUserReferralCode(user.dataValues.id);
+      sendWhatsAppMessage(from,`🌟 Here's your referral code: ${referralCode}\n\nShare this code and Makronexus whatsapp number with your friends and invite them to join Makronexus! Every successful referral brings exciting rewards. 🎁`)
   }else{
         const response = await openai.chat.completions.create({
           model: "gpt-3.5-turbo", 
@@ -864,7 +874,22 @@ async function registerUser(sessionData, from) {
                   referral.referrer_id = referrer.dataValues.id;
                   await referral.save();
 
-                  // Handle any post-registration logic for referrals here (e.g., rewarding the referrer)
+                  // Reset referrer's current_month_usage_count to 0
+                  await resetReferrerUsageCount(referrer.dataValues.id);
+                  const referrerPhone=referrer.dataValues.country_code+referrer.dataValues.phone_number
+                  sendWhatsAppMessage(referrerPhone,`🎉 Great News! 🎉
+
+                  Hi ${referrer.dataValues.first_name},
+                  
+                  We're excited to let you know that someone has joined Makronexus using your referral code! Thanks for spreading the word about us. 
+                  
+                  As a token of our appreciation, we've reset your monthly usage count to 0. You now have a fresh start to enjoy our features for this month!
+                  
+                  Keep sharing your referral code to enjoy more benefits. Thanks for being a valuable member of the Makronexus community!
+                  
+                  Cheers,
+                  The Makronexus Team
+                  `)
                   return newUser;
               } else {
                   await sendWhatsAppMessage(from, "Registration failed. You could not be registered");

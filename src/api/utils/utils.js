@@ -1,5 +1,7 @@
+import UserFeatureUsageModel from "../makronexusAI/ai_usage/model.js";
 import ReferralModel from "../makronexusAI/ai_usage/referral_model.js";
 import { sendWhatsAppMessage } from "../makronexusAI/whatsapp/index.js";
+import UserModel from "../users/model.js";
 
 export async function collectUserDataForRegistration(recipient) {
     let newUser = {};
@@ -76,4 +78,36 @@ export async function validateReferralCode(code) {
     console.error("Error in validateReferralCode:", error);
     throw new Error('Error validating referral code');
   }
+}
+export async function resetReferrerUsageCount(referrerId) {
+  const currentDate = new Date();
+  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+
+  const usageRecords = await UserFeatureUsageModel.findAll({
+    where: {
+      user_id: referrerId,
+      last_used_at: {
+        [sequelize.Op.lt]: firstDayOfMonth
+      }
+    }
+  });
+
+  for (let record of usageRecords) {
+    await record.update({
+      current_month_usage_count: 0,
+      last_used_at: currentDate
+    });
+  }
+}
+export async function getUserReferralCode(userId) {
+  if (!userId) {
+    throw new Error("Invalid user ID.");
+  }
+
+  const user = await UserModel.findByPk(userId);
+  if (!user) {
+    throw new Error("User not found.");
+  }
+
+  return user.dataValues.referral_code; 
 }
