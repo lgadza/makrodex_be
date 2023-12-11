@@ -854,14 +854,76 @@ function generatePassword(length = 12) {
 //       throw error;
 //   }
 // }
+// async function registerUser(sessionData, from) {
+//   try {
+//       // Check if a referral code is provided in the session data
+//       if (sessionData.referral_code) {
+//           let referral = await ReferralModel.findOne({ where: { code: sessionData.referral_code } });
+//           const referrer = await UserModel.findOne({ where: { referral_code: sessionData.referral_code } });
+//           if (!referral) {
+//             referral = await ReferralModel.create({
+//                 code: sessionData.referral_code,
+//                 referred_id: null ,
+//                 referrer_id:referrer.dataValues.id
+//             });
+//         }
+//           if (!referrer) {
+//               // Handle the case where the referral code is invalid
+//               await sendWhatsAppMessage(from, "The referral code is invalid. Proceeding with registration without referral.");  
+//           } else {
+//               // Create the new user with the referral code
+//               const newUser = await UserModel.create(sessionData);
+//               if (newUser) {
+//                   console.log('User successfully registered:', newUser);
+
+//                   // Update the referral entry with the ID of the referred user
+//                   referral.referred_id = newUser.id;
+//                   referral.referrer_id = referrer.id;
+//                   await referral.save();
+
+//                   // Reset referrer's current_month_usage_count to 0
+//                   await resetReferrerUsageCount(referrer.id);
+//                   const referrerPhone=referrer.country_code+referrer.phone_number
+//                   sendWhatsAppMessage(referrerPhone,`🎉 Great News! 🎉
+
+//                   Hi ${referrer.first_name},
+                  
+//                   We're excited to let you know that someone has joined Makronexus using your referral code! Thanks for spreading the word about us. 
+                  
+//                   As a token of our appreciation, we've reset your monthly usage count to 0. You now have a fresh start to enjoy our features for this month!
+                  
+//                   Keep sharing your referral code to enjoy more benefits. Thanks for being a valuable member of the Makronexus community!
+                  
+//                   Cheers,
+//                   The Makronexus Team
+//                   `)
+//                   return newUser;
+//               } else {
+//                   await sendWhatsAppMessage(from, "Registration failed. You could not be registered");
+//               }
+//           }
+//       } else {
+//           // Create the new user without a referral code
+//           const newUser = await UserModel.create(sessionData);
+//           if (newUser) {
+//               console.log('User successfully registered:', newUser);
+//               return newUser;
+//           } else {
+//               await sendWhatsAppMessage(from, "Registration failed. You could not be registered");
+//           }
+//       }
+//   } catch (error) {
+//       console.error('Error registering user:', error);
+//       throw error;
+//   }
+// }
 async function registerUser(sessionData, from) {
   try {
-      // Check if a referral code is provided in the session data
       if (sessionData.referral_code) {
-          const referral = await ReferralModel.findOne({ where: { code: sessionData.referral_code } });
+          // Find the referrer based on the referral code
           const referrer = await UserModel.findOne({ where: { referral_code: sessionData.referral_code } });
+
           if (!referrer) {
-              // Handle the case where the referral code is invalid
               await sendWhatsAppMessage(from, "The referral code is invalid. Proceeding with registration without referral.");
           } else {
               // Create the new user with the referral code
@@ -869,34 +931,24 @@ async function registerUser(sessionData, from) {
               if (newUser) {
                   console.log('User successfully registered:', newUser);
 
-                  // Update the referral entry with the ID of the referred user
-                  referral.referred_id = newUser.id;
-                  referral.referrer_id = referrer.id;
-                  await referral.save();
+                  // Create or update the referral entry
+                  const referral =await ReferralModel.create({
+                          code: sessionData.referral_code,
+                          referred_id: newUser.dataValues.id,
+                          referrer_id: referrer.dataValues.id
+                      });
+                 console.log(referral,"REFERRAL")
 
                   // Reset referrer's current_month_usage_count to 0
-                  await resetReferrerUsageCount(referrer.id);
-                  const referrerPhone=referrer.country_code+referrer.phone_number
-                  sendWhatsAppMessage(referrerPhone,`🎉 Great News! 🎉
-
-                  Hi ${referrer.first_name},
-                  
-                  We're excited to let you know that someone has joined Makronexus using your referral code! Thanks for spreading the word about us. 
-                  
-                  As a token of our appreciation, we've reset your monthly usage count to 0. You now have a fresh start to enjoy our features for this month!
-                  
-                  Keep sharing your referral code to enjoy more benefits. Thanks for being a valuable member of the Makronexus community!
-                  
-                  Cheers,
-                  The Makronexus Team
-                  `)
+                  await resetReferrerUsageCount(referrer.dataValues.id);
+                  const referrerPhone = referrer.dataValues.country_code + referrer.dataValues.phone_number;
+                  await sendWhatsAppMessage(referrerPhone, `🎉 Great News! 🎉\n\nHi ${referrer.dataValues.first_name},\n\nWe're excited to let you know that someone has joined Makronexus using your referral code! Thanks for spreading the word about us.\n\nAs a token of our appreciation, we've reset your monthly usage count to 0. You now have a fresh start to enjoy our features for this month!\n\nKeep sharing your referral code to enjoy more benefits. Thanks for being a valuable member of the Makronexus community!\n\nCheers,\nThe Makronexus Team`);
                   return newUser;
               } else {
                   await sendWhatsAppMessage(from, "Registration failed. You could not be registered");
               }
           }
       } else {
-          // Create the new user without a referral code
           const newUser = await UserModel.create(sessionData);
           if (newUser) {
               console.log('User successfully registered:', newUser);
@@ -907,9 +959,12 @@ async function registerUser(sessionData, from) {
       }
   } catch (error) {
       console.error('Error registering user:', error);
+      await sendWhatsAppMessage(from, "An error occurred during registration. Please try again.");
       throw error;
   }
 }
+
+
 
 
 export default whatsAppRouter;
