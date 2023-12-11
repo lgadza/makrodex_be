@@ -72,7 +72,7 @@ if (newUser.email) {
  */
 export async function validateReferralCode(code) {
   try {
-    const referral = await ReferralModel.findOne({ where: { code } });
+    const referral = await UserModel.findOne({ where: { referral_code:code } });
     return referral !== null;
   } catch (error) {
     console.error("Error in validateReferralCode:", error);
