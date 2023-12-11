@@ -870,16 +870,16 @@ async function registerUser(sessionData, from) {
                   console.log('User successfully registered:', newUser);
 
                   // Update the referral entry with the ID of the referred user
-                  referral.referred_id = newUser.dataValues.id;
-                  referral.referrer_id = referrer.dataValues.id;
+                  referral.referred_id = newUser.id;
+                  referral.referrer_id = referrer.id;
                   await referral.save();
 
                   // Reset referrer's current_month_usage_count to 0
-                  await resetReferrerUsageCount(referrer.dataValues.id);
-                  const referrerPhone=referrer.dataValues.country_code+referrer.dataValues.phone_number
+                  await resetReferrerUsageCount(referrer.id);
+                  const referrerPhone=referrer.country_code+referrer.phone_number
                   sendWhatsAppMessage(referrerPhone,`🎉 Great News! 🎉
 
-                  Hi ${referrer.dataValues.first_name},
+                  Hi ${referrer.first_name},
                   
                   We're excited to let you know that someone has joined Makronexus using your referral code! Thanks for spreading the word about us. 
                   
