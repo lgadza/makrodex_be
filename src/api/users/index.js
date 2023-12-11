@@ -226,20 +226,28 @@ userRouter.delete("/me", JWTAuthMiddleware, async (req, res, next) => {
   }
 });
 
-userRouter.post("/login", async (req, res, next) => {
+// Rate limiting middleware for login attempts
+const loginRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // limit each IP to 10 requests per windowMs
+  message: 'Too many login attempts from this IP, please try again after 15 minutes'
+});
+
+// Improved login route
+userRouter.post("/login", loginRateLimiter, async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    const foundUser = await UserModel.findOne({ where: { email } });
-
-    if (!foundUser) {
-      return next(createHttpError(401, `You do not have an account yet. Please sign up to access the platform`));
+    // Input validation (basic example)
+    if (!email || !password) {
+      return next(createHttpError(400, "Email and password are required"));
     }
 
-    const isPasswordValid = await foundUser.checkCredentials(email, password);
+    const foundUser = await UserModel.findOne({ where: { email } });
 
-    if (!isPasswordValid) {
-      return next(createHttpError(401, "Credentials are wrong!"));
+    if (!foundUser || !(await UserModel.checkCredentials(email, password))) {
+      // Generic error message for security
+      return next(createHttpError(401, "Invalid credentials"));
     }
 
     const payload = { id: foundUser.id, email: foundUser.email, role: foundUser.role };
@@ -251,6 +259,7 @@ userRouter.post("/login", async (req, res, next) => {
     next(createHttpError(500, "Internal server error"));
   }
 });
+
 
 
 
