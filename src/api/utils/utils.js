@@ -1,4 +1,5 @@
 import { Op } from "sequelize";
+import sequelize from "../../../db.js";
 import UserFeatureUsageModel from "../makronexusAI/ai_usage/model.js";
 import ReferralModel from "../makronexusAI/ai_usage/referral_model.js";
 import { sendWhatsAppMessage } from "../makronexusAI/whatsapp/index.js";
@@ -84,20 +85,29 @@ export async function resetReferrerUsageCount(referrerId) {
   const currentDate = new Date();
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
 
-  const usageRecords = await UserFeatureUsageModel.findAll({
-    where: {
-      user_id: referrerId,
-      last_used_at: {
-        [Op.lt]: firstDayOfMonth
-      }
-    }
-  });
+  const transaction = await sequelize.transaction();
 
-  for (let record of usageRecords) {
-    await record.update({
-      current_month_usage_count: 0,
-      last_used_at: currentDate
-    });
+  try {
+    await UserFeatureUsageModel.update(
+      {
+        current_month_usage_count: 0,
+        last_used_at: currentDate
+      },
+      {
+        where: {
+          user_id: referrerId,
+          last_used_at: {
+            [Op.lt]: firstDayOfMonth
+          }
+        },
+        transaction: transaction
+      }
+    );
+
+    await transaction.commit();
+  } catch (error) {
+    await transaction.rollback();
+    // Handle the error appropriately
   }
 }
 export async function getUserReferralCode(userId) {
