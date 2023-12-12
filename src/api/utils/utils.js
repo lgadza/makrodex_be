@@ -1,9 +1,9 @@
 import { Op } from "sequelize";
-import sequelize from "../../../db.js";
 import UserFeatureUsageModel from "../makronexusAI/ai_usage/model.js";
 import ReferralModel from "../makronexusAI/ai_usage/referral_model.js";
 import { sendWhatsAppMessage } from "../makronexusAI/whatsapp/index.js";
 import UserModel from "../users/model.js";
+import sequelize from "../../db.js";
 
 export async function collectUserDataForRegistration(recipient) {
     let newUser = {};
