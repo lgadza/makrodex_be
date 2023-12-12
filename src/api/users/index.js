@@ -10,7 +10,7 @@ import AddressModel from "../address/model.js";
 import { sendRegistrationEmail } from "../lib/email_tool.js"; 
 import { sendWhatsAppMessageWithTemplate } from "../makronexusAI/whatsapp/index.js";
 import sgMail from "@sendgrid/mail";
-import { generateReferralCode } from "../utils/utils.js";
+import { generateReferralCode, resetReferrerUsageCount } from "../utils/utils.js";
 
 const userRouter = express.Router();
 
@@ -293,6 +293,21 @@ userRouter.post("/login", async (req, res, next) => {
     next(createHttpError(500, "Internal server error"));
   }
 });
-
+userRouter.post('/reset-usage/:referrerId', async (req, res) => {
+  try {
+    const referrerId = req.params.referrerId;
+    const numberOfAffectedRows = await resetReferrerUsageCount(referrerId);
+  
+    if (numberOfAffectedRows === 0) {
+      return res.status(404).json({ message: 'No records found to update or already updated.' });
+    }
+  
+    res.status(200).json({ message: 'Current usage count reset successfully.' });
+  } catch (error) {
+    console.error('Error resetting usage count:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+  
+});
 
 export default userRouter;

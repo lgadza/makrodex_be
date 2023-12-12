@@ -85,10 +85,13 @@ export async function resetReferrerUsageCount(referrerId) {
   const currentDate = new Date();
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
 
+  console.log("Referrer ID:", referrerId);
+  console.log("First Day of Month:", firstDayOfMonth);
+
   const transaction = await sequelize.transaction();
 
   try {
-    await UserFeatureUsageModel.update(
+    const [numberOfAffectedRows] = await UserFeatureUsageModel.update(
       {
         current_month_usage_count: 0,
         last_used_at: currentDate
@@ -96,20 +99,24 @@ export async function resetReferrerUsageCount(referrerId) {
       {
         where: {
           user_id: referrerId,
-          last_used_at: {
-            [Op.lt]: firstDayOfMonth
-          }
+          // Comment out for debugging
+          // last_used_at: {
+          //   [Op.lt]: firstDayOfMonth
+          // }
         },
         transaction: transaction
       }
     );
 
     await transaction.commit();
+    return numberOfAffectedRows;
   } catch (error) {
     await transaction.rollback();
-  console.error("Error in resetReferrerUsageCount:", error);
+    console.error("Error in resetReferrerUsageCount:", error);
+    throw error;
   }
 }
+
 export async function getUserReferralCode(userId) {
   if (!userId) {
     throw new Error("Invalid user ID.");
