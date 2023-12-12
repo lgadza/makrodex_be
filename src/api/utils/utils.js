@@ -107,7 +107,7 @@ export async function resetReferrerUsageCount(referrerId) {
     await transaction.commit();
   } catch (error) {
     await transaction.rollback();
-    // Handle the error appropriately
+  console.error("Error in resetReferrerUsageCount:", error);
   }
 }
 export async function getUserReferralCode(userId) {
