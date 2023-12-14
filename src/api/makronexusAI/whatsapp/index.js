@@ -729,9 +729,27 @@ if (userSession.step === 'awaiting_referral_code') {
   }
 });
 
+//function isValidWebhookRequest(body) {
+//  return (
+ //   body &&
+ //   body.entry &&
+ //   Array.isArray(body.entry) &&
+ //   body.entry.length > 0 &&
+  //  body.entry[0].changes &&
+ //   Array.isArray(body.entry[0].changes) &&
+ //   body.entry[0].changes.length > 0 &&
+  //  body.entry[0].changes[0].value &&
+ //   body.entry[0].changes[0].value.messages &&
+ //   Array.isArray(body.entry[0].changes[0].value.messages) &&
+ //   body.entry[0].changes[0].value.messages.length > 0 &&
+ //   body.entry[0].changes[0].value.messages[0].text &&
+ //   body.entry[0].changes[0].value.messages[0].text.body
+//  );
+//}
 function isValidWebhookRequest(body) {
   return (
     body &&
+    body.object === "whatsapp_business_account" && // Checks if the object type is correct
     body.entry &&
     Array.isArray(body.entry) &&
     body.entry.length > 0 &&
@@ -742,10 +760,13 @@ function isValidWebhookRequest(body) {
     body.entry[0].changes[0].value.messages &&
     Array.isArray(body.entry[0].changes[0].value.messages) &&
     body.entry[0].changes[0].value.messages.length > 0 &&
+    body.entry[0].changes[0].value.messages[0].type === "text" && // Ensure the message type is text
     body.entry[0].changes[0].value.messages[0].text &&
     body.entry[0].changes[0].value.messages[0].text.body
   );
 }
+
+
 function isImageWebhookRequest(body) {
   return (
     body &&
