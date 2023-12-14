@@ -514,7 +514,7 @@ if (userSession.step === 'awaiting_country_code') {
 
       // Send a message asking for confirmation
      await sendWhatsAppMessage(from, `Just to make sure, you are ${gender === 'male' ? 'a gentleman' : 'a lady'}, .`);
-      sendWhatsAppMessage(from, `If correct? Type 'Y' or 'N''}, .`);
+      sendWhatsAppMessage(from, `If correct? Type 'Y' or 'N'.`);
 
       res.status(200).send('OK');
       return;
