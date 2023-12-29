@@ -35,6 +35,8 @@ import messageRouter from "./api/messages/dual_messages/index.js";
 import conversationRouter from "./api/messages/conversations/index.js";
 import messengerParticipantRouter from "./api/messages/participants/index.js";
 import usageRouter from "./api/makronexusAI/ai_usage/index.js";
+import postRouter from "./api/connect_makronexus/posts/index.js";
+import commentRouter from "./api/connect_makronexus/comments/index.js";
 
 // Load environment variables
 dotenv.config();
@@ -93,6 +95,10 @@ server.use('/makronexa', userAISettingsRouter);
 // server.use("/conversations",conversationRouter);
 // server.use("/messenger",messengerParticipantRouter);
 // server.use("/ai_usage",usageRouter)
+// server.use("/ai_usage",usageRouter)
+// server.use("/settings",userSettingsRouter)
+server.use("/posts",postRouter)
+server.use("/comments",commentRouter)
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)
