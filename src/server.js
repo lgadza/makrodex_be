@@ -37,6 +37,9 @@ import messengerParticipantRouter from "./api/messages/participants/index.js";
 import usageRouter from "./api/makronexusAI/ai_usage/index.js";
 import postRouter from "./api/connect_makronexus/posts/index.js";
 import commentRouter from "./api/connect_makronexus/comments/index.js";
+import followRouter from "./api/connect_makronexus/follows/index.js";
+import groupRouter from "./api/connect_makronexus/groups/index.js";
+import requestRouter from "./api/connect_makronexus/requests/index.js";
 
 // Load environment variables
 dotenv.config();
@@ -99,6 +102,9 @@ server.use('/makronexa', userAISettingsRouter);
 // server.use("/settings",userSettingsRouter)
 server.use("/posts",postRouter)
 server.use("/comments",commentRouter)
+server.use("/follows",followRouter)
+server.use("/groups",groupRouter)
+server.use("/follow_request",requestRouter)
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)

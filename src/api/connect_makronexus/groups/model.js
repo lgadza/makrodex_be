@@ -1,24 +1,26 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../../../db.js';  // Adjust the path as needed for your project structure
-import UserModel from '../../users/model.js';  // Adjust the path to the User model
+import sequelize from '../../../db.js';  
+import UserModel from '../../users/model.js';  
 
 const GroupModel = sequelize.define('group', {
     id: {
         type: DataTypes.UUID,
         primaryKey: true,
-        defaultValue: DataTypes.UUIDV4
+        defaultValue: DataTypes.UUIDV4,
+        allowNull: false
     },
     group_name: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
     },
     description: {
         type: DataTypes.TEXT,
-        allowNull: true
+        allowNull: true 
     },
     creation_date: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW
+        defaultValue: DataTypes.NOW,
+        allowNull: false
     },
     group_owner_id: {
         type: DataTypes.UUID,
@@ -29,12 +31,14 @@ const GroupModel = sequelize.define('group', {
         }
     },
     group_privacy_setting: {
-        type: DataTypes.STRING,
-        allowNull: false  // Possible values: 'public', 'private'
+        type: DataTypes.ENUM('private', 'public'), 
+        defaultValue: 'public',
+        allowNull: false  
     }
 }, {
-    // Optional settings
-    timestamps: true,  // Tracks createdAt and updatedAt automatically
+   
+    timestamps: true, 
+
     // Indexes for performance optimization
     indexes: [
         {

@@ -3,13 +3,13 @@ import sequelize from '../../../db.js';  // Adjust the path as needed for your p
 import UserModel from '../../users/model.js';  // Adjust the path to the User model
 
 // Define enums for request_type and request_status
-const RequestType = {
+export const RequestType = {
     FRIEND: 'friend',
-    GROUP_JOIN: 'group join',
+    GROUP_JOIN: 'group_join',
     // Add more request types as needed
 };
 
-const RequestStatus = {
+export const RequestStatus = {
     PENDING: 'pending',
     ACCEPTED: 'accepted',
     DECLINED: 'declined',

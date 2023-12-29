@@ -138,7 +138,6 @@ postRouter.put('/update-post/:user_id/:id', [
 
     try {
       
-
         const post = await PostModel.findByPk(postId);
         if (!post) {
             return res.status(404).json({ error: 'Post not found' });

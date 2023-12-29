@@ -30,10 +30,6 @@ const CommentModel = sequelize.define('comment', {
         type: DataTypes.TEXT,
         allowNull: false
     },
-    timestamp: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW
-    }
 }, {
     // Optional settings
     timestamps: true,  // If you want to track createdAt and updatedAt
@@ -52,5 +48,7 @@ const CommentModel = sequelize.define('comment', {
 // Associations
 CommentModel.belongsTo(PostModel, { as: 'post', foreignKey: 'post_id' });
 CommentModel.belongsTo(UserModel, { as: 'user', foreignKey: 'user_id' });
+
+
 
 export default CommentModel;
