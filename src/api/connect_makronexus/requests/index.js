@@ -45,6 +45,47 @@ requestRouter.post('/:user_id', [
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }));
+// Endpoint for a group admin/owner to invite a user to join the group
+requestRouter.post('/:sender_user_id/:groupId/invite-user', [
+    param('sender_user_id').isUUID().withMessage('Invalid sender_user_id format'),
+    param('groupId').isUUID().withMessage('Invalid group ID format'),
+    body('user_id').isUUID().withMessage('Invalid user ID format'),
+], asyncHandler(async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const groupId = req.params.groupId;
+    const currentUserId = req.params.sender_user_id; 
+    const { user_id } = req.body;
+
+    try {
+        // Check if the current user is authorized (group admin or owner)
+        const group = await GroupModel.findByPk(groupId);
+        if (!group || group.group_owner_id !== currentUserId) {
+            return res.status(403).json({ error: 'Unauthorized to invite users to this group' });
+        }
+
+        // Create a new invitation request
+        const newInvitation = await RequestModel.create({
+            sender_user_id: currentUserId,
+            receiver_user_id: user_id,
+            group_id: groupId,
+            request_type: "group_join",
+            request_status:"pending"
+        });
+
+        res.status(201).json({
+            message: 'User invited to join the group successfully',
+            data: newInvitation
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}));
+
 // Endpoint to accept/decline a request
 requestRouter.put('/:user_id/:request_id', [
     param('request_id').isUUID().withMessage('Invalid request ID format'),
@@ -145,7 +186,45 @@ requestRouter.get('/:user_id', [
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }));
+// Endpoint to view all pending join requests for a group
+requestRouter.get('/:user_id/:groupId/pending-requests', [
+    param('groupId').isUUID().withMessage('Invalid group ID format'),
+    param('user_id').isUUID().withMessage('Invalid user ID format'),
+], asyncHandler(async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
 
+    const groupId = req.params.groupId;
+    const currentUserId = req.params.user_id; // Function to get the current user's ID
+
+    try {
+        // Check if the current user is authorized (group admin or owner)
+        const group = await GroupModel.findByPk(groupId);
+        if (!group || group.group_owner_id !== currentUserId) {
+            return res.status(403).json({ error: 'Unauthorized to view requests for this group' });
+        }
+
+        // Retrieve all pending join requests for the group
+        const pendingRequests = await RequestModel.findAll({
+            where: {
+                group_id: groupId,
+                request_type: RequestType.GROUP_JOIN,
+                request_status: RequestStatus.PENDING
+            },
+            order: [['createdAt', 'ASC']] // Sorting by request date
+        });
+
+        res.status(200).json({
+            message: 'Pending join requests retrieved successfully',
+            data: pendingRequests
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}));
 // Endpoint to cancel a sent request
 requestRouter.delete('/:user_id/:request_id', [
     param('user_id').isUUID().withMessage('Invalid User ID format'),

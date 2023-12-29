@@ -3,16 +3,22 @@ import { body, validationResult, param,query } from 'express-validator';
 import GroupModel from './model.js'; 
 import { asyncHandler } from '../../../middleware/asyncHandler.js'; 
 import UserModel from '../../users/model.js';
+import GroupMembershipModel from '../group_memberships/model.js';
 
 const groupRouter = express.Router();
 
-// Endpoint to create a new group
+// Endpoint to create a new group and add the creator as an admin
 groupRouter.post('/:user_id', [
     param('user_id').isUUID().withMessage('Invalid user ID'), 
-    body('group_name').notEmpty().withMessage('Group name is required'),
+    body('group_name').notEmpty().withMessage('Group name is required')
+        .custom(async (value) => {
+            const existingGroup = await GroupModel.findOne({ where: { group_name: value } });
+            if (existingGroup) {
+                return Promise.reject('Group name already in use');
+            }
+        }),
     body('description').optional().trim(),
     body('group_privacy_setting').isIn(['private', 'public']).withMessage('Invalid privacy setting'),
-    // Additional validations can be added here
 ], asyncHandler(async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -23,6 +29,7 @@ groupRouter.post('/:user_id', [
     const { group_name, description, group_privacy_setting } = req.body;
 
     try {
+        // Create the group
         const newGroup = await GroupModel.create({
             group_name,
             description,
@@ -30,8 +37,15 @@ groupRouter.post('/:user_id', [
             group_owner_id: userId
         });
 
+        // Add the creator as an admin member of the group
+        await GroupMembershipModel.create({
+            group_id: newGroup.id,
+            user_id: userId,
+            member_role: 'Admin'
+        });
+
         res.status(201).json({
-            message: 'Group created successfully',
+            message: 'Group created successfully and admin added',
             data: newGroup
         });
     } catch (error) {
@@ -190,6 +204,41 @@ groupRouter.get('/:group_id', [
         }
 
         res.status(200).json(group);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}));
+
+// Endpoint to list all groups a user is a member of
+groupRouter.get('/user/:userId/groups', [
+    param('userId').isUUID().withMessage('Invalid User ID format'),
+], asyncHandler(async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const userId = req.params.userId;
+
+    try {
+        // Retrieve all groups the user is a member of
+        const memberships = await GroupMembershipModel.findAll({
+            where: { user_id: userId },
+            include: [{
+                model: GroupModel,
+                as: 'group',
+                attributes: ['id', 'group_name', 'description'] // Adjust attributes as needed
+            }],
+            order: [['createdAt', 'ASC']] // Sorting by join date
+        });
+
+        const groups = memberships.map(membership => membership.group);
+
+        res.status(200).json({
+            message: 'User groups retrieved successfully',
+            data: groups
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
