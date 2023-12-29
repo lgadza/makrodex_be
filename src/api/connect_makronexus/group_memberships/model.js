@@ -1,12 +1,9 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../../../db.js';  // Adjust the path as needed for your project structure
-import UserModel from '../../users/model.js';  // Adjust the path to the User model
-import GroupModel from '../../groups/model.js';  // Adjust the path to the Group model
-const MemberRoles = {
-    ADMIN: 'Admin',
-    MEMBER: 'Member',
-    // Add more roles as needed
-};
+import sequelize from '../../../db.js';
+import GroupModel from '../groups/model.js';
+import UserModel from '../../users/model.js';
+ 
+
 const GroupMembershipModel = sequelize.define('group_membership', {
     id: {
         type: DataTypes.UUID,
@@ -29,23 +26,17 @@ const GroupMembershipModel = sequelize.define('group_membership', {
             key: 'id'
         }
     },
-    join_date: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW
-    },
     member_role: {
-        type: DataTypes.ENUM(Object.values(MemberRoles)),
+        type: DataTypes.ENUM('Admin', 'Member'),  
         allowNull: false,
-        defaultValue: MemberRoles.MEMBER,  
+        defaultValue: 'Member',  
     },
     last_activity_date: {
         type: DataTypes.DATE,
         allowNull: true
     }
 }, {
-    // Optional settings
-    timestamps: true,  // Tracks createdAt and updatedAt automatically
-    // Indexes for performance optimization
+    timestamps: true, 
     indexes: [
         {
             fields: ['group_id'],

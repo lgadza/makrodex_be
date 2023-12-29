@@ -1,19 +1,18 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../../../db.js';  // Adjust the path as needed for your project structure
-import UserModel from '../../users/model.js';  // Adjust the path to the User model
-
-// Define enums for request_type and request_status
+import sequelize from '../../../db.js';
+import UserModel from '../../users/model.js'; 
+import GroupModel from '../groups/model.js'; 
 export const RequestType = {
     FRIEND: 'friend',
     GROUP_JOIN: 'group_join',
-    // Add more request types as needed
+    
 };
 
 export const RequestStatus = {
     PENDING: 'pending',
     ACCEPTED: 'accepted',
     DECLINED: 'declined',
-    // Add more request statuses as needed
+    
 };
 
 const RequestModel = sequelize.define('request', {
@@ -32,9 +31,17 @@ const RequestModel = sequelize.define('request', {
     },
     receiver_user_id: {
         type: DataTypes.UUID,
-        allowNull: false,
+        allowNull: true, 
         references: {
             model: UserModel,
+            key: 'id'
+        }
+    },
+    group_id: { 
+        type: DataTypes.UUID,
+        allowNull: true, 
+        references: {
+            model: GroupModel,
             key: 'id'
         }
     },
@@ -51,22 +58,18 @@ const RequestModel = sequelize.define('request', {
         defaultValue: DataTypes.NOW
     }
 }, {
-    // Optional settings
-    timestamps: true,  // Tracks createdAt and updatedAt automatically
-    paranoid: true,    // Enable soft deletes
-    // Indexes for performance optimization
+    timestamps: true,
+    paranoid: true,
     indexes: [
-        {
-            fields: ['sender_user_id'],
-        },
-        {
-            fields: ['receiver_user_id'],
-        }
+        { fields: ['sender_user_id'] },
+        { fields: ['receiver_user_id'] },
+        { fields: ['group_id'] }
     ]
 });
 
 // Associations
 RequestModel.belongsTo(UserModel, { as: 'sender', foreignKey: 'sender_user_id' });
 RequestModel.belongsTo(UserModel, { as: 'receiver', foreignKey: 'receiver_user_id' });
+RequestModel.belongsTo(GroupModel, { as: 'group', foreignKey: 'group_id' }); // New association for group
 
 export default RequestModel;

@@ -40,6 +40,7 @@ import commentRouter from "./api/connect_makronexus/comments/index.js";
 import followRouter from "./api/connect_makronexus/follows/index.js";
 import groupRouter from "./api/connect_makronexus/groups/index.js";
 import requestRouter from "./api/connect_makronexus/requests/index.js";
+import groupMembershipRouter from "./api/connect_makronexus/group_memberships/index.js";
 
 // Load environment variables
 dotenv.config();
@@ -105,6 +106,7 @@ server.use("/comments",commentRouter)
 server.use("/follows",followRouter)
 server.use("/groups",groupRouter)
 server.use("/follow_request",requestRouter)
+server.use("/group_membership",groupMembershipRouter)
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler)
