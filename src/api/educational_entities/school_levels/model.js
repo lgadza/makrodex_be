@@ -9,7 +9,8 @@ const SchoolLevelsModel = sequelize.define('school_level', {
     },
     level_name: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        unique:true
     }
 }, {
     timestamps: true

@@ -30,12 +30,13 @@ schoolLevelRouter.get('/:id', async (req, res) => {
 });
 
 // POST /school_levels - Create a new school level
-schoolLevelRouter.post('/', async (req, res) => {
+schoolLevelRouter.post('/', async (req, res,next) => {
     try {
         const newSchoolLevel = await SchoolLevelsModel.create(req.body);
         res.status(201).json(newSchoolLevel);
     } catch (error) {
         res.status(400).send(error.message);
+        next(error);
     }
 });
 
@@ -55,7 +56,19 @@ schoolLevelRouter.put('/:id', async (req, res) => {
         res.status(400).send(error.message);
     }
 });
-
+// POST /school_levels/bulk - Create multiple school_levels
+schoolLevelRouter.post("/bulk", async (req, res, next) => {
+    try {
+      const school_levels = await SchoolLevelsModel.bulkCreate([
+        { level_name: "Primary" },
+        { level_name: "Secondary" },
+      
+      ]);
+      res.status(201).json(school_levels.map(c => c.id));
+    } catch (error) {
+      next(error);
+    }
+  });
 // DELETE /school_levels/:id - Delete a specific school level by ID
 schoolLevelRouter.delete('/:id', async (req, res) => {
     try {
