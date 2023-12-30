@@ -1,13 +1,13 @@
 import { DataTypes } from "sequelize"
-import sequelize from "../../db.js"
+import sequelize from "../../../db.js"
 
 const CategoriesModel = sequelize.define("category", {
-  categoryId: {
+  id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
-  name: {
+  category_name: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,

@@ -41,6 +41,11 @@ import followRouter from "./api/connect_makronexus/follows/index.js";
 import groupRouter from "./api/connect_makronexus/groups/index.js";
 import requestRouter from "./api/connect_makronexus/requests/index.js";
 import groupMembershipRouter from "./api/connect_makronexus/group_memberships/index.js";
+import categoriesRouter from "./api/educational_entities/categories/index.js";
+import formRouter from "./api/educational_entities/forms/index.js";
+import schoolLevelRouter from "./api/educational_entities/school_levels/index.js";
+import subjectLevelRouter from "./api/educational_entities/subject_levels/index.js";
+import subjectRouter from "./api/educational_entities/subjects/index.js";
 
 // Load environment variables
 dotenv.config();
@@ -78,6 +83,11 @@ server.use(morgan('dev'));
 // ********************************** ENDPOINTS ****************************************
 
 server.use("/users",userRouter)
+server.use("/categories",categoriesRouter)
+server.use("/forms",formRouter)
+server.use("/school_levels",schoolLevelRouter)
+server.use("/subject_levels",subjectLevelRouter)
+server.use("/subjects",subjectRouter)
 server.use("/schools",schoolRouter)
 server.use("/address", addressRouter)
 server.use("/guardians",guardiansRouter)
