@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../../../db.js';  // Adjust the path as needed for your project structure
-import UserModel from '../../users/model.js';  // Adjust the path to the User model
-import PostModel from '../../posts/model.js';  // Adjust the path to the Post model
+import sequelize from '../../../db.js';
+import PostModel from '../posts/model.js';
+import UserModel from '../../users/model.js';
 
 const LikeModel = sequelize.define('like', {
     id: {
@@ -27,8 +27,7 @@ const LikeModel = sequelize.define('like', {
     }
 }, {
     // Optional settings
-    timestamps: true,  // Tracks createdAt and updatedAt automatically
-    // Indexes for performance optimization
+    timestamps: true, 
     indexes: [
         {
             fields: ['post_id'],

@@ -46,6 +46,7 @@ import formRouter from "./api/educational_entities/forms/index.js";
 import schoolLevelRouter from "./api/educational_entities/school_levels/index.js";
 import subjectLevelRouter from "./api/educational_entities/subject_levels/index.js";
 import subjectRouter from "./api/educational_entities/subjects/index.js";
+import likeRouter from "./api/connect_makronexus/likes/index.js";
 
 // Load environment variables
 dotenv.config();
@@ -114,6 +115,7 @@ server.use('/makronexa', userAISettingsRouter);
 server.use("/posts",postRouter)
 server.use("/comments",commentRouter)
 server.use("/follows",followRouter)
+server.use("/likes",likeRouter)
 server.use("/groups",groupRouter)
 server.use("/follow_request",requestRouter)
 server.use("/group_membership",groupMembershipRouter)

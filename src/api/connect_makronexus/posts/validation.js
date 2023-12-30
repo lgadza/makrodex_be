@@ -1,8 +1,8 @@
-import { body } from 'express-validator';
+import { body,param } from 'express-validator';
 import UserModel from '../../users/model.js';
 
 const validatePost = [
-    body('user_id')
+    param('user_id')
         .isUUID().withMessage('User ID must be a valid UUID')
         .custom(async (value) => {
             const user = await UserModel.findByPk(value);
@@ -10,6 +10,7 @@ const validatePost = [
                 return Promise.reject('User not found');
             }
         }),
+        body('parent_post_id').optional().isUUID().withMessage('Invalid Parent Post ID format'),
     body('title')
         .optional()
         .trim()
