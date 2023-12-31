@@ -45,5 +45,8 @@ const FollowModel = sequelize.define('follow', {
 // Associations
 FollowModel.belongsTo(UserModel, { as: 'follower', foreignKey: 'follower_id' });
 FollowModel.belongsTo(UserModel, { as: 'following', foreignKey: 'following_id' });
+// UserModel.hasMany(FollowModel, { as: 'following', foreignKey: 'follower_id' });
+// UserModel.hasMany(FollowModel, { as: 'followers', foreignKey: 'following_id' });
+
 
 export default FollowModel;

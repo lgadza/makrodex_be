@@ -35,6 +35,18 @@ const UserModel = sequelize.define("user", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  bio: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  followers_count: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+},
+  following_count: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+},
   phone_number: {
     type: DataTypes.STRING,
     allowNull: true,

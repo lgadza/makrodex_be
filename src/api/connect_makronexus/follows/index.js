@@ -2,6 +2,7 @@ import express from 'express';
 import { body, validationResult,param } from 'express-validator';
 import FollowModel from './model.js'; 
 import { asyncHandler } from '../../../middleware/asyncHandler.js'; 
+import UserModel from '../../users/model.js';
 
 const followRouter = express.Router();
 // Endpoint to create a new follow relationship
@@ -36,7 +37,11 @@ followRouter.post('/:user_id', [
             follower_id: followerId,
             following_id
         });
+        // Update the follower's following_count
+        await UserModel.increment('following_count', { where: { id: followerId } });
 
+        // Update the following user's followers_count
+        await UserModel.increment('followers_count', { where: { id: following_id } });
         res.status(201).json({
             message: 'Follow relationship created successfully',
             data: newFollow

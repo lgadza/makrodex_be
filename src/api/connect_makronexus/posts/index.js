@@ -69,7 +69,7 @@ postRouter.get('/:id', [
         include: [{
             model: UserModel,
             as: 'user',
-            attributes: ['id', 'first_name', 'last_name', 'avatar']
+            attributes: ['id', 'first_name', 'last_name', 'avatar',"role"]
         }]
     });
 
@@ -85,7 +85,7 @@ postRouter.get('/:id', [
         include: [{
             model: UserModel,
             as: 'user',
-            attributes: ['id', 'first_name', 'last_name', 'avatar']
+            attributes: ['id', 'first_name', 'last_name', 'avatar',"role"]
         }]
     });
 
@@ -97,7 +97,7 @@ postRouter.get('/:id', [
 
 // Endpoint to get all posts with advanced filters and pagination
 postRouter.get('/', [
-    query('user_id').optional().isInt().withMessage('User ID must be an integer'),
+    query('user_id').optional().isUUID().withMessage('User ID must be an UUID'),
     query('status').optional().isIn(['active', 'deleted', 'archived']).withMessage('Invalid status value'),
     query('visibility').optional().isIn(['public', 'friends', 'private', 'custom']).withMessage('Invalid visibility value'),
     query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
@@ -129,7 +129,7 @@ postRouter.get('/', [
             include: [{
                 model: UserModel,
                 as: 'user',
-                attributes: ['id', 'first_name', 'last_name', 'avatar']
+                attributes: ['id', 'first_name', 'last_name', 'avatar',"role"]
             }],
             order: [['createdAt', 'DESC']], 
         });
