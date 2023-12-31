@@ -69,7 +69,7 @@ postRouter.get('/:id', [
         include: [{
             model: UserModel,
             as: 'user',
-            attributes: ['id', 'first_name',"last_name","avatar"] 
+            attributes: ['id', 'first_name', 'last_name', 'avatar']
         }]
     });
 
@@ -77,8 +77,24 @@ postRouter.get('/:id', [
         return res.status(404).json({ error: 'Post not found' });
     }
 
-    res.status(200).json(post);
+    // Get all posts with the same parent_post_id as the current post's id
+    const replies = await PostModel.findAll({
+        where: {
+            parent_post_id: postId,
+        },
+        include: [{
+            model: UserModel,
+            as: 'user',
+            attributes: ['id', 'first_name', 'last_name', 'avatar']
+        }]
+    });
+
+    res.status(200).json({
+        post,
+        replies,
+    });
 }));
+
 // Endpoint to get all posts with advanced filters and pagination
 postRouter.get('/', [
     query('user_id').optional().isInt().withMessage('User ID must be an integer'),
@@ -93,8 +109,8 @@ postRouter.get('/', [
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 10;
+    const page = parseInt(req.query.page, 20) || 1;
+    const limit = parseInt(req.query.limit, 20) || 20;
     const offset = (page - 1) * limit;
 
     const filters = {};
@@ -102,8 +118,11 @@ postRouter.get('/', [
     if (req.query.status) filters.status = req.query.status;
     if (req.query.visibility) filters.visibility = req.query.visibility;
 
+    // Add the condition to filter by null parent_post_id
+    filters.parent_post_id = null;
+
     try {
-        const { rows: posts, count: totalPosts } = await PostModel.findAndCountAll({
+        const { rows: postsWithNoAvatars, count: totalPosts } = await PostModel.findAndCountAll({
             where: filters,
             limit: limit,
             offset: offset,
@@ -112,13 +131,30 @@ postRouter.get('/', [
                 as: 'user',
                 attributes: ['id', 'first_name', 'last_name', 'avatar']
             }],
-            order: [['createdAt', 'DESC']], // Sorting by the creation date
+            order: [['createdAt', 'DESC']], 
         });
+        const posts = await Promise.all(postsWithNoAvatars.map(async (post) => {
+            if (post.comments_count > 0) {
+                const comments = await PostModel.findAll({
+                    where: { parent_post_id: post.id },
+                    include: [{
+                        model: UserModel,
+                        as: 'user',
+                        attributes: ['avatar']
+                    }],
+                });
 
+                // Extract avatars from comments
+                const avatars = comments.map(comment => comment.user.avatar);
+
+                return { ...post.toJSON(), replyAvatars: avatars };
+            } else {
+                return post.toJSON();
+            }
+        }));
         const totalPages = Math.ceil(totalPosts / limit);
 
         res.status(200).json({
-           
             pagination: {
                 totalPosts,
                 totalPages,
@@ -132,6 +168,7 @@ postRouter.get('/', [
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }));
+
 // Endpoint to update a post
 postRouter.put('/update-post/:user_id/:id', [
     param('id').isUUID().withMessage('Invalid post ID format'),

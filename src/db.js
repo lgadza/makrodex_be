@@ -14,13 +14,13 @@ const sequelize = new Sequelize({
   database: PG_DB,
   username: PG_USER,
   dialect: "postgres",
-  // dialectOptions: {
-  //   ssl: {
-  //     require: true,
-  //     rejectUnauthorized: true,
-  //     ca: fs.readFileSync("./us-east-1-bundle.pem")
-  //   }
-  // },
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: true,
+      ca: fs.readFileSync("./us-east-1-bundle.pem")
+    }
+  },
   logging: false,
 })
 export const pgConnect = async () => {
