@@ -30,7 +30,6 @@ import userAISettingsRouter from "./api/makronexusAI/userAISettings/index.js"
 import AIFileRouter from "./api/makronexusAI/files/index.js"
 import datasetChatRouter from "./api/makronexusAI/datasetChats/index.js"
 import stripeRouter from "./api/payment_gateways/index.js"
-import fileSystemManagement from "./api/file/filesystem-server.js"
 import messageRouter from "./api/messages/dual_messages/index.js";
 import conversationRouter from "./api/messages/conversations/index.js";
 import messengerParticipantRouter from "./api/messages/participants/index.js";
