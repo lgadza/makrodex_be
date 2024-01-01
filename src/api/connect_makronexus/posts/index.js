@@ -71,7 +71,13 @@ postRouter.get('/:id', [
             model: UserModel,
             as: 'user',
             attributes: ['id', 'first_name', 'last_name', 'avatar',"role"]
-        }]
+        },
+        {
+            model: MediaModel, 
+            as:"media",
+            attributes: ['id','upload_date',"thumbnail_url","post_id", 'media_url', 'media_type'],
+        },
+    ]
     });
 
     if (!post) {
