@@ -1,6 +1,7 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../../../db.js';  // Adjust the path as needed for your project structure
-import PostModel from '../../posts/model.js';  // Adjust the path to the Post model
+import sequelize from '../../../db.js';
+import PostModel from '../posts/model.js';
+
 
 const MediaModel = sequelize.define('media', {
     id: {
@@ -22,7 +23,7 @@ const MediaModel = sequelize.define('media', {
     },
     media_type: {
         type: DataTypes.STRING,
-        allowNull: false  // 'image' or 'video'
+        allowNull: false 
     },
     upload_date: {
         type: DataTypes.DATE,
@@ -34,9 +35,8 @@ const MediaModel = sequelize.define('media', {
     }
 }, {
     // Optional settings
-    timestamps: true,  // If you want to track createdAt and updatedAt
-    paranoid: true,    // Enable soft deletes
-    // Indexes for performance optimization
+    timestamps: true,  
+    paranoid: true,    
     indexes: [
         {
             fields: ['post_id']
@@ -46,5 +46,9 @@ const MediaModel = sequelize.define('media', {
 
 // Associations
 MediaModel.belongsTo(PostModel, { as: 'post', foreignKey: 'post_id' });
+PostModel.hasMany(MediaModel, {
+    foreignKey: 'post_id', // Name of the foreign key in the MediaModel
+    as: 'media', // Alias for the association
+});
 
 export default MediaModel;

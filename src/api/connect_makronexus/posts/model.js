@@ -69,4 +69,5 @@ const PostModel = sequelize.define('post', {
 // Associations
 PostModel.belongsTo(UserModel, { as: 'user', foreignKey: 'user_id' });
 
+
 export default PostModel;
