@@ -6,6 +6,7 @@ import UserModel from '../../users/model.js';
 import { validatePost } from './validation.js'; 
 import { asyncHandler } from '../../../middleware/asyncHandler.js';
 import MediaModel from '../media/model.js';
+import LikeModel from '../likes/model.js';
 
 const postRouter = express.Router();
 
@@ -77,6 +78,11 @@ postRouter.get('/:id', [
             as:"media",
             attributes: ['id','upload_date',"thumbnail_url","post_id", 'media_url', 'media_type'],
         },
+        {
+            model: LikeModel, 
+            as:"likes",
+            attributes: ['id','post_id',"user_id"],
+        },
     ]
     });
 
@@ -142,6 +148,11 @@ postRouter.get('/', [
                 model: MediaModel, 
                 as:"media",
                 attributes: ['id','upload_date',"thumbnail_url","post_id", 'media_url', 'media_type'],
+            },
+            {
+                model: LikeModel, 
+                as:"likes",
+                attributes: ['id','post_id',"user_id"],
             },
         ],
             order: [['createdAt', 'DESC']], 

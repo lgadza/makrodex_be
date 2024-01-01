@@ -39,7 +39,17 @@ const LikeModel = sequelize.define('like', {
 });
 
 // Associations
+// Associations
 LikeModel.belongsTo(PostModel, { as: 'post', foreignKey: 'post_id' });
+PostModel.hasMany(LikeModel, {
+    foreignKey: 'post_id', 
+    as: 'likes', 
+});
+
 LikeModel.belongsTo(UserModel, { as: 'user', foreignKey: 'user_id' });
+UserModel.hasMany(LikeModel, {
+    foreignKey: 'user_id', 
+    as: 'likes', 
+});
 
 export default LikeModel;
