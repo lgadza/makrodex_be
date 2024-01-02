@@ -539,7 +539,7 @@ if (userSession.step === 'awaiting_country_code') {
 
       } else {
           userSession.awaitingConfirmation = false;
-          sendWhatsAppMessage(from, "Oops Error! Let's try your phone_number again, e.g male or female  😄");
+          sendWhatsAppMessage(from, "Oops Error! Let's try your phone_number again, e.g 0788883376 😄");
       }
 
       res.status(200).send('OK');
@@ -588,6 +588,7 @@ if (userSession.step === 'awaiting_referral_code') {
   // Call the registerUser function to create the user record with referral code
   registerUser(userSession.data,from).then((newUser) => {
     sendWhatsAppMessage(from,`🎉 Congratulations, ${newUser.first_name}! Your registration is complete. Welcome aboard Makronexus! 🚀`)
+    sendWhatsAppMessage(from,`Your password to access our online platform is ${generatePassword()}`)
      sendWhatsAppMessageWithTemplate(from,"makronexus_intro")
      
  }).catch((error) => {
@@ -634,11 +635,11 @@ if (userSession.step === 'awaiting_referral_code') {
 
               }
               // ! GENERATE IMAGE Function
-              // else{
-              //   const image_url = await generateImage(text);
-              //   await sendWhatsAppImage(from,image_url)
-              //   res.status(200).json({ message: 'Images sent successfully' });
-              // }
+              else{
+                const image_url = await generateImage(text);
+                await sendWhatsAppImage(from,image_url)
+                res.status(200).json({ message: 'Images sent successfully' });
+              }
             }catch (error) {
               console.error('Error:', error);
               res.status(500).json({ error: 'Internal Server Error' });
@@ -729,23 +730,7 @@ if (userSession.step === 'awaiting_referral_code') {
   }
 });
 
-//function isValidWebhookRequest(body) {
-//  return (
- //   body &&
- //   body.entry &&
- //   Array.isArray(body.entry) &&
- //   body.entry.length > 0 &&
-  //  body.entry[0].changes &&
- //   Array.isArray(body.entry[0].changes) &&
- //   body.entry[0].changes.length > 0 &&
-  //  body.entry[0].changes[0].value &&
- //   body.entry[0].changes[0].value.messages &&
- //   Array.isArray(body.entry[0].changes[0].value.messages) &&
- //   body.entry[0].changes[0].value.messages.length > 0 &&
- //   body.entry[0].changes[0].value.messages[0].text &&
- //   body.entry[0].changes[0].value.messages[0].text.body
-//  );
-//}
+
 function isValidWebhookRequest(body) {
   return (
     body &&
@@ -828,29 +813,30 @@ export async function sendWhatsAppMessage(recipient, message) {
   }
 }
 // ! GENERATE IMAGE Function
-// async function generateImage(prompt) {
-//   try {
-//     const response = await openai.images.generate({
-//       model: "dall-e-3",
-//       prompt: prompt,
-//       n: 1,
-//       quality:"standard",
-//       size: "1024x1024",
-//     });
+async function generateImage(prompt) {
+  try {
+    const response = await openai.images.generate({
+      model: "dall-e-3",
+      prompt: prompt,
+      n: 1,
+      quality:"standard",
+      size: "1024x1024",
+    });
 
-//     const imageUrl = response.data[0].url;
-//     return imageUrl;
-//   } catch (error) {
-//     console.error("Error generating image:", error);
-//     throw error;
-//   }
-// }
+    const imageUrl = response.data[0].url;
+    return imageUrl;
+  } catch (error) {
+    console.error("Error generating image:", error);
+    throw error;
+  }
+}
 
 // // Example usage:
 // const prompt = "a white siamese cat";
 // const image_url = await generateImage(prompt);
 // console.log(image_url);
 
+// generate password for the user
 function generatePassword(length = 12) {
   const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
   let password = "";
@@ -859,85 +845,7 @@ function generatePassword(length = 12) {
   }
   return password;
 }
-
-// async function registerUser(sessionData,from) {
-//   try {
-//       const newUser = await UserModel.create(sessionData);
-
-//       if (newUser) {
-//           console.log('User successfully registered:', newUser);
-//           return newUser;
-//       }else{
-//         sendWhatsAppMessage(from, "Registration failed. You could not be registered")
-//       }
-//   } catch (error) {
-//       console.error('Error registering user:', error);
-//       throw error;
-//   }
-// }
-// async function registerUser(sessionData, from) {
-//   try {
-//       // Check if a referral code is provided in the session data
-//       if (sessionData.referral_code) {
-//           let referral = await ReferralModel.findOne({ where: { code: sessionData.referral_code } });
-//           const referrer = await UserModel.findOne({ where: { referral_code: sessionData.referral_code } });
-//           if (!referral) {
-//             referral = await ReferralModel.create({
-//                 code: sessionData.referral_code,
-//                 referred_id: null ,
-//                 referrer_id:referrer.dataValues.id
-//             });
-//         }
-//           if (!referrer) {
-//               // Handle the case where the referral code is invalid
-//               await sendWhatsAppMessage(from, "The referral code is invalid. Proceeding with registration without referral.");  
-//           } else {
-//               // Create the new user with the referral code
-//               const newUser = await UserModel.create(sessionData);
-//               if (newUser) {
-//                   console.log('User successfully registered:', newUser);
-
-//                   // Update the referral entry with the ID of the referred user
-//                   referral.referred_id = newUser.id;
-//                   referral.referrer_id = referrer.id;
-//                   await referral.save();
-
-//                   // Reset referrer's current_month_usage_count to 0
-//                   await resetReferrerUsageCount(referrer.id);
-//                   const referrerPhone=referrer.country_code+referrer.phone_number
-//                   sendWhatsAppMessage(referrerPhone,`🎉 Great News! 🎉
-
-//                   Hi ${referrer.first_name},
-                  
-//                   We're excited to let you know that someone has joined Makronexus using your referral code! Thanks for spreading the word about us. 
-                  
-//                   As a token of our appreciation, we've reset your monthly usage count to 0. You now have a fresh start to enjoy our features for this month!
-                  
-//                   Keep sharing your referral code to enjoy more benefits. Thanks for being a valuable member of the Makronexus community!
-                  
-//                   Cheers,
-//                   The Makronexus Team
-//                   `)
-//                   return newUser;
-//               } else {
-//                   await sendWhatsAppMessage(from, "Registration failed. You could not be registered");
-//               }
-//           }
-//       } else {
-//           // Create the new user without a referral code
-//           const newUser = await UserModel.create(sessionData);
-//           if (newUser) {
-//               console.log('User successfully registered:', newUser);
-//               return newUser;
-//           } else {
-//               await sendWhatsAppMessage(from, "Registration failed. You could not be registered");
-//           }
-//       }
-//   } catch (error) {
-//       console.error('Error registering user:', error);
-//       throw error;
-//   }
-// }
+// Registering the user through whatsapp
 async function registerUser(sessionData, from) {
   try {
       if (sessionData.referral_code) {
