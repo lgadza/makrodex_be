@@ -4,12 +4,14 @@ import GroupModel from './model.js';
 import { asyncHandler } from '../../../middleware/asyncHandler.js'; 
 import UserModel from '../../users/model.js';
 import GroupMembershipModel from '../group_memberships/model.js';
+import sequelize from '../../../db.js';
 
 const groupRouter = express.Router();
 
 // Endpoint to create a new group and add the creator as an admin
 groupRouter.post('/:user_id', [
     param('user_id').isUUID().withMessage('Invalid user ID'), 
+    body('slug_group_name').notEmpty().withMessage('Group name is required'), 
     body('group_name').notEmpty().withMessage('Group name is required')
         .custom(async (value) => {
             const existingGroup = await GroupModel.findOne({ where: { group_name: value } });
@@ -26,13 +28,14 @@ groupRouter.post('/:user_id', [
     }
 
     const userId = req.params.user_id;
-    const { group_name, description, group_privacy_setting } = req.body;
+    const { group_name, description, group_privacy_setting,slug_group_name } = req.body;
 
     try {
         // Create the group
         const newGroup = await GroupModel.create({
             group_name,
             description,
+            slug_group_name,
             group_privacy_setting,
             group_owner_id: userId
         });
@@ -132,6 +135,53 @@ groupRouter.delete('/:user_id/:group_id', [
     }
 }));
 // Endpoint to list groups with optional filters
+// groupRouter.get('/', [
+//     query('group_name').optional().trim(),
+//     query('group_privacy_setting').optional().isIn(['private', 'public']).withMessage('Invalid privacy setting'),
+//     query('group_owner_id').optional().isUUID().withMessage('Invalid owner ID format'),
+//     query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
+//     query('limit').optional().isInt({ min: 1 }).withMessage('Limit must be a positive integer'),
+//     // Additional query parameters can be added as needed
+// ], asyncHandler(async (req, res) => {
+//     const errors = validationResult(req);
+//     if (!errors.isEmpty()) {
+//         return res.status(400).json({ errors: errors.array() });
+//     }
+
+//     const page = parseInt(req.query.page, 10) || 1;
+//     const limit = parseInt(req.query.limit, 10) || 10;
+//     const offset = (page - 1) * limit;
+
+//     const filters = {};
+//     if (req.query.group_name) filters.group_name = req.query.group_name;
+//     if (req.query.group_privacy_setting) filters.group_privacy_setting = req.query.group_privacy_setting;
+//     if (req.query.group_owner_id) filters.group_owner_id = req.query.group_owner_id;
+
+//     try {
+//         const { rows: groups, count: totalGroups } = await GroupModel.findAndCountAll({
+//             where: filters,
+//             limit: limit,
+//             offset: offset,
+//             order: [['creation_date', 'DESC']], // Sorting by creation date
+//         });
+
+//         const totalPages = Math.ceil(totalGroups / limit);
+
+//         res.status(200).json({
+//             pagination: {
+//                 totalGroups,
+//                 totalPages,
+//                 currentPage: page,
+//                 limit
+//             },
+//             groups
+//         });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// }));
+// Define the GET endpoint for fetching groups
 groupRouter.get('/', [
     query('group_name').optional().trim(),
     query('group_privacy_setting').optional().isIn(['private', 'public']).withMessage('Invalid privacy setting'),
@@ -155,30 +205,50 @@ groupRouter.get('/', [
     if (req.query.group_owner_id) filters.group_owner_id = req.query.group_owner_id;
 
     try {
+        // Perform a JOIN operation between GroupModel and GroupMembershipModel to get members for each group
         const { rows: groups, count: totalGroups } = await GroupModel.findAndCountAll({
             where: filters,
             limit: limit,
             offset: offset,
-            order: [['creation_date', 'DESC']], // Sorting by creation date
+            order: [['creation_date', 'DESC']], 
+            include: [
+                {
+                    model: GroupMembershipModel,
+                    as: 'memberships',
+                    attributes: ['id','user_id',"member_role",'last_activity_date'],
+                    include: [
+                        {
+                            model: UserModel,
+                            as: 'user',
+                            attributes: ['id', 'first_name',"last_name", 'email',"avatar","role"], 
+                        },
+                    ],
+                },
+            ],
+            attributes: {
+                include: [
+                    [sequelize.literal('(SELECT COUNT(*) FROM "group_memberships" WHERE "group_memberships"."group_id" = "group"."id")'), 'members_count'],
+                ],
+            },
         });
 
         const totalPages = Math.ceil(totalGroups / limit);
+
 
         res.status(200).json({
             pagination: {
                 totalGroups,
                 totalPages,
                 currentPage: page,
-                limit
+                limit,
             },
-            groups
+            groups: groups,
         });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }));
-
 // Endpoint to get details of a specific group
 groupRouter.get('/:group_id', [
     param('group_id').isUUID().withMessage('Invalid group ID format'),
@@ -196,7 +266,20 @@ groupRouter.get('/:group_id', [
                 model: UserModel,
                 as: 'groupOwner',
                 attributes: ['id', 'first_name',"last_name","avatar"] 
-            }]
+            },
+            {
+                model: GroupMembershipModel,
+                as: 'memberships',
+                attributes: ['id','user_id',"member_role",'last_activity_date'],
+                include: [
+                    {
+                        model: UserModel,
+                        as: 'user',
+                        attributes: ['id', 'first_name',"last_name", 'email',"avatar","role"], 
+                    },
+                ],
+            },
+        ]
         });
 
         if (!group) {

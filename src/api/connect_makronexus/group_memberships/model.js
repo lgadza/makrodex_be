@@ -49,6 +49,8 @@ const GroupMembershipModel = sequelize.define('group_membership', {
 
 // Associations
 GroupMembershipModel.belongsTo(GroupModel, { as: 'group', foreignKey: 'group_id' });
+GroupModel.hasMany(GroupMembershipModel, { as: 'memberships', foreignKey: 'group_id' });
+
 GroupMembershipModel.belongsTo(UserModel, { as: 'user', foreignKey: 'user_id' });
 
 export default GroupMembershipModel;

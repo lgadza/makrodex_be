@@ -193,16 +193,9 @@ groupMembershipRouter.get('/:groupId/members', [
             order: [['createdAt', 'ASC']]
         });
 
-        res.status(200).json({
-            message: 'Group members retrieved successfully',
-            data: rows,
-            pagination: {
-                total: count,
-                perPage: limit,
-                currentPage: page,
-                totalPages: Math.ceil(count / limit)
-            }
-        });
+        res.status(200).json(
+        rows
+        );
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });

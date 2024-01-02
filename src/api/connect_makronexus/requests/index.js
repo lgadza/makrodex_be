@@ -3,6 +3,8 @@ import { body, validationResult, param, query } from 'express-validator';
 import RequestModel, { RequestType, RequestStatus } from './model.js'; 
 import { asyncHandler } from '../../../middleware/asyncHandler.js'; 
 import GroupModel from '../groups/model.js';
+import UserModel from '../../users/model.js';
+import GroupMembershipModel from '../group_memberships/model.js';
 const requestRouter = express.Router();
 
 // Endpoint to send a request
@@ -87,6 +89,8 @@ requestRouter.post('/:sender_user_id/:groupId/invite-user', [
 }));
 
 // Endpoint to accept/decline a request
+
+
 requestRouter.put('/:user_id/:request_id', [
     param('request_id').isUUID().withMessage('Invalid request ID format'),
     param('user_id').isUUID().withMessage('Invalid User ID format'),
@@ -108,16 +112,31 @@ requestRouter.put('/:user_id/:request_id', [
         }
 
         if (request.request_type === RequestType.GROUP_JOIN) {
-            // Fetch the group details for a group join request
             const group = await GroupModel.findByPk(request.group_id);
             if (!group || group.group_owner_id !== currentUserId) {
                 return res.status(403).json({ error: 'Unauthorized to respond to this group join request' });
+            }
+
+            if (request_status === RequestStatus.ACCEPTED) {
+                // Check if the user is already a member
+                const existingMembership = await GroupMembershipModel.findOne({
+                    where: { group_id: request.group_id, user_id: request.sender_user_id }
+                });
+
+                if (!existingMembership) {
+                    // Add the user to the group if not already a member
+                    await GroupMembershipModel.create({
+                        group_id: request.group_id,
+                        user_id: request.sender_user_id,
+                        member_role: 'Member' // or any other default role
+                    });
+                }
             }
         } else if (request.request_type === RequestType.FRIEND && request.receiver_user_id !== currentUserId) {
             return res.status(403).json({ error: 'Unauthorized to respond to this friend request' });
         }
 
-        // Update the request status
+        // Update the request status regardless of the type
         await request.update({ request_status });
 
         res.status(200).json({
@@ -129,6 +148,8 @@ requestRouter.put('/:user_id/:request_id', [
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }));
+
+
 // Endpoint to list requests for a user or a group
 requestRouter.get('/:user_id', [
     param('user_id').isUUID().withMessage('Invalid User ID format'),
@@ -213,13 +234,22 @@ requestRouter.get('/:user_id/:groupId/pending-requests', [
                 request_type: RequestType.GROUP_JOIN,
                 request_status: RequestStatus.PENDING
             },
-            order: [['createdAt', 'ASC']] // Sorting by request date
+            order: [['createdAt', 'ASC']], // Sorting by request date
+            
+            include: [
+                        {
+                            model: UserModel,
+                            as: 'sender',
+                            attributes: ['id', 'first_name',"last_name", 'email',"avatar","role"], 
+                        },
+                    ],
+           
         });
 
-        res.status(200).json({
-            message: 'Pending join requests retrieved successfully',
-            data: pendingRequests
-        });
+        res.status(200).json(
+            // message: 'Pending join requests retrieved successfully',
+             pendingRequests
+        );
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });

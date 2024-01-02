@@ -13,8 +13,20 @@ const GroupModel = sequelize.define('group', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    slug_group_name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    members_count:{
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+    },
     description: {
         type: DataTypes.TEXT,
+        allowNull: true 
+    },
+    group_avatar: {
+        type: DataTypes.STRING,
         allowNull: true 
     },
     creation_date: {
