@@ -6,6 +6,8 @@ import createHttpError from "http-errors";
 import UserModel from "../users/model.js";
 import { JWTAuthMiddleware } from "../lib/auth/jwtAuth.js";
 import { generateSignedUrl, s3 } from "../../s3Service.js";
+import GroupModel from "../connect_makronexus/groups/model.js";
+import { param } from "express-validator";
 
 const fileRouter = express.Router();
 
@@ -112,7 +114,57 @@ fileRouter.post("/:user_id/avatar", JWTAuthMiddleware,upload.single('file'), asy
     next(error);
   }
 });
+// Post Community Avatar
+fileRouter.post("/:user_id/:community_id/avatar", JWTAuthMiddleware,[
+  param('user_id').isUUID().withMessage('Invalid user ID'), 
+  param('community_id').isUUID().withMessage('Invalid community ID format'),
+],upload.single('file'), async (req, res, next) => {
+  const community_id = req.params.community_id;
+  const userId = req.params.user_id;
+  try {
+    if (!req.file) {
+      return next(createHttpError(400, "Avatar file is required."));
+    }
 
+    if (req.file.size > 1024 * 1024 * 2) {
+      return next(createHttpError(400, "Avatar file size exceeds the limit."));
+    }
+
+    const community = await GroupModel.findByPk(community_id);
+    if (!community) {
+        return res.status(404).json({ error: 'Community not found' });
+    }
+   
+    // Check if the current user is the group owner
+    if (community.group_owner_id !== userId) {
+      return res.status(403).json({ error: 'Unauthorized to upload profile image of this group' });
+  }
+ 
+    const file = req.file;
+    const result = await uploadFileToS3(file.buffer, file.originalname,"avatars", file.mimetype);
+    
+    const [updatedRowCount] = await GroupModel.update(
+      { group_avatar: result.Location },
+      {
+        where: { id: community_id },
+        returning: true,
+      }
+    );
+
+    if (updatedRowCount > 0) {
+      const updatedRecord = await GroupModel.findOne({
+        where: { id: community_id },
+        raw: true,
+      });
+      res.send(updatedRecord);
+    } else {
+      next(createHttpError(404, `User with id ${community_id} not found!`));
+    }
+  } catch (error) {
+    console.log(error, "Error");
+    next(error);
+  }
+});
 // Get all files for an user
 fileRouter.get('/:user_id', async (req, res, next) => {
   try {

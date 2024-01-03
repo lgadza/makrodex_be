@@ -636,6 +636,7 @@ if (userSession.step === 'awaiting_referral_code') {
               }
               // ! GENERATE IMAGE Function
               else{
+                await sendWhatsAppMessage(from, "Makronexus is now processing and generating the image as per your request.");
                 const image_url = await generateImage(text);
                 await sendWhatsAppImage(from,image_url)
                 res.status(200).json({ message: 'Images sent successfully' });
