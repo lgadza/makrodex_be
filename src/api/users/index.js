@@ -11,6 +11,8 @@ import { sendRegistrationEmail } from "../lib/email_tool.js";
 import { sendWhatsAppMessageWithTemplate } from "../makronexusAI/whatsapp/index.js";
 import sgMail from "@sendgrid/mail";
 import { generateReferralCode, resetReferrerUsageCount } from "../utils/utils.js";
+import { asyncHandler } from "../../middleware/asyncHandler.js";
+import sequelize from "../../db.js";
 
 const userRouter = express.Router();
 
@@ -63,31 +65,58 @@ userRouter.post("/register", checkUserSchema, triggerBadRequest, async (req, res
   }
 });
 
-userRouter.get("/", async (req, res, next) => {
+
+// Endpoint to fetch users with dynamic query, sorting, and pagination
+userRouter.get("/", asyncHandler(async (req, res, next) => {
   try {
-    const query = {};
-    const minSearchLength = 3;
+      const minSearchLength = 3;
+      let whereClause = {};
+      const searchFields = ['first_name', 'last_name', 'email', 'country_code', 'citizenship'];
+      searchFields.forEach(field => {
+          if (req.query[field] && req.query[field].length >= minSearchLength) {
+              whereClause[field] = { [Op.iLike]: `%${req.query[field]}%` };
+          }
+      });
+if (req.query.gender) {
+  whereClause.gender = sequelize.literal(`"gender"::text ILIKE '%${req.query.gender}%'`);
+}
+if (req.query.role) {
+  whereClause.role = sequelize.literal(`"role"::text ILIKE '%${req.query.role}%'`);
+}
 
-    if (req.query.first_name && req.query.first_name.length >= minSearchLength) {
-      query.first_name = { [Op.like]: `%${req.query.first_name}%` };
-    }
+      // Pagination parameters
+      const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+      const page = req.query.page ? parseInt(req.query.page) : 1;
+      const offset = (page - 1) * limit;
 
-    if (req.query.last_name && req.query.last_name.length >= minSearchLength) {
-      query.last_name = { [Op.like]: `%${req.query.last_name}%` };
-    }
+      // Sorting parameters
+      const sortField = req.query.sortField || 'createdAt'; // Default sort field
+      const sortOrder = req.query.sortOrder === 'desc' ? 'DESC' : 'ASC'; // Default sort order
 
-    const users = await UserModel.findAll({
-      where: query,
-      attributes: { exclude: ["password", "createdAt"] },
-      // include relevant models if needed
-    });
+      // Fetch users with count for pagination
+      const { count: totalUsers, rows: users } = await UserModel.findAndCountAll({
+          where: whereClause,
+          attributes: { exclude: ["password"] }, // Exclude sensitive data
+          limit,
+          offset,
+          order: [[sortField, sortOrder]],
+      });
 
-    res.status(200).json(users);
+      // Calculate total number of pages
+      const totalPages = Math.ceil(totalUsers / limit);
+
+      res.status(200).json({
+          totalUsers,
+          totalPages,
+          currentPage: page,
+          usersPerPage: limit,
+          users,
+      });
   } catch (error) {
-    console.error(error);
-    next(createHttpError(500, "Internal server error"));
+      console.error(error);
+      next(createHttpError(500, "Internal server error"));
   }
-});
+}));
 
 
 
