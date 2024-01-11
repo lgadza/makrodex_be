@@ -1,6 +1,7 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../../../db.js';
 import PostModel from '../posts/model.js';
+import ProjectModel from '../projects/model.js';
 
 
 const MediaModel = sequelize.define('media', {
@@ -11,9 +12,17 @@ const MediaModel = sequelize.define('media', {
     },
     post_id: {
         type: DataTypes.UUID,
-        allowNull: false,
+        allowNull: true,
         references: {
             model: PostModel,
+            key: 'id'
+        }
+    },
+    project_id: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+            model: ProjectModel,
             key: 'id'
         }
     },
@@ -31,7 +40,7 @@ const MediaModel = sequelize.define('media', {
     },
     thumbnail_url: {
         type: DataTypes.STRING,
-        allowNull: true  // Only for videos
+        allowNull: true  
     }
 }, {
     // Optional settings
@@ -40,6 +49,9 @@ const MediaModel = sequelize.define('media', {
     indexes: [
         {
             fields: ['post_id']
+        },
+        {
+            fields: ['project_id']
         }
     ]
 });
@@ -47,8 +59,13 @@ const MediaModel = sequelize.define('media', {
 // Associations
 MediaModel.belongsTo(PostModel, { as: 'post', foreignKey: 'post_id' });
 PostModel.hasMany(MediaModel, {
-    foreignKey: 'post_id', // Name of the foreign key in the MediaModel
-    as: 'media', // Alias for the association
+    foreignKey: 'post_id', 
+    as: 'media', 
+});
+MediaModel.belongsTo(ProjectModel, { as: 'project', foreignKey: 'project_id' });
+ProjectModel.hasMany(MediaModel, {
+    foreignKey: 'project_id', 
+    as: 'media', 
 });
 
 export default MediaModel;

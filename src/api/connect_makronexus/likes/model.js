@@ -2,6 +2,8 @@ import { DataTypes } from 'sequelize';
 import sequelize from '../../../db.js';
 import PostModel from '../posts/model.js';
 import UserModel from '../../users/model.js';
+import CommentModel from '../comments/mode.js';
+import ProjectModel from '../projects/model.js';
 
 const LikeModel = sequelize.define('like', {
     id: {
@@ -11,9 +13,25 @@ const LikeModel = sequelize.define('like', {
     },
     post_id: {
         type: DataTypes.UUID,
-        allowNull: false,
+        allowNull: true,
         references: {
             model: PostModel,
+            key: 'id'
+        }
+    },
+    comment_id: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+            model: CommentModel,
+            key: 'id'
+        }
+    },
+    project_id: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+            model: ProjectModel,
             key: 'id'
         }
     },
@@ -39,10 +57,22 @@ const LikeModel = sequelize.define('like', {
 });
 
 // Associations
-// Associations
+
 LikeModel.belongsTo(PostModel, { as: 'post', foreignKey: 'post_id' });
 PostModel.hasMany(LikeModel, {
     foreignKey: 'post_id', 
+    as: 'likes', 
+});
+
+LikeModel.belongsTo(CommentModel, { as: 'comment', foreignKey: 'comment_id' });
+CommentModel.hasMany(LikeModel, {
+    foreignKey: 'comment_id', 
+    as: 'likes', 
+});
+
+LikeModel.belongsTo(ProjectModel, { as: 'project', foreignKey: 'project_id' });
+ProjectModel.hasMany(LikeModel, {
+    foreignKey: 'project_id', 
     as: 'likes', 
 });
 

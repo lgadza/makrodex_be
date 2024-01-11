@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
-import PostModel from '../posts/model.js';
 import UserModel from '../../users/model.js';
 import sequelize from '../../../db.js';
+import ProjectModel from '../projects/model.js';
 
 
 const CommentModel = sequelize.define('comment', {
@@ -10,11 +10,11 @@ const CommentModel = sequelize.define('comment', {
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4
     },
-    post_id: {
+    project_id: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
-            model: PostModel,
+            model: ProjectModel,
             key: 'id'
         }
     },
@@ -30,6 +30,10 @@ const CommentModel = sequelize.define('comment', {
         type: DataTypes.TEXT,
         allowNull: false
     },
+    likes_count: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+    },
 }, {
     // Optional settings
     timestamps: true,  // If you want to track createdAt and updatedAt
@@ -37,7 +41,7 @@ const CommentModel = sequelize.define('comment', {
     // Indexes for performance optimization
     indexes: [
         {
-            fields: ['post_id'],
+            fields: ['project_id'],
         },
         {
             fields: ['user_id'],
@@ -46,8 +50,10 @@ const CommentModel = sequelize.define('comment', {
 });
 
 // Associations
-CommentModel.belongsTo(PostModel, { as: 'post', foreignKey: 'post_id' });
+CommentModel.belongsTo(ProjectModel, {  foreignKey: 'project_id' });
+ProjectModel.hasMany(CommentModel, {as:"comments",  foreignKey: 'project_id' });
 CommentModel.belongsTo(UserModel, { as: 'user', foreignKey: 'user_id' });
+UserModel.hasMany(CommentModel, { as: 'comments', foreignKey: 'user_id' });
 
 
 

@@ -1,29 +1,20 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../../../db.js';  // Adjust the path as needed for your project structure
-import UserModel from '../../users/model.js';  // Adjust the path to the User model
-const ProjectStatus = {
-    ONGOING: 'ongoing',
-    COMPLETED: 'completed',
-    // Add more statuses as needed
-};
+import sequelize from '../../../db.js'; 
+import UserModel from '../../users/model.js'; 
+import SchoolModel from '../../schools/model.js';
 
-const VisibilityOptions = {
-    PUBLIC: 'public',
-    PRIVATE: 'private',
-    GROUP_SPECIFIC: 'group-specific',
-    // Add more visibility options as needed
-};
+
 const ProjectModel = sequelize.define('project', {
     id: {
         type: DataTypes.UUID,
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4
     },
-    project_title: {
+    title: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    description: {
+    background: {
         type: DataTypes.TEXT,
         allowNull: true
     },
@@ -35,7 +26,7 @@ const ProjectModel = sequelize.define('project', {
         type: DataTypes.DATE,
         allowNull: true
     },
-    project_owner_id: {
+    owner_id: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
@@ -43,29 +34,38 @@ const ProjectModel = sequelize.define('project', {
             key: 'id'
         }
     },
-    project_status: {
-        type: DataTypes.ENUM(Object.values(ProjectStatus)),
+school_id: {
+        type: DataTypes.UUID,
         allowNull: false,
-        defaultValue: ProjectStatus.ONGOING,  // Set a default status if needed
+        references: {
+            model: SchoolModel,
+            key: 'id'
+        }
+    },
+    status: {
+        type: DataTypes.ENUM,
+        values:["ongoing","completed"],
+        allowNull: false,
+        defaultValue:"ongoing",  
     },
     visibility: {
-        type: DataTypes.ENUM(Object.values(VisibilityOptions)),
+        type: DataTypes.ENUM,
+        values:["public","private","group-specific"],
         allowNull: false,
-        defaultValue: VisibilityOptions.PUBLIC,  // Set a default visibility if needed
+        defaultValue: "public", 
     }
 }, {
     // Optional settings
-    timestamps: true,  // Tracks createdAt and updatedAt automatically
-    paranoid: true,    // Enable soft deletes
-    // Indexes for performance optimization
+    timestamps: true,  
+    paranoid: true,    
     indexes: [
         {
-            fields: ['project_owner_id'],
+            fields: ['owner_id'],
         }
     ]
 });
 
 // Associations
-ProjectModel.belongsTo(UserModel, { as: 'projectOwner', foreignKey: 'project_owner_id' });
+ProjectModel.belongsTo(UserModel, { as: 'owner', foreignKey: 'owner_id' });
 
 export default ProjectModel;

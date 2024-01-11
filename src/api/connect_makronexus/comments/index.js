@@ -18,12 +18,12 @@ commentRouter.post('/:user_id', validateCommentCreation, asyncHandler(async (req
     }
 
     const userId = req.params.user_id;
-    const { post_id, comment_text } = req.body;
+    const { project_id, comment_text } = req.body;
 
     try {
         // Create a new comment
         const newComment = await CommentModel.create({
-            post_id,
+            project_id,
             user_id: userId,
             comment_text
         });
@@ -66,7 +66,7 @@ commentRouter.get('/:id', [
 // Endpoint to get comments with optional filters
 
 commentRouter.get('/', [
-    query('post_id').isUUID().withMessage('Post ID must be a valid UUID'),
+    query('project_id').isUUID().withMessage('Post ID must be a valid UUID'),
     query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
     query('limit').optional().isInt({ min: 1 }).withMessage('Limit must be a positive integer'),
     // Additional query parameters can be added as needed for further filtering
@@ -76,14 +76,14 @@ commentRouter.get('/', [
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const postId = req.query.post_id;
+    const project_id = req.query.project_id;
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const offset = (page - 1) * limit;
 
     try {
         const { rows: comments, count: totalComments } = await CommentModel.findAndCountAll({
-            where: { post_id: postId },
+            where: { project_id: project_id },
             limit: limit,
             offset: offset,
             include: [{
