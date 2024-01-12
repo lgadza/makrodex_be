@@ -1,11 +1,5 @@
 import fs from "fs"
 import { Sequelize } from "sequelize"
-
-// const connectionString = process.env.DATABASE_CONNECTION_STRING;
-// const sequelize = new Sequelize(connectionString,{
-//   dialect: "postgres",
-//   logging: false,
-// })
 const { PG_DB, PG_USER, PG_PASSWORD, PG_HOST, PG_PORT } = process.env
 const sequelize = new Sequelize({
   host: PG_HOST,
@@ -22,6 +16,7 @@ const sequelize = new Sequelize({
     }
   },
   logging: false,
+  // logging: console.log, 
 })
 export const pgConnect = async () => {
   try {

@@ -36,7 +36,7 @@ const ProjectModel = sequelize.define('project', {
     },
 school_id: {
         type: DataTypes.UUID,
-        allowNull: false,
+        allowNull: true,
         references: {
             model: SchoolModel,
             key: 'id'
@@ -64,7 +64,6 @@ school_id: {
         }
     ]
 });
-
 // Associations
 ProjectModel.belongsTo(UserModel, { as: 'owner', foreignKey: 'owner_id' });
 
