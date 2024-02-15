@@ -8,15 +8,14 @@ const sequelize = new Sequelize({
   database: PG_DB,
   username: PG_USER,
   dialect: "postgres",
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: true,
-      ca: fs.readFileSync("./us-east-1-bundle.pem")
-    }
-  },
+  // dialectOptions: {
+  //   ssl: {
+  //     require: true,
+  //     rejectUnauthorized: true,
+  //     ca: fs.readFileSync("./us-east-1-bundle.pem")
+  //   }
+  // },
   logging: false,
-  // logging: console.log, 
 })
 export const pgConnect = async () => {
   try {

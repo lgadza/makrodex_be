@@ -19,6 +19,7 @@ import sessionManager from "./sessionManager.js";
 import { handleFeatureUsage } from "../ai_usage/index.js";
 import { getUserReferralCode, resetReferrerUsageCount, validateReferralCode } from "../../utils/utils.js";
 import ReferralModel from "../ai_usage/referral_model.js";
+import axios from "axios";
 
 
 const whatsAppRouter = express.Router();
@@ -787,6 +788,68 @@ function extractMessageData(body) {
 //   return { from, imageFile, caption };
 // }
 
+// ! TEST EXTRACT IMAGE
+function extractImageMessageData(body) {
+  const message = body.entry[0].changes[0].value.messages[0];
+
+  
+  if (message.type === 'image' && message.image) {
+    const imageData = {
+      from: message.from,
+      id: message.id,
+      imageId: message.image.id,
+      mimeType: message.image.mime_type,
+      sha256: message.image.sha256,
+      caption: message.image.caption,
+      status: message.image.status,
+      timestamp: message.timestamp,
+    };
+
+    return imageData;
+  } else {
+    console.error('No image data found in the message');
+    return null;
+  }
+}
+
+/**
+ * Retrieves the actual image URL using the media ID.
+
+ */
+async function retrieveImageUrl(mediaId) {
+  const requestUrl = `https://graph.facebook.com/v17.0/${mediaId}`;
+
+  try {
+    const response = await axios.get(requestUrl, {
+      headers: { 'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}` },
+    });
+    // Assuming the response contains a JSON object with the URL
+    return response.data.url;
+  } catch (error) {
+    console.error('Error retrieving image URL:', error);
+    throw error;
+  }
+}
+
+/**
+ * Downloads the image from the retrieved URL.
+
+ */
+async function downloadImage(imageUrl) {
+  try {
+    const response = await axios.get(imageUrl, {
+      headers: { 'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}` },
+      responseType: 'arraybuffer',
+    });
+    console.log("THIS IS THE WHATSAPP IMAGE DOWNLOADED:", response)
+    return response.data;
+  } catch (error) {
+    console.error('Error downloading image:', error);
+    throw error;
+  }
+}
+
+// ! TEST EXTRACT IMAGE
 export async function sendWhatsAppMessage(recipient, message) {
   const url = process.env.BUSINESS_WHATSAPP_URL;
   const headers = {
