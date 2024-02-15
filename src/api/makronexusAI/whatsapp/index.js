@@ -284,8 +284,18 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
     if (isValidWebhookRequest(bodyParam) || isImageWebhookRequest(bodyParam))
     
     {
-      const messageData = extractMessageData(bodyParam);
-      const imageData=extractImageMessageData(bodyParam)
+      let messageData, imageData;
+      // const messageData = extractMessageData(bodyParam);
+      // const imageData=extractImageMessageData(bodyParam)
+      // Extract based on the type of message received
+      const messageType = bodyParam.entry[0].changes[0].value.messages[0].type;
+      if (messageType === 'image') {
+        imageData = extractImageMessageData(bodyParam);
+        // Handle imageData
+      } else {
+        messageData = extractMessageData(bodyParam);
+        // Handle messageData
+      }
 
       if (messageData || imageData) {
         // Determine 'from' based on the available data
