@@ -654,7 +654,7 @@ if (userSession.step === 'awaiting_referral_code') {
             console.error('Error processing the image:', error);
             // Handle the error appropriately. For example, send an error message via WhatsApp or log the error.
           }
-        }
+        }else{
           const lowerCaseMessage = text.trim().toLowerCase();
           console.log("USER:",user.dataValues.id)
           if (lowerCaseMessage.startsWith("image:")) {
@@ -739,6 +739,7 @@ if (userSession.step === 'awaiting_referral_code') {
       }
     }
     }
+  }
       } else {
         res.status(400).json({ error: 'Invalid message data' });
       }
