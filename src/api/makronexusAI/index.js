@@ -139,7 +139,6 @@ AiRouter.post("/chats/:chat_id/analyze-image",JWTAuthMiddleware, async (req, res
     const user = await UserModel.findByPk(user_id);
     const chat = await aiChatModel.findByPk(chat_id);
   
-
     if (!chat) {
       return res.status(404).json({ error: "Chat not found" });
     }

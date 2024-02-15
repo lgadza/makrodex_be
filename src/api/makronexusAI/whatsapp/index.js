@@ -280,17 +280,20 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
     const bodyParam = req.body;
     console.log(JSON.stringify(bodyParam, null, 2));
 
-    if (isValidWebhookRequest(bodyParam))
-    // if (isValidWebhookRequest(bodyParam) || isImageWebhookRequest(bodyParam))
+    // if (isValidWebhookRequest(bodyParam)) 
+    if (isValidWebhookRequest(bodyParam) || isImageWebhookRequest(bodyParam))
     
     {
       const messageData = extractMessageData(bodyParam);
-      // const imageData=extractImageMessageData(bodyParam)
+      const imageData=extractImageMessageData(bodyParam)
 
-      // if (messageData || imageData) 
-      if (messageData) {
-        const {from,text} = messageData;
-        // const from = (messageData || imageData).from;
+      if (messageData || imageData) 
+      // if (messageData) 
+      {
+        // const {from,text} = messageData;
+        const from = (messageData || imageData).from;
+        const {text} = messageData;
+        const {imageId,caption} = imageData;
         const phone_number = from.slice(-9);
         console.log(phone_number,"FROM PHONE_NUMBER")
         const country_code = from.slice(0, -9);
@@ -407,7 +410,7 @@ if (userSession.step === 'awaiting_country_code') {
        
          await sendWhatsAppMessage(from, ` 🎉 Now, let's talk about your special day! `);
         await   sendWhatsAppMessage(from, ` Could you please share your date of birth with me? `);
-         await sendWhatsAppMessage(from, ` Just the format DD-MM-YYYY would be perfect. `);
+        await sendWhatsAppMessage(from, `Please ensure the date is formatted strictly in the following format: DD-MM-YYYY. For example, if you're referring to the 15th of February, 2024, it should be written as 15-02-2024.`);
           sendWhatsAppMessage(from, ` This will help us celebrate you when the time comes! 🎂 `);
       } else {
           userSession.awaitingConfirmation = false;
@@ -422,12 +425,11 @@ if (userSession.step === 'awaiting_country_code') {
   if (/^\+\d{1,3}$/.test(countryCode)) {
       userSession.update({ country_code: countryCode }, 'awaiting_country_code');
       userSession.awaitingConfirmation = true;
-
       // Send a message asking for confirmation
       let confirmationMessage = "";
       switch (userSession.data.country_code) {
           case '+263':
-              confirmationMessage = "Ooh, you're Zimbabwean! Land of the mighty Victoria Falls. 🌍.";
+              confirmationMessage = "Ooh, you're Zimbabwean! Land of the mighty Victoria Falls.🌍.";
               break;
           case '+27':
               confirmationMessage = "Lovely, you're from South Africa! Home of the breathtaking Table Mountain. 🏞️.";
@@ -607,11 +609,52 @@ if (userSession.step === 'awaiting_referral_code') {
           console.log("USER NOT FOUND")
           sendWhatsAppMessageWithTemplate("+" + from, "call_to_register")
           
-        }else if (!['admin', 'teacher','user', 'student'].includes(user.dataValues.role)) {
+        }else if (!['admin', 'teacher','user','student'].includes(user.dataValues.role)) {
           console.log("USER NOT FOUND")
           await sendWhatsAppMessage(from, "You do not currently hold the role of a student, teacher, or admin at one of our partnered schools. If you believe this is in error or have any questions, please feel free to contact us on WhatsApp at +48794144892.");
         res.status(200).json({ message: 'Message sent' });
         }else{
+          if (imageId) {
+            console.log("THIS IS THE IMAGE RECEIVED FROM WHATSAPP");
+          try {
+            if(!["admin","teacher"].includes(user.dataValues.role)){
+              await sendWhatsAppMessage(from, " Access to Makronexus image analyser is currently restricted. Upgrade to the premium version now for uninterrupted service. For more information, please contact us at +48794144892.");
+              res.status(200).json({ message: 'Message sent' });
+
+            }else{
+            const imageUrl = await retrieveImageUrl(imageId); // Retrieve the image URL based on the imageId
+            const imageBuffer = await downloadImage(imageUrl); // Download the image to get a Buffer
+            console.log('Image downloaded successfully.');
+        
+            await sendWhatsAppMessage(from, "Analyzing the image...");
+        
+            // Encode the Buffer to a base64 string for embedding in the API call
+            const base64Image = bufferToBase64(imageBuffer);
+        
+            const response = await openai.chat.completions.create({
+              model: "gpt-4-vision-preview",
+              messages: [{
+                role: "user",
+                content: [
+                  { type: "text", text: caption },
+                  { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64Image}` } },
+                ],
+              }],
+            });
+        
+            console.log("THIS IS THE IMAGE RECEIVED FROM WHATSAPP");
+        
+            // Extract the response message and send it via WhatsApp
+            const replyMessage = response.choices[0].message.content;
+            await sendWhatsAppMessage(from, replyMessage);
+        
+            console.log('Message sent successfully.');
+          } 
+        }catch (error) {
+            console.error('Error processing the image:', error);
+            // Handle the error appropriately. For example, send an error message via WhatsApp or log the error.
+          }
+        }
           const lowerCaseMessage = text.trim().toLowerCase();
           console.log("USER:",user.dataValues.id)
           if (lowerCaseMessage.startsWith("image:")) {
@@ -647,30 +690,6 @@ if (userSession.step === 'awaiting_referral_code') {
               res.status(500).json({ error: 'Internal Server Error' });
             }
           }
-        //   else if((imageData)){
-        //     const response = await openai.chat.completions.create({
-        //       model: "gpt-4-vision-preview",
-        //       messages: [
-        //         {
-        //           role: "user",
-        //           content: [
-        //             { type: "text", text: imageData.caption },
-        //             {
-        //               type: "image_url",
-        //               image_url: {
-        //                 url: imageData.imageFile,
-        //               },
-        //             },
-        //           ],
-        //         },
-        //       ],
-        //     });
-        //     console.log("THIS IS THE IMAGE RECIEVED FROM WHATSAPP")
-        //     const replyMessage = response.choices[0].message.content;
-        // await sendWhatsAppMessage(from, replyMessage);
-        // res.status(200).json({ message: 'Message sent' });
-        //   }
-          
           else{
             // ! Resply from openai
             // Check the conversation limit
@@ -847,6 +866,10 @@ async function downloadImage(imageUrl) {
     console.error('Error downloading image:', error);
     throw error;
   }
+}
+// Function to encode the buffer to base64
+function bufferToBase64(buffer) {
+  return Buffer.from(buffer).toString('base64');
 }
 
 // ! TEST EXTRACT IMAGE
