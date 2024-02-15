@@ -636,6 +636,7 @@ if (userSession.step === 'awaiting_referral_code') {
 
             }else{
             const imageUrl = await retrieveImageUrl(imageId); // Retrieve the image URL based on the imageId
+            await sendWhatsAppMessage(from, `imageurl: ${imageUrl}`);
             const imageBuffer = await downloadImage(imageUrl); // Download the image to get a Buffer
             console.log('Image downloaded successfully.');
         
@@ -665,6 +666,7 @@ if (userSession.step === 'awaiting_referral_code') {
           } 
         }catch (error) {
             console.error('Error processing the image:', error);
+            await sendWhatsAppMessage(from, 'Error processing the image:', error);
             // Handle the error appropriately. For example, send an error message via WhatsApp or log the error.
           }
         }else{
@@ -868,7 +870,8 @@ async function retrieveImageUrl(mediaId) {
  * Downloads the image from the retrieved URL.
 
  */
-async function downloadImage(imageUrl) {
+async function downloadImage(imageUrl) { 
+  console.log("THIS IS THE WHATSAPP IMAGE URL:", imageUrl)
   try {
     const response = await axios.get(imageUrl, {
       headers: { 'Authorization': `Bearer ${process.env.BUSINESS_WHATSAPP_BEARER_TOKEN}` },
