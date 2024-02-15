@@ -301,6 +301,7 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
         if (imageData) {
           // Safely destructure imageId and caption only if imageData is not null
           ({ imageId, caption } = imageData);
+          await  sendWhatsAppMessage(from, `imageId and caption: ${imageId} + caption: ${caption}`);
         }
         
         // Extract phone number and country code from 'from'
