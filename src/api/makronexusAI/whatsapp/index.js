@@ -629,6 +629,7 @@ if (userSession.step === 'awaiting_referral_code') {
         }else{
           if (imageId) {
             console.log("THIS IS THE IMAGE RECEIVED FROM WHATSAPP");
+            await sendWhatsAppMessage(from, `IMAGE RECEIVED`);
           try {
             if(!["admin","teacher"].includes(user.dataValues.role)){
               await sendWhatsAppMessage(from, " Access to Makronexus image analyser is currently restricted. Upgrade to the premium version now for uninterrupted service. For more information, please contact us at +48794144892.");
