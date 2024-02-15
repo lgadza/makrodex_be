@@ -804,10 +804,10 @@ function isImageWebhookRequest(body) {
     body.entry[0].changes[0].value.messages &&
     Array.isArray(body.entry[0].changes[0].value.messages) &&
     body.entry[0].changes[0].value.messages.length > 0 &&
-    body.entry[0].changes[0].value.messages[0].image &&
-    body.entry[0].changes[0].value.messages[0].image.file!== undefined
+    body.entry[0].changes[0].value.messages[0].type === 'image' 
   );
 }
+
 
 function extractMessageData(body) {
   const message = body.entry[0].changes[0].value.messages[0];
@@ -833,13 +833,8 @@ function extractImageMessageData(body) {
   if (message.type === 'image' && message.image) {
     const imageData = {
       from: message.from,
-      id: message.id,
       imageId: message.image.id,
-      mimeType: message.image.mime_type,
-      sha256: message.image.sha256,
       caption: message.image.caption,
-      status: message.image.status,
-      timestamp: message.timestamp,
     };
 
     return imageData;
