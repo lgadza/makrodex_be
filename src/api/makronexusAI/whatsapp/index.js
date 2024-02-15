@@ -287,17 +287,30 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
       const messageData = extractMessageData(bodyParam);
       const imageData=extractImageMessageData(bodyParam)
 
-      if (messageData || imageData) 
-      // if (messageData) 
-      {
-        // const {from,text} = messageData;
-        const from = (messageData || imageData).from;
-        const {text} = messageData;
-        const {imageId,caption} = imageData;
+      if (messageData || imageData) {
+        // Determine 'from' based on the available data
+        const from = messageData?.from || imageData?.from;
+        
+        // Initialize variables outside the conditional blocks
+        let text, imageId, caption;
+        
+        if (messageData) {
+          text = messageData.text; // Only access text if messageData is provided
+        }
+        
+        if (imageData) {
+          // Safely destructure imageId and caption only if imageData is not null
+          ({ imageId, caption } = imageData);
+        }
+        
+        // Extract phone number and country code from 'from'
         const phone_number = from.slice(-9);
-        console.log(phone_number,"FROM PHONE_NUMBER")
+        console.log(phone_number, "FROM PHONE_NUMBER");
+        
         const country_code = from.slice(0, -9);
-        console.log(country_code,"FROM country_code")
+        console.log(country_code, "FROM country_code");
+        
+        // Attempt to find the user in the database
         const user = await UserModel.findOne({
           where: {
             phone_number: phone_number,
