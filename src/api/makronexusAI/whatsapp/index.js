@@ -20,7 +20,6 @@ import { handleFeatureUsage } from "../ai_usage/index.js";
 import { getUserReferralCode, resetReferrerUsageCount, validateReferralCode } from "../../utils/utils.js";
 import ReferralModel from "../ai_usage/referral_model.js";
 import axios from "axios";
-import sharp from "sharp";
 
 
 const whatsAppRouter = express.Router();
@@ -651,10 +650,7 @@ if (userSession.step === 'awaiting_referral_code') {
             await sendWhatsAppMessage(from, "Analyzing the image...");
         
             // Encode the Buffer to a base64 string for embedding in the API call
-           
-            const processedImageBuffer = await compressAndResizeImage(imageBuffer);
-            const base64Image = processedImageBuffer.toString('base64');
-    
+            const base64Image = bufferToBase64(imageBuffer);
         
             const response = await openai.chat.completions.create({
               model: "gpt-4-vision-preview",
@@ -996,21 +992,7 @@ async function registerUser(sessionData, from) {
   }
 }
 
-async function compressAndResizeImage(imageBuffer) {
-  try {
-    // Adjust the resize options and quality as per your requirements
-    return await sharp(imageBuffer)
-      .resize(1024, 768, {
-        fit: 'inside',
-        withoutEnlargement: true
-      })
-      .jpeg({ quality: 80 })
-      .toBuffer();
-  } catch (error) {
-    console.error('Error compressing and resizing image:', error);
-    throw error; // Rethrow to handle it in the calling context
-  }
-}
+
 
 
 export default whatsAppRouter;
