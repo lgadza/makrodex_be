@@ -169,7 +169,7 @@ AiRouter.post("/chats/:chat_id/analyze-image",JWTAuthMiddleware, async (req, res
       });
       const result = response.choices[0];
       console.log(result,"RESULTS")
-          // Create a new MakronexaQA instance for the user's input
+          // Create a new MakronexaQA instance for the user's inputgpt-4-vision-preview
           const newMakronexaQA = await MakronexaQA.create({
             type: "text",
             message: question,

@@ -20,6 +20,7 @@ import { handleFeatureUsage } from "../ai_usage/index.js";
 import { getUserReferralCode, resetReferrerUsageCount, validateReferralCode } from "../../utils/utils.js";
 import ReferralModel from "../ai_usage/referral_model.js";
 import axios from "axios";
+import sharp from "sharp";
 
 
 const whatsAppRouter = express.Router();
@@ -311,7 +312,6 @@ whatsAppRouter.post('/webhooks', async (req, res) => {
         if (imageData) {
           // Safely destructure imageId and caption only if imageData is not null
           ({ imageId, caption } = imageData);
-          await  sendWhatsAppMessage(from, `imageId and caption: ${imageId} + caption: ${caption}`);
         }
         
         // Extract phone number and country code from 'from'
@@ -638,9 +638,7 @@ if (userSession.step === 'awaiting_referral_code') {
           await sendWhatsAppMessage(from, "You do not currently hold the role of a student, teacher, or admin at one of our partnered schools. If you believe this is in error or have any questions, please feel free to contact us on WhatsApp at +48794144892.");
         res.status(200).json({ message: 'Message sent' });
         }else{
-          if (imageId) {
-            console.log("THIS IS THE IMAGE RECEIVED FROM WHATSAPP");
-            await sendWhatsAppMessage(from, `IMAGE RECEIVED`);
+          if (imageId) {            
           try {
             if(!["admin","teacher"].includes(user.dataValues.role)){
               await sendWhatsAppMessage(from, " Access to Makronexus image analyser is currently restricted. Upgrade to the premium version now for uninterrupted service. For more information, please contact us at +48794144892.");
@@ -648,14 +646,15 @@ if (userSession.step === 'awaiting_referral_code') {
 
             }else{
             const imageUrl = await retrieveImageUrl(imageId); // Retrieve the image URL based on the imageId
-            await sendWhatsAppMessage(from, `imageurl: ${imageUrl}`);
             const imageBuffer = await downloadImage(imageUrl); // Download the image to get a Buffer
-            console.log('Image downloaded successfully.');
         
             await sendWhatsAppMessage(from, "Analyzing the image...");
         
             // Encode the Buffer to a base64 string for embedding in the API call
-            const base64Image = bufferToBase64(imageBuffer);
+           
+            const processedImageBuffer = await compressAndResizeImage(imageBuffer);
+            const base64Image = processedImageBuffer.toString('base64');
+    
         
             const response = await openai.chat.completions.create({
               model: "gpt-4-vision-preview",
@@ -666,6 +665,7 @@ if (userSession.step === 'awaiting_referral_code') {
                   { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64Image}` } },
                 ],
               }],
+              max_tokens:1500,
             });
         
             console.log("THIS IS THE IMAGE RECEIVED FROM WHATSAPP");
@@ -826,16 +826,8 @@ function extractMessageData(body) {
 
   return { from, text };
 }
-// function extractImageMessageData(body) {
-//   const message = body.entry[0].changes[0].value.messages[0];
-//   const from = message.from;
-//   const imageFile = message.image.file;
-//   const caption = message.image.caption;
 
-//   return { from, imageFile, caption };
-// }
 
-// ! TEST EXTRACT IMAGE
 function extractImageMessageData(body) {
   const message = body.entry[0].changes[0].value.messages[0];
 
@@ -896,7 +888,7 @@ function bufferToBase64(buffer) {
   return Buffer.from(buffer).toString('base64');
 }
 
-// ! TEST EXTRACT IMAGE
+
 export async function sendWhatsAppMessage(recipient, message) {
   const url = process.env.BUSINESS_WHATSAPP_URL;
   const headers = {
@@ -1004,7 +996,21 @@ async function registerUser(sessionData, from) {
   }
 }
 
-
+async function compressAndResizeImage(imageBuffer) {
+  try {
+    // Adjust the resize options and quality as per your requirements
+    return await sharp(imageBuffer)
+      .resize(1024, 768, {
+        fit: 'inside',
+        withoutEnlargement: true
+      })
+      .jpeg({ quality: 80 })
+      .toBuffer();
+  } catch (error) {
+    console.error('Error compressing and resizing image:', error);
+    throw error; // Rethrow to handle it in the calling context
+  }
+}
 
 
 export default whatsAppRouter;
