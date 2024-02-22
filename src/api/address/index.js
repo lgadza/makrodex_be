@@ -2,6 +2,7 @@ import express from "express";
 import AddressModel from "./model.js";
 import UserModel from "../users/model.js";
 import { JWTAuthMiddleware } from "../lib/auth/jwtAuth.js";
+import { param, validationResult } from "express-validator";
 
 const addressRouter = express.Router();
 
@@ -27,20 +28,35 @@ addressRouter.post("/:user_id", JWTAuthMiddleware, async (req, res, next) => {
 });
 
 // Get all addresses
-// addressRouter.get("/:user_id", async (req, res, next) => {
-//   try {
-//     const addresses = await AddressModel.findAll();
-//     res.status(200).send({ addresses });
-//   } catch (error) {
-//     next(error);
-//   }
-// });
+addressRouter.get("/all/:user_id", [
+  param('user_id').isUUID().withMessage('User ID must be a UUID.') 
+], async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { user_id } = req.params;
+  try {
+    const addresses = await AddressModel.findAll({ where: { user_id } });
+    // Check if addresses exist for the user_id
+    if (addresses && addresses.length > 0) {
+      res.status(200).json({  addresses });
+    } else {
+      res.status(404).json({ success: false, message: "No addresses found for the given user." });
+    }
+  } catch (error) {
+    console.error('Error fetching addresses:', error);
+    res.status(500).json({ success: false, message: "An error occurred while fetching addresses." });
+  }
+});
 
 // Get an address by ID
-addressRouter.get("/:user_id", async (req, res, next) => {
+addressRouter.get("/:user_id/:address_id", async (req, res, next) => {
   try {
     const user_id = req.params.user_id;
-    const address = await AddressModel.findOne({ where: { user_id } });
+    const address_id = req.params.address_id;
+    const address = await AddressModel.findOne({ where: { user_id , id:address_id} });
     if (!address) {
       return res.status(404).send({ error: "Address not found" });
     }

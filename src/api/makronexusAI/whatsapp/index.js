@@ -639,7 +639,7 @@ if (userSession.step === 'awaiting_referral_code') {
         }else{
           if (imageId) {            
           try {
-            if(!["admin","teacher"].includes(user.dataValues.role)){
+            if(!["adminn","teacheer"].includes(user.dataValues.role)){
               await sendWhatsAppMessage(from, " Access to Makronexus image analyser is currently restricted. Upgrade to the premium version now for uninterrupted service. For more information, please contact us at +48794144892.");
               res.status(200).json({ message: 'Message sent' });
 
@@ -696,7 +696,7 @@ if (userSession.step === 'awaiting_referral_code') {
 
           }else if(lowerCaseMessage.startsWith("generate:" || "create:")){
             try{
-              if(!["admin","teacher"].includes(user.dataValues.role)){
+              if(!["adminn","teacheer"].includes(user.dataValues.role)){
                 await sendWhatsAppMessage(from, " Access to Makronexus image generation is currently restricted. Upgrade to the premium version now for uninterrupted service. For more information, please contact us at +48794144892.");
                 res.status(200).json({ message: 'Message sent' });
 
